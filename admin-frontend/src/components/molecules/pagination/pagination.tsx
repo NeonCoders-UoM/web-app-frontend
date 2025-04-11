@@ -32,54 +32,78 @@ const Pagination: React.FC<PaginationProps> = ({
     onItemsPerPageChange(newItems);
   };
 
- 
   const getPageNumbers = () => {
     const pages = [];
     const maxVisiblePages = 5;
     let startPage = Math.max(1, currentPage - 2);
     let endPage = Math.min(totalPages, currentPage + 2);
 
-    if (endPage - startPage < maxVisiblePages - 1) {
-      if (startPage === 1) endPage = Math.min(maxVisiblePages, totalPages);
-      else if (endPage === totalPages) startPage = Math.max(1, totalPages - maxVisiblePages + 1);
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      if (startPage === 1) {
+        endPage = Math.min(totalPages, maxVisiblePages);
+      } else if (endPage === totalPages) {
+        startPage = Math.max(1, totalPages - maxVisiblePages + 1);
+      }
     }
 
-    if (startPage > 2) pages.push('...');
+    if (startPage > 2) {
+      pages.push('...');
+    }
+
     for (let i = startPage; i <= endPage; i++) {
       pages.push(i);
     }
-    if (endPage < totalPages - 1) pages.push('...');
 
-    return [1, ...pages, totalPages].filter((page, index, self) =>
-      page === '...' ? self.indexOf(page) === index : true
-    );
+    if (endPage < totalPages - 1) {
+      pages.push('...');
+    }
+
+    const result = [];
+    if (startPage > 1) {
+      result.push(1);
+    }
+    result.push(...pages);
+    if (endPage < totalPages) {
+      result.push(totalPages);
+    }
+
+    return result.filter((page, index, self) => {
+      if (page === '...') {
+        return self.indexOf(page) === index;
+      }
+      return self.indexOf(page) === index;
+    });
   };
 
   return (
-    <div className="flex items-center gap-4 py-4">
-     
-      <Dropdown
-        label="Show result"
-        options={['6', '12', '20']}
-        placeholder={`${selectedItems}`}
-        onSelect={handleItemsPerPageChange}
-      />
+    <div className="flex justify-between items-center py-4 w-full">
+      {/* Left: Show result dropdown */}
+      <div className="w-40">
+        <Dropdown
+          label="Show result"
+          options={['6', '12', '20']}
+          placeholder={`${selectedItems}`}
+          onSelect={handleItemsPerPageChange}
+        />
+      </div>
 
-   
+      {/* Right: Pagination controls */}
       <div className="flex items-center gap-2">
         <button
           onClick={() => handlePageClick(1)}
           className="px-2 py-1 text-sm font-medium text-neutral-500 hover:text-neutral-700 rounded-md transition-colors"
           disabled={currentPage === 1}
+          suppressHydrationWarning
         >
-          &laquo;
+          «
         </button>
         <button
           onClick={() => handlePageClick(currentPage - 1)}
           className="px-2 py-1 text-sm font-medium text-neutral-500 hover:text-neutral-700 rounded-md transition-colors"
           disabled={currentPage === 1}
+          suppressHydrationWarning
         >
-          &lt;
+          &lt; {/* Fixed: Use HTML entity for < */}
         </button>
 
         {getPageNumbers().map((page, index) =>
@@ -92,6 +116,7 @@ const Pagination: React.FC<PaginationProps> = ({
                   ? 'bg-neutral-600 text-white'
                   : 'text-neutral-500 hover:text-neutral-700 hover:bg-neutral-200'
               }`}
+              suppressHydrationWarning
             >
               {page}
             </button>
@@ -106,15 +131,17 @@ const Pagination: React.FC<PaginationProps> = ({
           onClick={() => handlePageClick(currentPage + 1)}
           className="px-2 py-1 text-sm font-medium text-neutral-500 hover:text-neutral-700 rounded-md transition-colors"
           disabled={currentPage === totalPages}
+          suppressHydrationWarning
         >
-          &gt;
+          &gt; {/* Fixed: Use HTML entity for > */}
         </button>
         <button
           onClick={() => handlePageClick(totalPages)}
           className="px-2 py-1 text-sm font-medium text-neutral-500 hover:text-neutral-700 rounded-md transition-colors"
           disabled={currentPage === totalPages}
+          suppressHydrationWarning
         >
-          &raquo;
+          »
         </button>
       </div>
     </div>
