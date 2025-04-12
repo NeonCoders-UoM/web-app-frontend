@@ -63,6 +63,7 @@ const Pagination: React.FC<PaginationProps> = ({
         options={['6', '12', '20']}
         placeholder={`${selectedItems}`}
         onSelect={handleItemsPerPageChange}
+        className="w-24"
       />
 
    

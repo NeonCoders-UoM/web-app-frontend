@@ -7,28 +7,40 @@ interface DropdownProps {
   options: string[];
   placeholder?: string;
   onSelect: (option: string) => void;
+  className?: string; // for customizing width or spacing
 }
 
-const Dropdown: React.FC<DropdownProps> = ({ 
-  label, 
-  options, 
-  placeholder, 
-  onSelect }) => {
+const Dropdown: React.FC<DropdownProps> = ({
+  label,
+  options,
+  placeholder,
+  onSelect,
+  className = "w-64", // default width
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
 
   return (
-    <div className="w-64">
-      <label className="block text-sm text-neutral-600 mb-1">{label}</label>
+    <div className={`flex flex-col ${className}`}>
+      {label && (
+        <label className="mb-1 text-sm text-neutral-600 font-medium">
+          {label}
+        </label>
+      )}
+
       <div className="relative">
+        {/* Dropdown Button */}
         <button
-          className="w-full flex items-center px-4 py-2 bg-neutral-100 border border-neutral-400 rounded-md shadow-sm focus:ring-2 focus:ring-primary-100"
+          className="w-full flex items-center justify-between px-4 py-2 bg-neutral-100 border border-neutral-400 rounded-md shadow-sm focus:ring-2 focus:ring-primary-100"
           onClick={() => setIsOpen(!isOpen)}
         >
-          {selected || <span className="flex-1 text-left text-neutral-500">{placeholder}</span>}
-          <ChevronDown size={20} className="text-neutral-500 ml-2" />
+          <span className={`flex-1 text-left ${selected ? "" : "text-neutral-500"}`}>
+            {selected || placeholder}
+          </span>
+          <ChevronDown size={20} className="text-neutral-500 ml-2 shrink-0" />
         </button>
 
+        {/* Dropdown Menu */}
         {isOpen && (
           <ul className="absolute mt-1 w-full bg-neutral-100 border border-neutral-400 rounded-md shadow-md max-h-40 overflow-y-auto z-10">
             {options.map((option, index) => (
