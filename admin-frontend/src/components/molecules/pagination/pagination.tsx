@@ -77,17 +77,17 @@ const Pagination: React.FC<PaginationProps> = ({
 
   return (
     <div className="flex justify-between items-center py-4 w-full">
-      {/* Left: Show result dropdown */}
+      
       <div className="w-40">
         <Dropdown
           label="Show result"
           options={['6', '12', '20']}
           placeholder={`${selectedItems}`}
           onSelect={handleItemsPerPageChange}
+          className="w-24"
         />
       </div>
-
-      {/* Right: Pagination controls */}
+      
       <div className="flex items-center gap-2">
         <button
           onClick={() => handlePageClick(1)}
@@ -103,7 +103,7 @@ const Pagination: React.FC<PaginationProps> = ({
           disabled={currentPage === 1}
           suppressHydrationWarning
         >
-          &lt; {/* Fixed: Use HTML entity for < */}
+          &lt; 
         </button>
 
         {getPageNumbers().map((page, index) =>
@@ -133,7 +133,7 @@ const Pagination: React.FC<PaginationProps> = ({
           disabled={currentPage === totalPages}
           suppressHydrationWarning
         >
-          &gt; {/* Fixed: Use HTML entity for > */}
+          &gt;
         </button>
         <button
           onClick={() => handlePageClick(totalPages)}
