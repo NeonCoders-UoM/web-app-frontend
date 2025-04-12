@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import TableHead from "@/components/molecules/Table/TableHead";
-import TableRow from "@/components/molecules/Table/TableRow";
-import Pagination from "@/components/molecules/Pagination/Pagination";
-import SearchBar from "@/components/atoms/SearchBar/SearchBar";
+import TableHead from "@/components/molecules/table-head/table-head";
+import TableRow from "@/components/molecules/table-row/table-row";
+import Pagination from "@/components/molecules/pagination/pagination";
+import SearchBar from "@/components/atoms/search-bar/search-bar";
 
 interface TableProps {
   headers: { title: string; sortable?: boolean }[];
@@ -27,10 +27,9 @@ const Table: React.FC<TableProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    setFilteredData(data); // Initialize filteredData when data changes
+    setFilteredData(data);
   }, [data]);
 
-  // Handle sorting logic
   const handleSort = (index: number) => {
     let direction: "asc" | "desc" = "asc";
     if (sortConfig?.column === index && sortConfig.direction === "asc") {
@@ -44,10 +43,9 @@ const Table: React.FC<TableProps> = ({
 
     setSortConfig({ column: index, direction });
     setFilteredData(sorted);
-    setCurrentPage(1); // Reset to page 1 when sorting
+    setCurrentPage(1);
   };
 
-  // Handle search term change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
@@ -57,10 +55,9 @@ const Table: React.FC<TableProps> = ({
     );
 
     setFilteredData(filtered);
-    setCurrentPage(1); // Reset to page 1 when search term changes
+    setCurrentPage(1);
   };
 
-  // Handle filter button click
   const handleFilterClick = () => {
     console.log("Filters button clicked");
     // TODO: Open a filter modal or toggle filter UI
@@ -73,7 +70,7 @@ const Table: React.FC<TableProps> = ({
   );
 
   useEffect(() => {
-    setCurrentPage(1); // Reset to page 1 when itemsPerPage changes
+    setCurrentPage(1);
   }, [itemsPerPage]);
 
   return (
