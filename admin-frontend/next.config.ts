@@ -1,7 +1,11 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
+// Removed unused import of NextConfig
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  images: {
+    domains: ['via.placeholder.com'], // Add the domain of your external image
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
+
+
