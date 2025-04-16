@@ -3,7 +3,6 @@
 import type React from "react"
 import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
-import FormLayout from "@/components/molecules/form-layout/form-layout"
 import FormField from "@/components/molecules/form-field/form-field"
 import InputField from "@/components/atoms/input-fields/input-fields"
 import Button from "@/components/atoms/button/button"
@@ -30,7 +29,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) =>
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
 
-    // Clear error when user types
     if (errors[name as keyof typeof errors]) {
       setErrors((prev) => ({ ...prev, [name]: "" }))
     }
@@ -40,7 +38,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) =>
     let valid = true
     const newErrors = { ...errors }
 
-    // Email validation
     if (!formData.email) {
       newErrors.email = "Email is required"
       valid = false
@@ -51,7 +48,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) =>
       newErrors.email = ""
     }
 
-    // Password validation
     if (!formData.password) {
       newErrors.password = "Password is required"
       valid = false
@@ -78,11 +74,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) =>
   }
 
   return (
-    <FormLayout
-      title="Login to Your Account"
-      subtitle="Enter your credentials to access your account"
-      onSubmit={handleSubmit}
-    >
+    <form onSubmit={handleSubmit} className="space-y-5">
       <FormField label="Email Address" htmlFor="email" error={errors.email} required>
         <InputField
           id="email"
@@ -114,7 +106,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) =>
         />
       </FormField>
 
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end -mt-3">
         <a href="#" className="text-sm text-primary-200 hover:text-primary-300 transition-colors">
           Forgot Password?
         </a>
@@ -131,15 +123,15 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) =>
         {isLoading ? "Logging in..." : "Login"}
       </Button>
 
-      <div className="text-center mt-4">
-        <p className="text-sm text-neutral-300">
+      <div className="text-center pt-2">
+        <p className="text-sm text-neutral-400">
           Don&apos;t have an account?{" "}
           <a href="#" className="text-primary-200 hover:text-primary-300 transition-colors">
             Sign up
           </a>
         </p>
       </div>
-    </FormLayout>
+    </form>
   )
 }
 
