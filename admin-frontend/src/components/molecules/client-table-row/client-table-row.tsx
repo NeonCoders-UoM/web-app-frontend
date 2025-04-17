@@ -19,7 +19,7 @@ export const TableRow: React.FC<TableRowProps> = ({
   showClientCell = false,
 }) => {
   return (
-    <tr className="hover:bg-neutral-50 transition-colors">
+    <tr className="hover:bg-neutral-100 transition-colors">
       {columns.map((key, index) => {
         const value = row[key] || "";
 

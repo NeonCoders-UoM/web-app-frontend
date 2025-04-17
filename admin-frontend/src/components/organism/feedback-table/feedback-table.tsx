@@ -79,7 +79,7 @@ const FeedbackTable: React.FC<TableProps> = ({ data }) => {
         placeholder="Search by name, stars, service center..."
       />
 
-      <table className="w-full border-collapse bg-white shadow-md rounded-lg mt-16">
+      <table className="w-full border-collapse bg-neutral-100 shadow-md rounded-lg mt-16">
         <TableHead
           headers={[
             { title: "Client Name", sortable: true },
@@ -97,7 +97,7 @@ const FeedbackTable: React.FC<TableProps> = ({ data }) => {
             ))
           ) : (
             <tr>
-              <td colSpan={4} className="text-center text-gray-500 py-4">
+              <td colSpan={4} className="text-center text-neutral-600 py-4">
                 No results found.
               </td>
             </tr>
