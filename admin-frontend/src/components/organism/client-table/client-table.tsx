@@ -103,7 +103,7 @@ const ClientTable: React.FC<TableProps> = ({
         />
       )}
 
-      <table className="w-full border-collapse bg-white shadow-md rounded-lg mt-16">
+      <table className="w-full border-collapse neutral-100 shadow-md rounded-lg mt-16">
         <TableHead headers={headers} onSort={handleSort} />
         <tbody>
           {paginatedData.length > 0 ? (
@@ -120,7 +120,7 @@ const ClientTable: React.FC<TableProps> = ({
             <tr>
               <td
                 colSpan={headers.length + 1}
-                className="text-center p-4 text-gray-500"
+                className="text-center p-4 text-neutral-600"
               >
                 No results found.
               </td>
