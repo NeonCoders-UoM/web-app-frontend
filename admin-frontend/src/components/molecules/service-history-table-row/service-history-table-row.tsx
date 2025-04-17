@@ -22,7 +22,7 @@ type OrderRowProps = {
 const OrderRow: React.FC<OrderRowProps> = ({ order }) => (
   <tr className="bg-white">
     <TableCell>
-      <div className="text-sm text-gray-500 mb-1">Order ID #{order.id}</div>
+      <div className="text-sm text-neutral-600">Order ID #{order.id}</div>
       <div className="flex items-center gap-3">
         <OrderImage src={order.image} alt={order.title} />
         <div>
@@ -30,7 +30,7 @@ const OrderRow: React.FC<OrderRowProps> = ({ order }) => (
           <div className="text-sm">
             Rs {order.price}
             {order.originalPrice && (
-              <span className="ml-1 line-through text-gray-400">
+              <span className="ml-1 line-through text-neutral-500">
                 Rs {order.originalPrice}
               </span>
             )}
