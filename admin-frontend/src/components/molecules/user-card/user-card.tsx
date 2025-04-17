@@ -1,19 +1,31 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { ChevronDown, LogOut, Settings, User } from "lucide-react"
-import Image from "next/image"
+import { LogOut, User, ShieldCheck, Building2, CreditCard, Database } from "lucide-react"
+import ProfilePicture from "@/components/atoms/profile-picture/profile-picture"
+import colors from "@/styles/colors"
+
+// Define the user roles as a type
+type UserRole = "admin" | "super-admin" | "service-center-admin" | "cashier" | "data-operator"
 
 interface UserProfileCardProps {
   pictureSrc?: string
+  pictureAlt?: string
   name?: string
-  role?: string
+  role?: UserRole
+  onLogout?: () => void
+  onProfileClick?: () => void
+  onSettingsClick?: () => void
 }
 
 const UserProfileCard = ({
   pictureSrc = "/profile-picture.jpg",
+  pictureAlt = "User Profile",
   name = "Moni Roy",
-  role = "Admin",
+  role = "admin",
+  onLogout,
+  onProfileClick,
+  onSettingsClick,
 }: UserProfileCardProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -36,61 +48,122 @@ const UserProfileCard = ({
     }
   }, [])
 
+  // Format role for display
+  const formatRole = (role: UserRole): string => {
+    switch (role) {
+      case "admin":
+        return "Admin"
+      case "super-admin":
+        return "Super Admin"
+      case "service-center-admin":
+        return "Service Center Admin"
+      case "cashier":
+        return "Cashier"
+      case "data-operator":
+        return "Data Operator"
+      default:
+        return role
+    }
+  }
+
+  // Get role icon based on user role
+  const getRoleIcon = (role: UserRole) => {
+    switch (role) {
+      case "admin":
+        return <User size={16} style={{ color: colors.neutral[300] }} />
+      case "super-admin":
+        return <ShieldCheck size={16} style={{ color: colors.neutral[300] }} />
+      case "service-center-admin":
+        return <Building2 size={16} style={{ color: colors.neutral[300] }} />
+      case "cashier":
+        return <CreditCard size={16} style={{ color: colors.neutral[300] }} />
+      case "data-operator":
+        return <Database size={16} style={{ color: colors.neutral[300] }} />
+      default:
+        return <User size={16} style={{ color: colors.neutral[300] }} />
+    }
+  }
+
+  const displayRole = formatRole(role)
+
   return (
     <div className="relative" ref={dropdownRef}>
-      <button
-        onClick={toggleDropdown}
-        className="flex items-center gap-3 py-2 px-3 rounded-full bg-white border border-neutral-100 shadow-sm hover:shadow-md transition-all duration-200"
-      >
-        <div className="relative w-8 h-8 rounded-full overflow-hidden bg-primary-100 flex items-center justify-center">
-          {pictureSrc ? (
-            <Image src={pictureSrc || "/placeholder.svg"} alt={name} width={32} height={32} className="object-cover" />
-          ) : (
-            <span className="text-white font-medium">{name.charAt(0)}</span>
-          )}
-        </div>
+      {/* Main Card - Fixed width and height as specified */}
+      <button onClick={toggleDropdown} className="flex items-center gap-3" style={{ width: "151px", height: "44px" }}>
+        {/* Profile Picture */}
+        <ProfilePicture src={pictureSrc} alt={pictureAlt} />
+
+        {/* Name and Role */}
         <div className="flex flex-col items-start">
-          <span className="text-sm font-medium text-neutral-700">{name}</span>
-          <span className="text-xs text-neutral-400">{role}</span>
+          <span className="font-semibold text-sm" style={{ color: colors.neutral[600] }}>
+            {name}
+          </span>
+          <span className="text-xsm" style={{ color: colors.neutral[300] }}>
+            {displayRole}
+          </span>
         </div>
-        <ChevronDown size={16} className="text-neutral-400 ml-1" />
       </button>
 
+      {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg z-10 border border-neutral-100 overflow-hidden">
-          <div className="p-4 border-b border-neutral-100">
+        <div
+          className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg z-10 overflow-hidden"
+          style={{ border: `1px solid ${colors.neutral[100]}` }}
+        >
+          <div className="p-4" style={{ borderBottom: `1px solid ${colors.neutral[100]}` }}>
             <div className="flex items-center gap-3">
-              <div className="relative w-12 h-12 rounded-full overflow-hidden bg-primary-100 flex items-center justify-center">
-                {pictureSrc ? (
-                  <Image
-                    src={pictureSrc || "/placeholder.svg"}
-                    alt={name}
-                    width={48}
-                    height={48}
-                    className="object-cover"
-                  />
-                ) : (
-                  <span className="text-white font-medium text-lg">{name.charAt(0)}</span>
-                )}
-              </div>
+              <ProfilePicture src={pictureSrc} alt={pictureAlt} />
               <div>
-                <p className="font-medium text-neutral-800">{name}</p>
-                <p className="text-sm text-neutral-500">{role}</p>
+                <p className="font-semibold" style={{ color: colors.neutral[600] }}>
+                  {name}
+                </p>
+                <div className="flex items-center gap-1">
+                  {getRoleIcon(role)}
+                  <p className="text-sm" style={{ color: colors.neutral[300] }}>
+                    {displayRole}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
           <div className="py-2">
-            <button className="flex items-center gap-3 w-full px-4 py-2 text-left text-sm hover:bg-neutral-50 transition-colors">
-              <User size={16} className="text-neutral-500" />
-              <span>My Profile</span>
+            <button
+              onClick={() => {
+                onProfileClick?.()
+                setIsOpen(false)
+              }}
+              className="flex items-center gap-3 w-full px-4 py-2 text-left text-sm hover:bg-neutral-100 transition-colors"
+              style={{ color: colors.neutral[400] }}
+            >
+              
+              
             </button>
-            <button className="flex items-center gap-3 w-full px-4 py-2 text-left text-sm hover:bg-neutral-50 transition-colors">
-              <Settings size={16} className="text-neutral-500" />
-              <span>Settings</span>
-            </button>
-            <div className="my-1 border-t border-neutral-100"></div>
-            <button className="flex items-center gap-3 w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-red-50 transition-colors">
+
+            {/* Only show settings for admin roles */}
+            {(role === "admin" || role === "super-admin" || role === "service-center-admin") && (
+              <button
+                onClick={() => {
+                  onSettingsClick?.()
+                  setIsOpen(false)
+                }}
+                className="flex items-center gap-3 w-full px-4 py-2 text-left text-sm hover:bg-neutral-100 transition-colors"
+                style={{ color: colors.neutral[400] }}
+              >
+                
+              </button>
+            )}
+
+            <div className="my-1" style={{ borderTop: `1px solid ${colors.neutral[100]}` }}></div>
+
+            <button
+              onClick={() => {
+                onLogout?.()
+                setIsOpen(false)
+              }}
+              className="flex items-center gap-3 w-full px-4 py-2 text-left text-sm transition-colors"
+              style={{ color: colors.states.error }}
+            >
               <LogOut size={16} />
               <span>Sign Out</span>
             </button>
