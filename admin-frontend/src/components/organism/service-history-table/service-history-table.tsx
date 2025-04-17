@@ -107,7 +107,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
         />
       )}
 
-      <table className="w-full border-collapse bg-white shadow-md rounded-lg mt-16">
+      <table className="w-full border-collapse bg-neutral-100 shadow-md rounded-lg mt-16">
         <TableHead headers={headers} onSort={handleSort} />
         <tbody>
           {paginatedOrders.map((order) => (
