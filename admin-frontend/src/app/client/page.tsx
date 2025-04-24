@@ -2,32 +2,12 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import Sidebar from "@/components/molecules/side-bar/side-bar"
 import ClientTable from "@/components/organism/client-table/client-table"
 import UserProfileCard from "@/components/molecules/user-card/user-card"
 
 const ClientsPage = () => {
   const router = useRouter()
-  const [activeSection, setActiveSection] = useState("Clients")
   const [clientFilter, setClientFilter] = useState("All Clients")
-
-  const sidebarSections = [
-    { label: "Dashboard" },
-    { label: "Clients" },
-    { label: "Vehicles" },
-    { label: "Service Status" },
-    { label: "Appointments" },
-    { label: "Feedback" },
-    { label: "Closure Schedule" },
-  ]
-
-  const handleSectionChange = (section: string) => {
-    setActiveSection(section)
-
-    // Convert section name to URL path
-    const path = section.toLowerCase().replace(/\s+/g, "-")
-    router.push(`/${path}`)
-  }
 
   const tableHeaders = [
     { title: "Id", sortable: true },
@@ -96,23 +76,29 @@ const ClientsPage = () => {
     },
   ]
 
+  // Handler for kebab menu actions
+  const handleActionSelect = (action: string, clientId: string) => {
+    // Normalize clientId to match the format expected by the routes (e.g., "client-1" instead of "#CLI-0001")
+    const normalizedClientId = clientId.replace("#CLI-00", "client-")
+
+    if (action === "View") {
+      router.push(`/client/${normalizedClientId}`)
+    } else if (action === "Edit") {
+      router.push(`/client/${normalizedClientId}/edit`)
+    } else if (action === "Loyalty Points") {
+      console.log(`Viewing loyalty points for client with ID: ${clientId}`)
+    }
+  }
+
   return (
     <div className="flex min-h-screen bg-white">
-      {/* Sidebar */}
-      <Sidebar
-        activeSection={activeSection}
-        onSectionChange={handleSectionChange}
-        sections={sidebarSections}
-        logo="V PASS"
-      />
-
       {/* Main Content */}
       <div className="flex-1 p-6">
         {/* Header with user profile */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-neutral-600">Clients</h1>
           <UserProfileCard
-            pictureSrc="/profile-picture.jpg"
+            pictureSrc="/images/profipic.jpg" // Updated to a valid image path
             pictureAlt="Moni Roy"
             name="Moni Roy"
             role="admin"
@@ -146,9 +132,10 @@ const ClientsPage = () => {
         <ClientTable
           headers={tableHeaders}
           data={clientsData}
-          actions={["view", "edit", "loyaltyPoints"]}
+          actions={["view", "edit", "delete"]}
           showSearchBar={true}
           showClientCell={true}
+          onActionSelect={handleActionSelect}
         />
       </div>
     </div>
