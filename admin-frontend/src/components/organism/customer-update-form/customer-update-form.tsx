@@ -4,6 +4,7 @@ import type React from "react"
 import { useState } from "react"
 import InputField from "@/components/atoms/input-fields/input-fields"
 import UploadPhoto from "@/components/atoms/upload-photo/upload-photo"
+import Button from "@/components/atoms/button/button" 
 import colors from "@/styles/colors"
 
 interface CustomerUpdateFormProps {
@@ -57,11 +58,10 @@ export default function CustomerUpdateForm({ onSubmit, initialData }: CustomerUp
         fontFamily: "var(--font-family-text)",
       }}
     >
-      {/* Left Section - Photo Upload */}
       <div
         style={{
           width: "320px",
-          height: "320px",
+          height: "370px",
           border: "1px solid #e0e0e0",
           borderRadius: "8px",
           padding: "20px",
@@ -100,11 +100,10 @@ export default function CustomerUpdateForm({ onSubmit, initialData }: CustomerUp
         </p>
       </div>
 
-      {/* Right Section - Form */}
       <div
         style={{
           width: "720px",
-          height: "340px",
+          height: "370px",
           border: "1px solid #e0e0e0",
           borderRadius: "8px",
           padding: "20px",
@@ -112,7 +111,7 @@ export default function CustomerUpdateForm({ onSubmit, initialData }: CustomerUp
       >
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-            {/* Customer Name */}
+           
             <div>
               <label
                 htmlFor="customerName"
@@ -134,7 +133,7 @@ export default function CustomerUpdateForm({ onSubmit, initialData }: CustomerUp
               />
             </div>
 
-            {/* Email */}
+      
             <div>
               <label
                 htmlFor="email"
@@ -157,7 +156,6 @@ export default function CustomerUpdateForm({ onSubmit, initialData }: CustomerUp
               />
             </div>
 
-            {/* NIC Number */}
             <div>
               <label
                 htmlFor="nicNumber"
@@ -179,7 +177,7 @@ export default function CustomerUpdateForm({ onSubmit, initialData }: CustomerUp
               />
             </div>
 
-            {/* Telephone Number */}
+          
             <div>
               <label
                 htmlFor="telephoneNumber"
@@ -225,21 +223,13 @@ export default function CustomerUpdateForm({ onSubmit, initialData }: CustomerUp
           </div>
 
           <div className="flex justify-end mt-6">
-            <button
+            <Button
               type="submit"
-              style={{
-                backgroundColor: "#4CAF50",
-                color: "white",
-                padding: "8px 16px",
-                borderRadius: "4px",
-                border: "none",
-                fontSize: "var(--font-size-sm)",
-                fontWeight: "var(--font-weight-medium)",
-                cursor: "pointer",
-              }}
+              variant="success"
+              size="medium"
             >
               Update
-            </button>
+            </Button>
           </div>
         </form>
       </div>
