@@ -69,15 +69,15 @@ const UsersPage = () => {
 
   const handleActionSelect = (action: string, userId: string) => {
     if (action === "Edit") {
-      router.push(`/users/${userId}/edit`)
+      router.push(`/user-managment/edit/${userId}`)
     } else if (action === "Delete") {
       console.log(`Deleting user with ID: ${userId}`)
     }
   }
 
   const handleCreateUser = () => {
-    router.push("/user-managment/add-user")
-  }
+  router.push("/user-managment/add-user")
+}
 
   // Render a minimal placeholder on the server, full content on the client
   if (!isClient) {
