@@ -76,7 +76,7 @@ const UsersPage = () => {
   }
 
   const handleCreateUser = () => {
-    router.push("/users/create")
+    router.push("/user-managment/add-user")
   }
 
   // Render a minimal placeholder on the server, full content on the client

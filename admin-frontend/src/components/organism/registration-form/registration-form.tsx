@@ -42,17 +42,7 @@ export default function NewUserForm() {
         fontFamily: "var(--font-family-text)",
       }}
     >
-      <h1
-        className="mb-6"
-        style={{
-          color: colors.primary[200],
-          fontSize: "var(--font-size-lg)",
-          fontWeight: "var(--font-weight-medium)",
-        }}
-      >
-        New User
-      </h1>
-
+     
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
@@ -141,7 +131,7 @@ export default function NewUserForm() {
           />
         </div>
 
-        <div className="mb-6">
+        <div className="mb-4">
           <Dropdown
             label="User Role"
             options={userRoleOptions}
