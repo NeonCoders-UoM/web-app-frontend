@@ -1,38 +1,45 @@
-"use client";
-import React, { useState } from "react";
-import { ChevronDown } from "lucide-react";
+"use client"
+
+import React, { useState, useEffect } from "react"
+import { ChevronDown } from "lucide-react"
 
 interface DropdownProps {
-  label: string;
-  options: string[];
-  placeholder?: string;
-  onSelect: (option: string) => void;
-  className?: string; // for customizing width or spacing
+  options: string[]
+  placeholder?: string
+  onSelect: (option: string) => void
+  className?: string
+  selectedOption?: string
 }
 
 const Dropdown: React.FC<DropdownProps> = ({
-  label,
   options,
-  placeholder,
+  placeholder = "Select an option",
   onSelect,
-  className = "w-64", // default width
+  className = "w-64",
+  selectedOption,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false)
+  const [selected, setSelected] = useState<string | null>(selectedOption || null)
+
+  // Update selected state when selectedOption prop changes
+  useEffect(() => {
+    setSelected(selectedOption || null)
+  }, [selectedOption])
+
+  const handleOptionClick = (option: string) => {
+    setSelected(option)
+    onSelect(option)
+    setIsOpen(false)
+  }
 
   return (
     <div className={`flex flex-col ${className}`}>
-      {label && (
-        <label className="mb-1 text-sm text-neutral-600 font-medium">
-          {label}
-        </label>
-      )}
-
       <div className="relative">
         {/* Dropdown Button */}
         <button
           className="w-full flex items-center justify-between px-4 py-2 bg-neutral-100 border border-neutral-400 rounded-md shadow-sm focus:ring-2 focus:ring-primary-100"
           onClick={() => setIsOpen(!isOpen)}
+          suppressHydrationWarning
         >
           <span className={`flex-1 text-left ${selected ? "" : "text-neutral-500"}`}>
             {selected || placeholder}
@@ -47,11 +54,7 @@ const Dropdown: React.FC<DropdownProps> = ({
               <li
                 key={index}
                 className="px-4 py-2 hover:bg-neutral-200 cursor-pointer"
-                onClick={() => {
-                  setSelected(option);
-                  onSelect(option);
-                  setIsOpen(false);
-                }}
+                onClick={() => handleOptionClick(option)}
               >
                 {option}
               </li>
@@ -60,7 +63,7 @@ const Dropdown: React.FC<DropdownProps> = ({
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Dropdown;
+export default Dropdown
