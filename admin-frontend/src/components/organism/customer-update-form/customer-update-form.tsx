@@ -1,22 +1,33 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import InputField from "@/components/atoms/input-fields/input-fields"
 import UploadPhoto from "@/components/atoms/upload-photo/upload-photo"
 import colors from "@/styles/colors"
 
-export default function CustomerUpdateForm() {
+interface CustomerUpdateFormProps {
+  onSubmit?: (data: { customerName: string; email: string; nicNumber: string; telephoneNumber: string; address: string; photo: File | null }) => void
+  initialData?: {
+    customerName: string
+    email: string
+    nicNumber: string
+    telephoneNumber: string
+    address: string
+    photo: File | null
+  }
+}
+
+export default function CustomerUpdateForm({ onSubmit, initialData }: CustomerUpdateFormProps) {
   const [formData, setFormData] = useState({
-    customerName: "",
-    email: "",
-    nicNumber: "",
-    telephoneNumber: "",
-    address: "",
+    customerName: initialData?.customerName || "",
+    email: initialData?.email || "",
+    nicNumber: initialData?.nicNumber || "",
+    telephoneNumber: initialData?.telephoneNumber || "",
+    address: initialData?.address || "",
   })
 
-  const [photo, setPhoto] = useState<File | null>(null)
+  const [photo, setPhoto] = useState<File | null>(initialData?.photo || null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -29,8 +40,11 @@ export default function CustomerUpdateForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Form submitted:", { ...formData, photo })
-    // Handle form submission logic here
+    if (onSubmit) {
+      onSubmit({ ...formData, photo })
+    } else {
+      console.log("Form submitted:", { ...formData, photo })
+    }
   }
 
   return (

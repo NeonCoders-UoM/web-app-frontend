@@ -26,7 +26,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   return (
     <div
       className="flex items-center gap-6 p-6 bg-white rounded-lg shadow-md border border-neutral-200"
-      style={{ width: '672px', height: '158px' }}
+      style={{ width: '672px', height: '170px' }}
     >
       {/* Profile Picture */}
       <ProfilePicture src={pictureSrc} alt={pictureAlt} />

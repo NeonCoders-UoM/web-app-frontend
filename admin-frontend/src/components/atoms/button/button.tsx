@@ -14,6 +14,7 @@ type ButtonProps = {
     icon?: 'save' | 'send' | 'check' | 'close' | 'loading' | 'delete';
     iconPosition?: 'left' | 'right';
     className?: string;
+    style?: React.CSSProperties; // Add style prop
 };
 
 const iconMap = {
@@ -35,6 +36,7 @@ const Button: React.FC<ButtonProps> = ({
     icon,
     iconPosition = 'left',
     className = '',
+    style, // Destructure the style prop
 }) => {
     const baseStyles = 'flex items-center justify-center gap-2 rounded-lg font-medium transition duration-200 focus:outline-none';
 
@@ -79,6 +81,7 @@ const Button: React.FC<ButtonProps> = ({
                 color: currentVariant.text,
                 fontFamily: 'var(--font-family-text)',
                 fontWeight: 'var(--font-weight-medium)',
+                ...style, 
             }}
             onMouseEnter={(e) => {
                 if (!disabled) {
@@ -87,7 +90,9 @@ const Button: React.FC<ButtonProps> = ({
             }}
             onMouseLeave={(e) => {
                 if (!disabled) {
-                    e.currentTarget.style.backgroundColor = currentVariant.background;
+                   
+                    e.currentTarget.style.backgroundColor =
+                        style?.backgroundColor || currentVariant.background;
                 }
             }}
             onMouseDown={(e) => {
@@ -97,7 +102,9 @@ const Button: React.FC<ButtonProps> = ({
             }}
             onMouseUp={(e) => {
                 if (!disabled) {
-                    e.currentTarget.style.backgroundColor = currentVariant.background;
+                   
+                    e.currentTarget.style.backgroundColor =
+                        style?.backgroundColor || currentVariant.background;
                 }
             }}
         >
