@@ -11,10 +11,10 @@ type ButtonProps = {
     variant?: 'primary' | 'success' | 'danger';
     size?: 'small' | 'medium' | 'large';
     disabled?: boolean;
-    icon?: 'save' | 'send' | 'check' | 'close' | 'loading' | 'delete';
+    icon?: 'save' | 'send' | 'check' | 'close' | 'loading' | 'delete'| "plus" ;
     iconPosition?: 'left' | 'right';
     className?: string;
-    style?: React.CSSProperties; // Add style prop
+    style?: React.CSSProperties; 
 };
 
 const iconMap = {
@@ -24,6 +24,7 @@ const iconMap = {
     close: <XCircle size={16} />,
     delete: <Trash2 size={16} />,
     loading: <Loader2 size={16} className="animate-spin" />,
+    plus: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>,
 };
 
 const Button: React.FC<ButtonProps> = ({
@@ -36,7 +37,7 @@ const Button: React.FC<ButtonProps> = ({
     icon,
     iconPosition = 'left',
     className = '',
-    style, // Destructure the style prop
+    style, 
 }) => {
     const baseStyles = 'flex items-center justify-center gap-2 rounded-lg font-medium transition duration-200 focus:outline-none';
 
