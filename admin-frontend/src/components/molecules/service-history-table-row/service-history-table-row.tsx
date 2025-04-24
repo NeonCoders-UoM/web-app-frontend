@@ -1,7 +1,7 @@
 import React from "react";
 import TableCell from "@/components/atoms/table-cell/table-cell";
-import StatusBadge from "@/components/atoms/order-image/order-image";
-import OrderImage from "@/components/atoms/order-status/order-status";
+import Status from "@/components/atoms/order-status/order-status";
+import OrderImage from "@/components/atoms/order-image/order-image";
 
 type Order = {
   id: string;
@@ -43,7 +43,7 @@ const OrderRow: React.FC<OrderRowProps> = ({ order }) => (
     <TableCell>{order.date}</TableCell>
     <TableCell>{order.serviceCenter}</TableCell>
     <TableCell>
-      <StatusBadge status={order.status} />
+      <Status status={order.status} />
     </TableCell>
     <TableCell className="w-12">&nbsp;</TableCell>
   </tr>
