@@ -36,7 +36,7 @@ export default function NewUserForm() {
 
   return (
     <div
-      className="w-[662px] h-[382px] p-6"
+      className="w-[662px] h-[500px] p-6"
       style={{
         backgroundColor: "#FFFFFF",
         fontFamily: "var(--font-family-text)",
