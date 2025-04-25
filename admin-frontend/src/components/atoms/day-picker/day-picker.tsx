@@ -1,41 +1,42 @@
 'use client';
 
 import React from 'react';
+import colors from '@/styles/colors';
 
 interface DayPickerProps {
-  selectedDays: string[]; 
+  selectedDays: string[];
   onDayChange: (days: string[]) => void;
 }
 
 const DayPicker: React.FC<DayPickerProps> = ({ selectedDays, onDayChange }) => {
-  const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   const toggleDay = (day: string) => {
     if (selectedDays.includes(day)) {
-
-      onDayChange([]);
+      onDayChange(selectedDays.filter((d) => d !== day));
     } else {
-     
-      onDayChange([day]);
+      onDayChange([...selectedDays, day]);
     }
   };
 
   return (
     <div className="w-full">
-      {/* Label */}
       <label className="block text-sm font-medium text-neutral-600 mb-2">Day</label>
-
-      {/* Day Buttons */}
       <div className="flex space-x-2">
-        {daysOfWeek.map((day) => (
+        {days.map((day) => (
           <button
             key={day}
             onClick={() => toggleDay(day)}
-            className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
-              selectedDays.includes(day)
-                ? 'bg-primary-200 text-neutral-100'
-                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-150'
-            }`}
+            className="px-4 py-2 rounded-md text-sm font-medium transition-colors flex-1"
+            style={{
+              backgroundColor: selectedDays.includes(day)
+                ? '#FFFFFF'
+                : colors.neutral[100],
+              color: colors.neutral[600],
+              border: selectedDays.includes(day)
+                ? `1px solid ${colors.neutral[150]}`
+                : 'none',
+            }}
           >
             {day}
           </button>
