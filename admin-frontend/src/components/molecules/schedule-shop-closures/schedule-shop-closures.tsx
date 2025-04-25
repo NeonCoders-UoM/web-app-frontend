@@ -26,7 +26,11 @@ const Select: React.FC<{
   </div>
 );
 
-const ScheduleShopClosures: React.FC = () => {
+interface ScheduleShopClosuresProps {
+  onSave: (week: string, days: string[]) => void;
+}
+
+const ScheduleShopClosures: React.FC<ScheduleShopClosuresProps> = ({ onSave }) => {
   const [selectedWeek, setSelectedWeek] = useState('Week 12 (Jan 1-7)');
   const [selectedDays, setSelectedDays] = useState<string[]>(['Mon']);
   const weeks = [
@@ -37,7 +41,7 @@ const ScheduleShopClosures: React.FC = () => {
   ];
 
   const handleSave = () => {
-    console.log('Saved:', { week: selectedWeek, days: selectedDays });
+    onSave(selectedWeek, selectedDays);
   };
 
   return (
@@ -52,13 +56,11 @@ const ScheduleShopClosures: React.FC = () => {
         Schedule Shop Closures
       </div>
       <div className="space-y-4">
-        {/* Week Select at the top */}
         <Select
           options={weeks}
           value={selectedWeek}
           onChange={setSelectedWeek}
         />
-        {/* DayPicker below the Week Select */}
         <DayPicker selectedDays={selectedDays} onDayChange={setSelectedDays} />
       </div>
       <div className="flex justify-end">

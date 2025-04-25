@@ -6,11 +6,9 @@ import ScheduleShopClosures from '@/components/molecules/schedule-shop-closures/
 import ShiftCard from '@/components/atoms/shiftcard/shiftcard';
 
 const ManageServices = () => {
-  const [shiftCards] = useState([
+  const [shiftCards, setShiftCards] = useState([
     { day: 'Today', status: 'Locked' },
-    { day: '25-12-2024', status: 'Locked' },
-    { day: '26-12-2024', status: 'Open' },
-    { day: '27-12-2024', status: 'Open' },
+    { day: '25-04-2025', status: 'Locked' },
   ]);
 
   const tableData = [
@@ -20,6 +18,16 @@ const ManageServices = () => {
     { id: '4', label: 'Wheel Alignment', checked: true },
     { id: '5', label: 'Suspension Upgrades', checked: false },
   ];
+
+  const handleSave = (week: string, days: string[]) => {
+    if (days.length > 0) {
+      const newShiftCard = {
+        day: '25-04-2025', 
+        status: 'Locked', 
+      };
+      setShiftCards([...shiftCards, newShiftCard]);
+    }
+  };
 
   return (
     <div
@@ -36,13 +44,18 @@ const ManageServices = () => {
       <div className="flex space-x-4">
         {/* Schedule Shop Closures Section (Left) */}
         <div className="flex-1">
-          <ScheduleShopClosures />
+          <ScheduleShopClosures onSave={handleSave} />
         </div>
 
         {/* Closure Schedule Section (Right) */}
         <div className="space-y-2">
           <div className="text-lg font-semibold text-neutral-600">Closure Schedule</div>
-          <div className="space-y-2">
+          <div
+            className="p-4 rounded-lg space-y-2"
+            style={{
+              backgroundColor: '#F3F7FF',
+            }}
+          >
             {shiftCards.map((shift, index) => (
               <ShiftCard key={index} day={shift.day} status={shift.status} />
             ))}
