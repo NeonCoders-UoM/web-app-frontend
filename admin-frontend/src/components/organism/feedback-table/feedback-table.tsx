@@ -1,11 +1,17 @@
+'use client';
+
 import React, { useState, useMemo, useEffect } from "react";
 import TableHead from "@/components/molecules/table-head/table-head";
 import TableRow from "@/components/molecules/feedback-table-row/feedback-table-row";
 import Pagination from "@/components/molecules/pagination/pagination";
 import SearchBar from "@/components/atoms/search-bar/search-bar";
+import FeedbackCard from "@/components/molecules/feedback-card/feedback-card";
 
 interface Feedback {
+  profileSrc: string;
+  profileAlt: string;
   clientName: string;
+  clientId: string;
   stars: number;
   serviceCenter: string;
   date: string;
@@ -22,8 +28,11 @@ const FeedbackTable: React.FC<TableProps> = ({ data }) => {
   const [itemsPerPage, setItemsPerPage] = useState(6);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const handleSort = (index: number) => {
-    const key = ["clientName", "stars", "serviceCenter"][index] as keyof Feedback;
+    const key = ["clientName", "stars", "serviceCenter", "date", "feedback"][index] as keyof Feedback;
     let direction: "asc" | "desc" = "asc";
     if (sortConfig?.key === key && sortConfig.direction === "asc") {
       direction = "desc";
@@ -34,11 +43,6 @@ const FeedbackTable: React.FC<TableProps> = ({ data }) => {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
-  };
-
-  const handleFilterClick = () => {
-    console.log("Filter button clicked");
-    // filter modal or filter logic
   };
 
   const filteredData = useMemo(() => {
@@ -70,12 +74,21 @@ const FeedbackTable: React.FC<TableProps> = ({ data }) => {
     setCurrentPage(1);
   }, [itemsPerPage]);
 
+  const handleViewClick = (feedback: Feedback) => {
+    setSelectedFeedback(feedback);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedFeedback(null);
+  };
+
   return (
     <div className="overflow-x-auto">
       <SearchBar
         value={searchTerm}
         onChange={handleSearchChange}
-        onFilterClick={handleFilterClick}
         placeholder="Search by name, stars, service center..."
       />
 
@@ -83,7 +96,7 @@ const FeedbackTable: React.FC<TableProps> = ({ data }) => {
         <TableHead
           headers={[
             { title: "Client Name", sortable: true },
-            { title: "Stars", sortable: false },
+            { title: "Stars", sortable: true },
             { title: "Service Center", sortable: true },
             { title: "Date", sortable: true },
             { title: "Feedback", sortable: true },
@@ -93,11 +106,11 @@ const FeedbackTable: React.FC<TableProps> = ({ data }) => {
         <tbody>
           {paginatedData.length > 0 ? (
             paginatedData.map((item, index) => (
-              <TableRow key={index} data={item} />
+              <TableRow key={index} data={item} onViewClick={handleViewClick} />
             ))
           ) : (
             <tr>
-              <td colSpan={4} className="text-center text-neutral-600 py-4">
+              <td colSpan={6} className="text-center text-neutral-500 py-4">
                 No results found.
               </td>
             </tr>
@@ -114,6 +127,30 @@ const FeedbackTable: React.FC<TableProps> = ({ data }) => {
           onItemsPerPageChange={setItemsPerPage}
         />
       </div>
+
+      {/* Feedback Card as a Modal Popup */}
+      {isModalOpen && selectedFeedback && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 relative">
+            <button
+              onClick={closeModal}
+              className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 text-2xl font-bold"
+            >
+              &times;
+            </button>
+
+            <FeedbackCard
+              profileSrc={selectedFeedback.profileSrc}
+              profileAlt={selectedFeedback.profileAlt}
+              name={selectedFeedback.clientName}
+              clientId={selectedFeedback.clientId}
+              serviceCenter={selectedFeedback.serviceCenter}
+              rating={selectedFeedback.stars}
+              feedback={selectedFeedback.feedback}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
