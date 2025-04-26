@@ -121,7 +121,7 @@ const SuperAdminDashboard: React.FC = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="flex justify-center gap-16 mb-8">
         <StatusCard title="Customers" value={stats?.customers || 0} icon="customers" />
         <StatusCard title="Vehicles" value={stats?.vehicles || 0} icon="vehicles" />
         <StatusCard title="Service Centers" value={stats?.serviceCenters || 0} icon="serviceCenters" />

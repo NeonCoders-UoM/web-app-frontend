@@ -95,16 +95,10 @@ const AdminDashboard = () => {
       <h1 className="text-2xl font-bold text-neutral-600 mb-6">Dashboard</h1>
 
       {/* Status Cards */}
-      <div className="flex flex-wrap justify-center mb-8" style={{ gap: "67px" }}>
-        <div style={{ width: "262px", height: "161px" }}>
-          <StatusCard title="Customers" value={dashboardData.customers} icon="customers" />
-        </div>
-        <div style={{ width: "262px", height: "161px" }}>
-          <StatusCard title="Vehicles" value={dashboardData.vehicles} icon="vehicles" />
-        </div>
-        <div style={{ width: "262px", height: "161px" }}>
-          <StatusCard title="Service Centers" value={dashboardData.serviceCenters} icon="serviceCenters" />
-        </div>
+      <div className="flex justify-center gap-16 mb-8">
+        <StatusCard title="Customers" value={dashboardData.customers} icon="customers" />
+        <StatusCard title="Vehicles" value={dashboardData.vehicles} icon="vehicles" />
+        <StatusCard title="Appointments" value={dashboardData.serviceCenters} icon="serviceCenters" />
       </div>
 
       {/* Service Centers Section */}
