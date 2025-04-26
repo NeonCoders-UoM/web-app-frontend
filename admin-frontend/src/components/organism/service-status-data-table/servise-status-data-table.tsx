@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from "react";
 import { ServiceStatusDataTableRow } from "@/components/molecules/service-status-data-table-row/service-status-data-table-row";
 
 type RowData = {
@@ -11,26 +10,19 @@ type RowData = {
 
 type TableProps = {
   data: RowData[];
+  onToggle: (index: number) => void;
 };
 
-export const ServiceStatusDataTable = ({ data }: TableProps) => {
-  const [rows, setRows] = useState(data);
-
-  const handleToggle = (index: number) => {
-    const updated = [...rows];
-    updated[index].checked = !updated[index].checked;
-    setRows(updated);
-  };
-
+export const ServiceStatusDataTable = ({ data, onToggle }: TableProps) => {
   return (
     <div>
       <table className="w-full border-separate border-spacing-y-2">
         <tbody>
-          {rows.map((row, index) => (
+          {data.map((row, index) => (
             <ServiceStatusDataTableRow
               key={index}
               checked={row.checked}
-              onToggle={() => handleToggle(index)}
+              onToggle={() => onToggle(index)}
               service={row.service}
               serviceCenter={row.serviceCenter}
             />
