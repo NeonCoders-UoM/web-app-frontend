@@ -1,3 +1,4 @@
+// src/app/pages/super-admin-dashboard/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -22,7 +23,7 @@ const SuperAdminDashboard: React.FC = () => {
           fetchDashboardStats(),
           fetchServiceCenters(),
         ]);
-        console.log("Fetched service centers in SuperAdminDashboard:", serviceCentersData); // Debug log
+        console.log("Fetched service centers in SuperAdminDashboard:", serviceCentersData);
         setStats(statsData);
         setServiceCenters(serviceCentersData);
       } catch (error) {
@@ -72,6 +73,7 @@ const SuperAdminDashboard: React.FC = () => {
   };
 
   const handleView = (id: string) => {
+    console.log("Navigating to:", `/service-centers/${id}/view`);
     router.push(`/service-centers/${id}/view`);
   };
 
@@ -113,9 +115,9 @@ const SuperAdminDashboard: React.FC = () => {
           pictureAlt="Moni Roy"
           name="Moni Roy"
           role="super-admin"
-          onLogout={() => console.log("Logout clicked")}
-          onProfileClick={() => console.log("Profile clicked")}
-          onSettingsClick={() => console.log("Settings clicked")}
+          onLogout={() => router.push("/login")} // Updated for consistency
+          onProfileClick={() => router.push("/profile")} // Updated for consistency
+          onSettingsClick={() => router.push("/settings")} // Updated for consistency
         />
       </div>
 
