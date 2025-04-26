@@ -6,18 +6,25 @@ import { useState } from "react"
 import Button from "@/components/atoms/button/button"
 import InputField from "@/components/atoms/input-fields/input-fields"
 
-export default function AppointmentSearch() {
-  const [appointmentId, setAppointmentId] = useState("")
+type AppointmentSearchProps = {
+  appointmentId: string;
+  setAppointmentId: (id: string) => void;
+  onSearch: () => void;
+};
 
+export default function AppointmentSearch({ 
+  appointmentId, 
+  setAppointmentId, 
+  onSearch, 
+}: AppointmentSearchProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAppointmentId(e.target.value)
-  }
+    setAppointmentId(e.target.value);
+  };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("Searching for appointment:", appointmentId)
-    // Handle search logic here
-  }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSearch(); // Call the parent's search function
+  };
 
   return (
     <div
@@ -33,7 +40,7 @@ export default function AppointmentSearch() {
         justifyContent: "center",
       }}
     >
-      <form onSubmit={handleSearch} className="flex flex-col">
+      <form onSubmit={handleSubmit} className="flex flex-col">
         <label
           htmlFor="appointmentId"
           className="mb-2"
