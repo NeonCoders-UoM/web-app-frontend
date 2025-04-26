@@ -1,17 +1,17 @@
-// src/types/index.ts
+
 export interface ServiceCenter {
-    id: string;
-    serviceCenterName: string;
-    email: string;
-    address: string;
-    telephoneNumber: string;
-    ownersName: string;
-    vatNumber: string;
-    registrationNumber: string;
-    commissionDate: string;
-    availableServices: string;
-    serviceHours: string;
-  }
+  id: string;
+  serviceCenterName: string;
+  email: string;
+  address: string;
+  telephoneNumber: string;
+  ownersName: string;
+  vatNumber: string;
+  registrationNumber: string;
+  commissionDate: string;
+  availableServices: string[];
+  serviceHours: { start: string; end: string };
+}
   
   export interface Client {
     id: string;

@@ -14,7 +14,7 @@ interface ServiceCenterFormProps {
 }
 
 export default function ServiceCenterForm({ initialData, onSubmit }: ServiceCenterFormProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Omit<ServiceCenter, "id">>({
     serviceCenterName: "",
     email: "",
     address: "",
@@ -23,9 +23,12 @@ export default function ServiceCenterForm({ initialData, onSubmit }: ServiceCent
     vatNumber: "",
     registrationNumber: "",
     commissionDate: "",
-    availableServices: "",
-    serviceHours: "",
+    availableServices: [], // Changed to string[]
+    serviceHours: { start: "", end: "" }, // Changed to object
   });
+
+  // Validation errors state
+  const [errors, setErrors] = useState<Partial<Record<keyof Omit<ServiceCenter, "id">, string>>>({});
 
   // Prefill form with initial data if provided (for edit mode)
   useEffect(() => {
@@ -39,24 +42,91 @@ export default function ServiceCenterForm({ initialData, onSubmit }: ServiceCent
         vatNumber: initialData.vatNumber || "",
         registrationNumber: initialData.registrationNumber || "",
         commissionDate: initialData.commissionDate || "",
-        availableServices: initialData.availableServices || "",
-        serviceHours: initialData.serviceHours || "",
+        availableServices: initialData.availableServices || [], // Now an array
+        serviceHours: initialData.serviceHours || { start: "", end: "" }, // Now an object
       });
     }
   }, [initialData]);
 
+  // Handle input changes for text fields
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "serviceHoursStart") {
+      setFormData((prev) => ({
+        ...prev,
+        serviceHours: { ...prev.serviceHours, start: value },
+      }));
+    } else if (name === "serviceHoursEnd") {
+      setFormData((prev) => ({
+        ...prev,
+        serviceHours: { ...prev.serviceHours, end: value },
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+    // Clear error for this field
+    setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
+  // Handle dropdown selection for availableServices
   const handleServiceSelect = (option: string) => {
-    setFormData((prev) => ({ ...prev, availableServices: option }));
+    // Since Dropdown supports single selection, we store the selected option as a single-item array
+    setFormData((prev) => ({ ...prev, availableServices: [option] }));
+    setErrors((prev) => ({ ...prev, availableServices: undefined }));
   };
 
+  // Validation function
+  const validateForm = (): boolean => {
+    const newErrors: Partial<Record<keyof Omit<ServiceCenter, "id">, string>> = {};
+
+    // Required fields
+    if (!formData.serviceCenterName.trim()) {
+      newErrors.serviceCenterName = "Service Center Name is required";
+    }
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Invalid email format";
+    }
+    if (!formData.address.trim()) {
+      newErrors.address = "Address is required";
+    }
+    if (!formData.telephoneNumber.trim()) {
+      newErrors.telephoneNumber = "Telephone Number is required";
+    } else if (!/^\d{10}$/.test(formData.telephoneNumber)) {
+      newErrors.telephoneNumber = "Telephone Number must be 10 digits";
+    }
+    if (!formData.ownersName.trim()) {
+      newErrors.ownersName = "Owner\'s Name is required"; // Escaped single quote
+    }
+    if (!formData.vatNumber.trim()) {
+      newErrors.vatNumber = "VAT Number is required";
+    }
+    if (!formData.registrationNumber.trim()) {
+      newErrors.registrationNumber = "Registration Number is required";
+    }
+    if (!formData.commissionDate.trim()) {
+      newErrors.commissionDate = "Commission Date is required";
+    } else if (isNaN(Date.parse(formData.commissionDate))) {
+      newErrors.commissionDate = "Commission Date must be a valid date";
+    }
+    if (formData.availableServices.length === 0) {
+      newErrors.availableServices = "At least one service must be selected";
+    }
+    if (!formData.serviceHours.start || !formData.serviceHours.end) {
+      newErrors.serviceHours = "Service Hours are required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    if (validateForm()) {
+      onSubmit(formData);
+    }
   };
 
   const availableServiceOptions = [
@@ -71,7 +141,7 @@ export default function ServiceCenterForm({ initialData, onSubmit }: ServiceCent
     <div
       style={{
         width: "743px",
-        height: "570px", // Fixed: Added colon (:)
+        height: "570px",
         fontFamily: "var(--font-family-text)",
         padding: "20px",
       }}
@@ -98,6 +168,9 @@ export default function ServiceCenterForm({ initialData, onSubmit }: ServiceCent
               value={formData.serviceCenterName}
               onChange={handleChange}
             />
+            {errors.serviceCenterName && (
+              <p className="text-red-500 text-sm mt-1">{errors.serviceCenterName}</p>
+            )}
           </div>
 
           {/* Email */}
@@ -121,6 +194,7 @@ export default function ServiceCenterForm({ initialData, onSubmit }: ServiceCent
               value={formData.email}
               onChange={handleChange}
             />
+            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
           </div>
 
           {/* Address */}
@@ -143,6 +217,7 @@ export default function ServiceCenterForm({ initialData, onSubmit }: ServiceCent
               value={formData.address}
               onChange={handleChange}
             />
+            {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
           </div>
 
           {/* Telephone Number */}
@@ -165,6 +240,9 @@ export default function ServiceCenterForm({ initialData, onSubmit }: ServiceCent
               value={formData.telephoneNumber}
               onChange={handleChange}
             />
+            {errors.telephoneNumber && (
+              <p className="text-red-500 text-sm mt-1">{errors.telephoneNumber}</p>
+            )}
           </div>
 
           {/* Owner's Name */}
@@ -178,7 +256,7 @@ export default function ServiceCenterForm({ initialData, onSubmit }: ServiceCent
                 fontWeight: "var(--font-weight-regular)",
               }}
             >
-              Owner&rsquo;s Name
+              Owner’s Name
             </label>
             <InputField
               id="ownersName"
@@ -187,6 +265,7 @@ export default function ServiceCenterForm({ initialData, onSubmit }: ServiceCent
               value={formData.ownersName}
               onChange={handleChange}
             />
+            {errors.ownersName && <p className="text-red-500 text-sm mt-1">{errors.ownersName}</p>}
           </div>
 
           {/* VAT Number */}
@@ -209,6 +288,7 @@ export default function ServiceCenterForm({ initialData, onSubmit }: ServiceCent
               value={formData.vatNumber}
               onChange={handleChange}
             />
+            {errors.vatNumber && <p className="text-red-500 text-sm mt-1">{errors.vatNumber}</p>}
           </div>
 
           {/* Registration Number */}
@@ -231,6 +311,9 @@ export default function ServiceCenterForm({ initialData, onSubmit }: ServiceCent
               value={formData.registrationNumber}
               onChange={handleChange}
             />
+            {errors.registrationNumber && (
+              <p className="text-red-500 text-sm mt-1">{errors.registrationNumber}</p>
+            )}
           </div>
 
           {/* Commission Date */}
@@ -249,10 +332,14 @@ export default function ServiceCenterForm({ initialData, onSubmit }: ServiceCent
             <InputField
               id="commissionDate"
               name="commissionDate"
+              type="date" // Changed to date input
               placeholder="Commission Date"
               value={formData.commissionDate}
               onChange={handleChange}
             />
+            {errors.commissionDate && (
+              <p className="text-red-500 text-sm mt-1">{errors.commissionDate}</p>
+            )}
           </div>
 
           {/* Choose Available Services */}
@@ -271,15 +358,17 @@ export default function ServiceCenterForm({ initialData, onSubmit }: ServiceCent
               options={availableServiceOptions}
               placeholder="Services"
               onSelect={handleServiceSelect}
-              selectedOption={formData.availableServices}
+              selectedOption={formData.availableServices[0] || ""} // Display the first selected service
               className="w-full"
             />
+            {errors.availableServices && (
+              <p className="text-red-500 text-sm mt-1">{errors.availableServices}</p>
+            )}
           </div>
 
           {/* Service Hours */}
           <div>
             <label
-              htmlFor="serviceHours"
               className="block mb-1"
               style={{
                 color: colors.neutral[600],
@@ -289,13 +378,31 @@ export default function ServiceCenterForm({ initialData, onSubmit }: ServiceCent
             >
               Service Hours
             </label>
-            <InputField
-              id="serviceHours"
-              name="serviceHours"
-              placeholder="Service Hours"
-              value={formData.serviceHours}
-              onChange={handleChange}
-            />
+            <div className="flex space-x-4">
+              <div className="flex-1">
+                <InputField
+                  id="serviceHoursStart"
+                  name="serviceHoursStart"
+                  type="time"
+                  placeholder="Start Time"
+                  value={formData.serviceHours.start}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="flex-1">
+                <InputField
+                  id="serviceHoursEnd"
+                  name="serviceHoursEnd"
+                  type="time"
+                  placeholder="End Time"
+                  value={formData.serviceHours.end}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+            {errors.serviceHours && (
+              <p className="text-red-500 text-sm mt-1">{errors.serviceHours}</p>
+            )}
           </div>
         </div>
 
