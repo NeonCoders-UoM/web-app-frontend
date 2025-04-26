@@ -1,39 +1,56 @@
-"use client"
+// src/components/atoms/dropdown/dropdown.tsx
+"use client";
 
-import React, { useState, useEffect } from "react"
-import { ChevronDown } from "lucide-react"
+import React, { useState, useEffect } from "react";
+import { ChevronDown } from "lucide-react";
+import colors from "@/styles/colors"; // Import colors to match DocumentUploadForm styling
 
 interface DropdownProps {
-  options: string[]
-  placeholder?: string
-  onSelect: (option: string) => void
-  className?: string
-  selectedOption?: string
+  label?: string; // Add label as an optional prop
+  options: string[];
+  placeholder?: string;
+  onSelect: (option: string) => void;
+  className?: string;
+  selectedOption?: string;
 }
 
 const Dropdown: React.FC<DropdownProps> = ({
+  label,
   options,
   placeholder = "Select an option",
   onSelect,
   className = "w-64",
   selectedOption,
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const [selected, setSelected] = useState<string | null>(selectedOption || null)
+  const [isOpen, setIsOpen] = useState(false);
+  const [selected, setSelected] = useState<string | null>(selectedOption || null);
 
   // Update selected state when selectedOption prop changes
   useEffect(() => {
-    setSelected(selectedOption || null)
-  }, [selectedOption])
+    setSelected(selectedOption || null);
+  }, [selectedOption]);
 
   const handleOptionClick = (option: string) => {
-    setSelected(option)
-    onSelect(option)
-    setIsOpen(false)
-  }
+    setSelected(option);
+    onSelect(option);
+    setIsOpen(false);
+  };
 
   return (
     <div className={`flex flex-col ${className}`}>
+      {label && (
+        <label
+          className="block mb-1"
+          style={{
+            color: colors.neutral[600],
+            fontSize: "var(--font-size-sm)",
+            fontWeight: "var(--font-weight-regular)",
+            fontFamily: "var(--font-family-text)",
+          }}
+        >
+          {label}
+        </label>
+      )}
       <div className="relative">
         {/* Dropdown Button */}
         <button
@@ -63,7 +80,7 @@ const Dropdown: React.FC<DropdownProps> = ({
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Dropdown
+export default Dropdown;
