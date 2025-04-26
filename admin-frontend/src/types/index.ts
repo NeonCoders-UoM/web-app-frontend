@@ -11,6 +11,8 @@ export interface ServiceCenter {
   commissionDate: string;
   availableServices: string[];
   serviceHours: { start: string; end: string };
+  photoUrl?: string;
+  registrationCopyUrl?: string;
 }
   
   export interface Client {

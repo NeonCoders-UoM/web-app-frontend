@@ -1,45 +1,133 @@
-"use client"
+// src/components/organism/document-upload-form/document-upload-form.tsx
+"use client";
 
-import type React from "react"
+import React, { useState, useEffect } from "react";
+import Button from "@/components/atoms/button/button";
+import InputField from "@/components/atoms/input-fields/input-fields";
+import Dropdown from "@/components/atoms/dropdown/dropdown";
+import UploadPhoto from "@/components/atoms/upload-photo/upload-photo";
+import UploadFile from "@/components/atoms/upload-file/upload-file";
+import colors from "@/styles/colors";
+import { ServiceCenter } from "@/types";
 
-import { useState } from "react"
-import Button from "@/components/atoms/button/button"
-import InputField from "@/components/atoms/input-fields/input-fields"
-import Dropdown from "@/components/atoms/dropdown/dropdown"
-import UploadPhoto from "@/components/atoms/upload-photo/upload-photo"
-import UploadFile from "@/components/atoms/upload-file/upload-file"
-import colors from "@/styles/colors"
+interface DocumentUploadFormProps {
+  initialData?: Partial<ServiceCenter>;
+  onSubmit: (data: Omit<ServiceCenter, "id">) => void;
+}
 
-export default function ServiceRegistrationForm() {
-  const [formData, setFormData] = useState({
+export default function DocumentUploadForm({ initialData, onSubmit }: DocumentUploadFormProps) {
+  const [formData, setFormData] = useState<Omit<ServiceCenter, "id">>({
     serviceCenterName: "",
     email: "",
     address: "",
     telephoneNumber: "",
     ownersName: "",
-    availableService: "",
-    serviceHours: "",
+    vatNumber: "",
     registrationNumber: "",
-    vinNumber: "",
-  })
+    commissionDate: "",
+    availableServices: [],
+    serviceHours: { start: "", end: "" },
+    photoUrl: "",
+    registrationCopyUrl: "",
+  });
 
-  const [photo, setPhoto] = useState<File | null>(null)
-  const [file, setFile] = useState<File | null>(null)
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [errors, setErrors] = useState<Partial<Record<keyof Omit<ServiceCenter, "id">, string>>>({});
+
+  // Prefill form with initial data if provided (for edit mode)
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        serviceCenterName: initialData.serviceCenterName || "",
+        email: initialData.email || "",
+        address: initialData.address || "",
+        telephoneNumber: initialData.telephoneNumber || "",
+        ownersName: initialData.ownersName || "",
+        vatNumber: initialData.vatNumber || "",
+        registrationNumber: initialData.registrationNumber || "",
+        commissionDate: "",
+        availableServices: initialData.availableServices || [],
+        serviceHours: initialData.serviceHours || { start: "", end: "" },
+        photoUrl: initialData.photoUrl || "",
+        registrationCopyUrl: initialData.registrationCopyUrl || "",
+      });
+    }
+  }, [initialData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    if (name === "serviceHoursStart") {
+      setFormData((prev) => ({
+        ...prev,
+        serviceHours: { ...prev.serviceHours, start: value },
+      }));
+    } else if (name === "serviceHoursEnd") {
+      setFormData((prev) => ({
+        ...prev,
+        serviceHours: { ...prev.serviceHours, end: value },
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+    setErrors((prev) => ({ ...prev, [name]: undefined }));
+  };
 
   const handleServiceSelect = (option: string) => {
-    setFormData((prev) => ({ ...prev, availableService: option }))
-  }
+    setFormData((prev) => ({ ...prev, availableServices: [option] }));
+    setErrors((prev) => ({ ...prev, availableServices: undefined }));
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("Form submitted:", { ...formData, photo, file })
-    // Handle form submission logic here
-  }
+  const validateForm = (): boolean => {
+    const newErrors: Partial<Record<keyof Omit<ServiceCenter, "id">, string>> = {};
+
+    if (!formData.serviceCenterName.trim()) {
+      newErrors.serviceCenterName = "Service Center Name is required";
+    }
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Invalid email format";
+    }
+    if (!formData.address.trim()) {
+      newErrors.address = "Address is required";
+    }
+    if (!formData.telephoneNumber.trim()) {
+      newErrors.telephoneNumber = "Telephone Number is required";
+    } else if (!/^\d{10}$/.test(formData.telephoneNumber)) {
+      newErrors.telephoneNumber = "Telephone Number must be 10 digits";
+    }
+    if (!formData.ownersName.trim()) {
+      newErrors.ownersName = "Owner\'s Name is required";
+    }
+    if (!formData.vatNumber.trim()) {
+      newErrors.vatNumber = "VAT Number is required";
+    }
+    if (!formData.registrationNumber.trim()) {
+      newErrors.registrationNumber = "Registration Number is required";
+    }
+    if (formData.availableServices.length === 0) {
+      newErrors.availableServices = "At least one service must be selected";
+    }
+    if (!formData.serviceHours.start || !formData.serviceHours.end) {
+      newErrors.serviceHours = "Service Hours are required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validateForm()) {
+      const updatedFormData = {
+        ...formData,
+        photoUrl: photo ? URL.createObjectURL(photo) : formData.photoUrl,
+        registrationCopyUrl: file ? URL.createObjectURL(file) : formData.registrationCopyUrl,
+      };
+      onSubmit(updatedFormData);
+    }
+  };
 
   const availableServiceOptions = [
     "Oil Change",
@@ -47,7 +135,7 @@ export default function ServiceRegistrationForm() {
     "Brake Service",
     "Engine Repair",
     "Full Inspection",
-  ]
+  ];
 
   return (
     <div
@@ -70,8 +158,36 @@ export default function ServiceRegistrationForm() {
           alignItems: "center",
         }}
       >
-        <UploadPhoto onChange={setPhoto} />
-        <UploadFile onChange={setFile} />
+        <div className="w-full">
+          <h3
+            className="text-lg font-semibold mb-2"
+            style={{ color: colors.neutral[600], textAlign: "center" }}
+          >
+            UPDATE PHOTO
+          </h3>
+          <UploadPhoto onChange={setPhoto} />
+          <p
+            className="text-center mt-2"
+            style={{ color: colors.neutral[400], fontSize: "var(--font-size-xs)" }}
+          >
+            ALLOWED JPEG, PNG, JPG FORMATS, UP TO 5MB
+          </p>
+        </div>
+        <div className="w-full">
+          <h3
+            className="text-lg font-semibold mb-2"
+            style={{ color: colors.neutral[600], textAlign: "center" }}
+          >
+            UPDATE SERVICE REGISTRATION COPY
+          </h3>
+          <UploadFile onChange={setFile} />
+          <p
+            className="text-center mt-2"
+            style={{ color: colors.neutral[400], fontSize: "var(--font-size-xs)" }}
+          >
+            JPEG, PNG, JPG AND FORMATS, UP TO 5MB
+          </p>
+        </div>
       </div>
 
       {/* Right Column - Form Section */}
@@ -103,6 +219,9 @@ export default function ServiceRegistrationForm() {
                 value={formData.serviceCenterName}
                 onChange={handleChange}
               />
+              {errors.serviceCenterName && (
+                <p className="text-red-500 text-sm mt-1">{errors.serviceCenterName}</p>
+              )}
             </div>
             <div>
               <label
@@ -124,6 +243,7 @@ export default function ServiceRegistrationForm() {
                 value={formData.email}
                 onChange={handleChange}
               />
+              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
             </div>
           </div>
 
@@ -146,6 +266,7 @@ export default function ServiceRegistrationForm() {
               value={formData.address}
               onChange={handleChange}
             />
+            {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-4">
@@ -168,6 +289,9 @@ export default function ServiceRegistrationForm() {
                 value={formData.telephoneNumber}
                 onChange={handleChange}
               />
+              {errors.telephoneNumber && (
+                <p className="text-red-500 text-sm mt-1">{errors.telephoneNumber}</p>
+              )}
             </div>
             <div>
               <label
@@ -188,38 +312,7 @@ export default function ServiceRegistrationForm() {
                 value={formData.ownersName}
                 onChange={handleChange}
               />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div>
-              <Dropdown
-                label="Choose Available Services"
-                options={availableServiceOptions}
-                placeholder="Choose Available Services"
-                onSelect={handleServiceSelect}
-                className="w-full"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="serviceHours"
-                className="block mb-1"
-                style={{
-                  color: colors.neutral[600],
-                  fontSize: "var(--font-size-sm)",
-                  fontWeight: "var(--font-weight-regular)",
-                }}
-              >
-                Service Hours
-              </label>
-              <InputField
-                id="serviceHours"
-                name="serviceHours"
-                placeholder="Service Hours"
-                value={formData.serviceHours}
-                onChange={handleChange}
-              />
+              {errors.ownersName && <p className="text-red-500 text-sm mt-1">{errors.ownersName}</p>}
             </div>
           </div>
 
@@ -243,10 +336,13 @@ export default function ServiceRegistrationForm() {
                 value={formData.registrationNumber}
                 onChange={handleChange}
               />
+              {errors.registrationNumber && (
+                <p className="text-red-500 text-sm mt-1">{errors.registrationNumber}</p>
+              )}
             </div>
             <div>
               <label
-                htmlFor="vinNumber"
+                htmlFor="vatNumber"
                 className="block mb-1"
                 style={{
                   color: colors.neutral[600],
@@ -254,25 +350,79 @@ export default function ServiceRegistrationForm() {
                   fontWeight: "var(--font-weight-regular)",
                 }}
               >
-                VIN Number
+                VAT Number
               </label>
               <InputField
-                id="vinNumber"
-                name="vinNumber"
-                placeholder="VIN Number"
-                value={formData.vinNumber}
+                id="vatNumber"
+                name="vatNumber"
+                placeholder="VAT Number"
+                value={formData.vatNumber}
                 onChange={handleChange}
               />
+              {errors.vatNumber && <p className="text-red-500 text-sm mt-1">{errors.vatNumber}</p>}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <Dropdown
+                label="Choose Available Services"
+                options={availableServiceOptions}
+                placeholder="Choose Available Services"
+                onSelect={handleServiceSelect}
+                selectedOption={formData.availableServices[0] || ""}
+                className="w-full"
+              />
+              {errors.availableServices && (
+                <p className="text-red-500 text-sm mt-1">{errors.availableServices}</p>
+              )}
+            </div>
+            <div>
+              <label
+                className="block mb-1"
+                style={{
+                  color: colors.neutral[600],
+                  fontSize: "var(--font-size-sm)",
+                  fontWeight: "var(--font-weight-regular)",
+                }}
+              >
+                Service Hours
+              </label>
+              <div className="flex gap-x-2">
+                <div className="flex-1">
+                  <InputField
+                    id="serviceHoursStart"
+                    name="serviceHoursStart"
+                    type="time"
+                    placeholder="Start Time"
+                    value={formData.serviceHours.start}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className="flex-1">
+                  <InputField
+                    id="serviceHoursEnd"
+                    name="serviceHoursEnd"
+                    type="time"
+                    placeholder="End Time"
+                    value={formData.serviceHours.end}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+              {errors.serviceHours && (
+                <p className="text-red-500 text-sm mt-1">{errors.serviceHours}</p>
+              )}
             </div>
           </div>
 
           <div className="mt-auto flex justify-end">
             <Button type="submit" variant="primary" size="medium">
-              Register
+              Save Changes
             </Button>
           </div>
         </form>
       </div>
     </div>
-  )
+  );
 }

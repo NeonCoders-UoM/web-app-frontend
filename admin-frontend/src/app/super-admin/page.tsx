@@ -1,4 +1,3 @@
-// src/app/pages/super-admin-dashboard/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -16,7 +15,6 @@ const SuperAdminDashboard: React.FC = () => {
   const [serviceCenters, setServiceCenters] = useState<ServiceCenter[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch dashboard stats and service centers on mount
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -24,6 +22,7 @@ const SuperAdminDashboard: React.FC = () => {
           fetchDashboardStats(),
           fetchServiceCenters(),
         ]);
+        console.log("Fetched service centers in SuperAdminDashboard:", serviceCentersData); // Debug log
         setStats(statsData);
         setServiceCenters(serviceCentersData);
       } catch (error) {
@@ -36,7 +35,6 @@ const SuperAdminDashboard: React.FC = () => {
     loadData();
   }, []);
 
-  // Transform serviceCenters into string[][] for the Table component
   const data = serviceCenters.map((sc) => [
     sc.id,
     sc.serviceCenterName,
@@ -45,7 +43,6 @@ const SuperAdminDashboard: React.FC = () => {
     sc.address,
   ]);
 
-  // Define table headers
   const headers = [
     { title: "ID", sortable: false },
     { title: "Name", sortable: false },
@@ -54,15 +51,13 @@ const SuperAdminDashboard: React.FC = () => {
     { title: "Address", sortable: false },
   ];
 
-  // Define actions for the kebab menu
   const actions: ("edit" | "delete" | "view" | "loyaltyPoints")[] = ["edit", "delete", "view"];
 
-  // Handle Edit action
   const handleEdit = (id: string) => {
+    console.log("Navigating to:", `/service-centers/${id}/edit`);
     router.push(`/service-centers/${id}/edit`);
   };
 
-  // Handle Delete action
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this service center?")) {
       try {
@@ -76,19 +71,18 @@ const SuperAdminDashboard: React.FC = () => {
     }
   };
 
-  // Handle View action
   const handleView = (id: string) => {
     router.push(`/service-centers/${id}/view`);
   };
 
-  // Handle clicking on Service Center Name
   const handleServiceCenterClick = (id: string) => {
     router.push(`/service-centers/${id}/admin`);
   };
 
-  // Handle kebab menu actions
   const handleAction = (action: string, row: string[]) => {
-    const id = row[0]; // ID is the first column
+    console.log("handleAction called with:", { action, row });
+    const id = row[0];
+    console.log("Extracted ID:", id);
     const actionMap: Record<string, string> = {
       Edit: "edit",
       Delete: "delete",
@@ -96,25 +90,24 @@ const SuperAdminDashboard: React.FC = () => {
       "Loyalty Points": "loyaltyPoints",
     };
     const actionType = actionMap[action];
+    console.log("Mapped actionType:", actionType);
     if (actionType === "edit") handleEdit(id);
     if (actionType === "delete") handleDelete(id);
     if (actionType === "view") handleView(id);
-    // "loyaltyPoints" not used in this context
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6 flex justify-center items-center">
+      <div className="min-h-screen bg-neutral-50 p-6 flex justify-center items-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      {/* Header */}
+    <div className="min-h-screen bg-neutral-50 p-6">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+        <h1 className="text-2xl font-semibold text-neutral-900">Dashboard</h1>
         <UserProfileCard
           pictureSrc="/images/profipic.jpg"
           pictureAlt="Moni Roy"
@@ -126,17 +119,15 @@ const SuperAdminDashboard: React.FC = () => {
         />
       </div>
 
-      {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatusCard title="Customers" value={stats?.customers || 0} icon="customers" />
         <StatusCard title="Vehicles" value={stats?.vehicles || 0} icon="vehicles" />
         <StatusCard title="Service Centers" value={stats?.serviceCenters || 0} icon="serviceCenters" />
       </div>
 
-      {/* Service Centers Section */}
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Service Centers</h2>
+          <h2 className="text-xl font-semibold text-neutral-900">Service Centers</h2>
           <div className="flex items-center space-x-4">
             <Button
               variant="primary"
@@ -148,14 +139,13 @@ const SuperAdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Service Centers Table */}
         <Table
           headers={headers}
           data={data}
           actions={actions}
           showSearchBar={true}
           onAction={handleAction}
-          onServiceCenterClick={handleServiceCenterClick} // Pass the handler
+          onServiceCenterClick={handleServiceCenterClick}
         />
       </div>
     </div>
