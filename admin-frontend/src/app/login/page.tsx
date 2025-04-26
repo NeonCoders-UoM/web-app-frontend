@@ -1,71 +1,66 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import LoginForm from "@/components/organism/login-form/login-form"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import LoginForm from "@/components/organism/login-form/login-form";
 
 const LoginPage = () => {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleLogin = async (data: { email: string; password: string }) => {
-    setIsLoading(true)
-    setError("")
+    setIsLoading(true);
+    setError("");
 
     try {
-      // Simulate API call to authenticate user
-      await new Promise((res) => setTimeout(res, 1000))
+      await new Promise((res) => setTimeout(res, 1000));
 
-      // This would be replaced with actual authentication logic
-      // For demo purposes, we'll use email to determine role
-      let userRole = ""
-
+      let userRole = "";
       if (data.email.includes("admin")) {
-        userRole = "admin"
+        userRole = "admin";
       } else if (data.email.includes("super")) {
-        userRole = "super-admin"
+        userRole = "super-admin";
       } else if (data.email.includes("service")) {
-        userRole = "service-center-admin"
+        userRole = "service-center-admin";
       } else if (data.email.includes("cashier")) {
-        userRole = "cashier"
+        userRole = "cashier";
       } else if (data.email.includes("data")) {
-        userRole = "data-operator"
+        userRole = "data-operator";
       } else {
-        throw new Error("Invalid credentials")
+        throw new Error("Invalid credentials");
       }
 
-      // Redirect based on role
       switch (userRole) {
         case "admin":
-          router.push("/admin/dashboard")
-          break
+          router.push("/admin/dashboard");
+          break;
         case "super-admin":
-          router.push("/super-admin/dashboard")
-          break
+          router.push("/super-admin/dashboard");
+          break;
         case "service-center-admin":
-          router.push("/service-center/dashboard")
-          break
+          router.push("/service-center/dashboard");
+          break;
         case "cashier":
-          router.push("/cashier/dashboard")
-          break
+          router.push("/cashier/dashboard");
+          break;
         case "data-operator":
-          router.push("/data-operator/dashboard")
-          break
+          router.push("/data-operator/dashboard");
+          break;
         default:
-          throw new Error("Invalid role")
+          throw new Error("Invalid role");
       }
     } catch (err: unknown) {
-      console.error("Login failed:", err)
+      console.error("Login failed:", err);
       if (err instanceof Error) {
-        setError(err.message || "Login failed. Please try again.")
+        setError(err.message || "Login failed. Please try again.");
       } else {
-        setError("Login failed. Please try again.")
+        setError("Login failed. Please try again.");
       }
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex items-center justify-center h-screen bg-neutral-50 px-4">
@@ -78,7 +73,11 @@ const LoginPage = () => {
         <LoginForm onSubmit={handleLogin} isLoading={isLoading} />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LoginPage
+// Disable SSR for this page
+export const dynamic = "force-dynamic";
+export const ssr = false;
+
+export default LoginPage;
