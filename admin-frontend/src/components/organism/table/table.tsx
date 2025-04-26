@@ -9,6 +9,7 @@ interface TableProps {
   headers: { title: string; sortable?: boolean }[];
   data: string[][];
   actions: ("edit" | "delete" | "view" | "loyaltyPoints")[];
+  hideActions?: boolean;
   showSearchBar?: boolean;
   onAction?: (action: string, row: string[]) => void;
   onServiceCenterClick?: (id: string) => void;
@@ -18,6 +19,7 @@ const Table: React.FC<TableProps> = ({
   headers,
   data,
   actions,
+  hideActions = false,
   showSearchBar = false,
   onAction,
   onServiceCenterClick,
@@ -96,6 +98,7 @@ const Table: React.FC<TableProps> = ({
               key={index}
               data={row}
               actions={actions}
+              hideActions={hideActions}
               onAction={onAction}
               onServiceCenterClick={onServiceCenterClick}
             />
