@@ -1,3 +1,4 @@
+// src/components/organism/table/table.tsx
 import React, { useState, useEffect } from "react";
 import TableHead from "@/components/molecules/table-head/table-head";
 import TableRow from "@/components/molecules/table-row/table-row";
@@ -9,6 +10,8 @@ interface TableProps {
   data: string[][];
   actions: ("edit" | "delete" | "view" | "loyaltyPoints")[];
   showSearchBar?: boolean;
+  onAction?: (action: string, row: string[]) => void;
+  onServiceCenterClick?: (id: string) => void;
 }
 
 const Table: React.FC<TableProps> = ({
@@ -16,6 +19,8 @@ const Table: React.FC<TableProps> = ({
   data,
   actions,
   showSearchBar = false,
+  onAction,
+  onServiceCenterClick,
 }) => {
   const [filteredData, setFilteredData] = useState<string[][]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -23,7 +28,7 @@ const Table: React.FC<TableProps> = ({
   const [sortConfig, setSortConfig] = useState<{
     column: number;
     direction: "asc" | "desc";
-  } | null>(null);
+  } | null>(null); // Removed 'salt: null'
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
@@ -41,7 +46,7 @@ const Table: React.FC<TableProps> = ({
       return direction === "asc" ? result : -result;
     });
 
-    setSortConfig({ column: index, direction });
+    setSortConfig({ column: index, direction }); // Matches the type now
     setFilteredData(sorted);
     setCurrentPage(1);
   };
@@ -88,7 +93,13 @@ const Table: React.FC<TableProps> = ({
         <TableHead headers={headers} onSort={handleSort} />
         <tbody>
           {paginatedData.map((row, index) => (
-            <TableRow key={index} data={row} actions={actions} />
+            <TableRow
+              key={index}
+              data={row}
+              actions={actions}
+              onAction={onAction}
+              onServiceCenterClick={onServiceCenterClick}
+            />
           ))}
         </tbody>
       </table>
