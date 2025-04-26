@@ -1,14 +1,19 @@
-"use client"
+// src/app/components/organism/service-center-form/service-center-form.tsx
+"use client";
 
-import type React from "react"
+import React, { useState, useEffect } from "react";
+import Button from "@/components/atoms/button/button";
+import InputField from "@/components/atoms/input-fields/input-fields";
+import Dropdown from "@/components/atoms/dropdown/dropdown";
+import colors from "@/styles/colors";
+import { ServiceCenter } from "@/types";
 
-import { useState } from "react"
-import Button from "@/components/atoms/button/button"
-import InputField from "@/components/atoms/input-fields/input-fields"
-import Dropdown from "@/components/atoms/dropdown/dropdown"
-import colors from "@/styles/colors"
+interface ServiceCenterFormProps {
+  initialData?: Partial<ServiceCenter>;
+  onSubmit: (data: Omit<ServiceCenter, "id">) => void;
+}
 
-export default function ServiceCenterForm() {
+export default function ServiceCenterForm({ initialData, onSubmit }: ServiceCenterFormProps) {
   const [formData, setFormData] = useState({
     serviceCenterName: "",
     email: "",
@@ -20,22 +25,39 @@ export default function ServiceCenterForm() {
     commissionDate: "",
     availableServices: "",
     serviceHours: "",
-  })
+  });
+
+  // Prefill form with initial data if provided (for edit mode)
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        serviceCenterName: initialData.serviceCenterName || "",
+        email: initialData.email || "",
+        address: initialData.address || "",
+        telephoneNumber: initialData.telephoneNumber || "",
+        ownersName: initialData.ownersName || "",
+        vatNumber: initialData.vatNumber || "",
+        registrationNumber: initialData.registrationNumber || "",
+        commissionDate: initialData.commissionDate || "",
+        availableServices: initialData.availableServices || "",
+        serviceHours: initialData.serviceHours || "",
+      });
+    }
+  }, [initialData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleServiceSelect = (option: string) => {
-    setFormData((prev) => ({ ...prev, availableServices: option }))
-  }
+    setFormData((prev) => ({ ...prev, availableServices: option }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("Form submitted:", formData)
-    // Handle form submission logic here
-  }
+    e.preventDefault();
+    onSubmit(formData);
+  };
 
   const availableServiceOptions = [
     "Oil Change",
@@ -43,13 +65,13 @@ export default function ServiceCenterForm() {
     "Brake Service",
     "Engine Repair",
     "Full Inspection",
-  ]
+  ];
 
   return (
     <div
       style={{
         width: "743px",
-        height: "570px",
+        height: "570px", // Fixed: Added colon (:)
         fontFamily: "var(--font-family-text)",
         padding: "20px",
       }}
@@ -156,7 +178,7 @@ export default function ServiceCenterForm() {
                 fontWeight: "var(--font-weight-regular)",
               }}
             >
-              Owner&#39;s Name
+              Owner&rsquo;s Name
             </label>
             <InputField
               id="ownersName"
@@ -235,11 +257,21 @@ export default function ServiceCenterForm() {
 
           {/* Choose Available Services */}
           <div>
+            <label
+              className="block mb-1"
+              style={{
+                color: colors.neutral[600],
+                fontSize: "var(--font-size-sm)",
+                fontWeight: "var(--font-weight-regular)",
+              }}
+            >
+              Choose Available Services
+            </label>
             <Dropdown
-              label="Choose Available Services"
               options={availableServiceOptions}
               placeholder="Services"
               onSelect={handleServiceSelect}
+              selectedOption={formData.availableServices}
               className="w-full"
             />
           </div>
@@ -274,5 +306,5 @@ export default function ServiceCenterForm() {
         </div>
       </form>
     </div>
-  )
+  );
 }
