@@ -24,11 +24,11 @@ const Table: React.FC<TableProps> = ({
 }) => {
   const [filteredData, setFilteredData] = useState<string[][]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(6);
+  const [itemsPerPage, setItemsPerPage] = useState(10); // Increased to avoid pagination
   const [sortConfig, setSortConfig] = useState<{
     column: number;
     direction: "asc" | "desc";
-  } | null>(null); // Removed 'salt: null'
+  } | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
@@ -46,7 +46,7 @@ const Table: React.FC<TableProps> = ({
       return direction === "asc" ? result : -result;
     });
 
-    setSortConfig({ column: index, direction }); // Matches the type now
+    setSortConfig({ column: index, direction });
     setFilteredData(sorted);
     setCurrentPage(1);
   };
@@ -65,7 +65,6 @@ const Table: React.FC<TableProps> = ({
 
   const handleFilterClick = () => {
     console.log("Filters button clicked");
-    // TODO: Open a filter modal or toggle filter UI
   };
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -89,7 +88,7 @@ const Table: React.FC<TableProps> = ({
         />
       )}
 
-      <table className="w-full border-collapse bg-white shadow-md rounded-lg mt-16">
+      <table className="w-full border-collapse bg-white shadow-md rounded-lg mt-4">
         <TableHead headers={headers} onSort={handleSort} />
         <tbody>
           {paginatedData.map((row, index) => (
@@ -104,15 +103,17 @@ const Table: React.FC<TableProps> = ({
         </tbody>
       </table>
 
-      <div className="flex justify-end mt-4">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          itemsPerPage={itemsPerPage}
-          onPageChange={setCurrentPage}
-          onItemsPerPageChange={setItemsPerPage}
-        />
-      </div>
+      {filteredData.length > itemsPerPage && (
+        <div className="flex justify-end mt-4">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+            onItemsPerPageChange={setItemsPerPage}
+          />
+        </div>
+      )}
     </div>
   );
 };

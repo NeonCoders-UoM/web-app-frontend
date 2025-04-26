@@ -1,28 +1,41 @@
-// src/app/service-centers/[id]/view/details/page.tsx
+// src/app/service-centers/[id]/view/services/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import Image from "next/image";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import TabNavigation from "@/components/atoms/tab-navigation/tab-navigation";
+import Table from "@/components/organism/table/table";
+import Button from "@/components/atoms/button/button";
 import { fetchServiceCenterById } from "@/utils/api";
 import { ServiceCenter } from "@/types";
 
-const DetailsTab: React.FC = () => {
+// Mock service data
+const mockServices = [
+  { id: "#SC-0001", name: "Engine Check", price: "60000LKR", effectiveTo: "12-05-2025", addAnother: "DGFHR3 Enterprises" },
+  { id: "#SC-0002", name: "Engine Check", price: "60000LKR", effectiveTo: "12-05-2025", addAnother: "DGFHR3 Enterprises" },
+  { id: "#SC-0003", name: "Engine Check", price: "60000LKR", effectiveTo: "12-05-2025", addAnother: "DGFHR3 Enterprises" },
+  { id: "#SC-0004", name: "Engine Check", price: "60000LKR", effectiveTo: "12-05-2025", addAnother: "DGFHR3 Enterprises" },
+  { id: "#SC-0005", name: "Engine Check", price: "60000LKR", effectiveTo: "12-05-2025", addAnother: "DGFHR3 Enterprises" },
+  { id: "#SC-0006", name: "Engine Check", price: "60000LKR", effectiveTo: "12-05-2025", addAnother: "DGFHR3 Enterprises" },
+  { id: "#SC-0007", name: "Engine Check", price: "60000LKR", effectiveTo: "12-05-2025", addAnother: "DGFHR3 Enterprises" },
+];
+
+const ServicesTab: React.FC = () => {
   const router = useRouter();
   const params = useParams();
   const { id } = params;
 
   const [serviceCenter, setServiceCenter] = useState<ServiceCenter | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [services, setServices] = useState(mockServices);
 
   useEffect(() => {
     const loadServiceCenter = async () => {
       if (typeof id === "string") {
         try {
           const data = await fetchServiceCenterById(id);
-          console.log("Fetched service center in DetailsTab:", data);
+          console.log("Fetched service center in ServicesTab:", data);
           setServiceCenter(data);
         } catch (error) {
           console.error("Error fetching service center:", error);
@@ -57,6 +70,24 @@ const DetailsTab: React.FC = () => {
     },
   ];
 
+  const headers = [
+    { title: "SERVICE ID", sortable: false },
+    { title: "NAME", sortable: false },
+    { title: "PRICE", sortable: false },
+    { title: "EFFECTIVE TO", sortable: false },
+    { title: "ADD ANOTHER", sortable: false },
+    { title: "ACTIONS", sortable: false }, // Added column for kebab menu
+  ];
+
+  const tableData = services.map(service => [
+    service.id,
+    service.name,
+    service.price,
+    service.effectiveTo,
+    service.addAnother,
+    "", // Placeholder for the actions column
+  ]);
+
   const handleTabChange = (tab: string) => {
     if (!id || typeof id !== "string") {
       console.error("Invalid ID for navigation:", id);
@@ -64,6 +95,18 @@ const DetailsTab: React.FC = () => {
     }
     const tabRoute = tab.toLowerCase();
     router.push(`/service-centers/${id}/view/${tabRoute}`);
+  };
+
+  const handleAction = (action: string, row: string[]) => {
+    const serviceId = row[0]; // SERVICE ID
+    if (action === "edit") {
+      console.log(`Editing service: ${serviceId}`);
+      // Navigate to edit page (to be implemented)
+      router.push(`/service-centers/${id}/view/services/edit/${serviceId}`);
+    } else if (action === "delete") {
+      console.log(`Deleting service: ${serviceId}`);
+      setServices(services.filter(service => service.id !== serviceId));
+    }
   };
 
   if (isLoading) {
@@ -104,66 +147,26 @@ const DetailsTab: React.FC = () => {
 
         {/* Tab Navigation and Content */}
         <div className="flex-1 flex flex-col">
-          <TabNavigation tabs={tabs} activeTab="Details" onTabChange={handleTabChange} />
+          <TabNavigation tabs={tabs} activeTab="Services" onTabChange={handleTabChange} />
 
           <div className="flex-1 p-6">
-            <div className="grid grid-cols-2 gap-x-4 gap-y-6">
-              {/* Left Column */}
-              <div>
-                <div className="mb-4">
-                  <p className="text-gray-500 text-sm">Service Center Name :</p>
-                  <p className="font-medium">{serviceCenter.serviceCenterName}</p>
-                </div>
-                <div className="mb-4">
-                  <p className="text-gray-500 text-sm">Service Center Address :</p>
-                  <p className="font-medium">{serviceCenter.address}</p>
-                </div>
-                <div className="mb-4">
-                  <p className="text-gray-500 text-sm">Owner&apos;s Name :</p>
-                  <p className="font-medium">{serviceCenter.ownersName}</p>
-                </div>
-                <div className="mb-4">
-                  <p className="text-gray-500 text-sm">VAT Number :</p>
-                  <p className="font-medium">{serviceCenter.vatNumber}</p>
-                </div>
-              </div>
-
-              {/* Right Column */}
-              <div>
-                <div className="mb-4">
-                  <p className="text-gray-500 text-sm">Email :</p>
-                  <p className="font-medium">{serviceCenter.email}</p>
-                </div>
-                <div className="mb-4">
-                  <p className="text-gray-500 text-sm">Telephone Number :</p>
-                  <p className="font-medium">{serviceCenter.telephoneNumber}</p>
-                </div>
-                <div className="mb-4">
-                  <p className="text-gray-500 text-sm">Registration Number :</p>
-                  <p className="font-medium">{serviceCenter.registrationNumber}</p>
-                </div>
-                <div className="mb-4">
-                  <p className="text-gray-500 text-sm">Commission Date :</p>
-                  <p className="font-medium">{serviceCenter.commissionDate}</p>
-                </div>
-                <div className="mb-4">
-                  <p className="text-gray-500 text-sm">Service Hours :</p>
-                  <p className="font-medium">
-                    {serviceCenter.serviceHours.start} - {serviceCenter.serviceHours.end}
-                  </p>
-                </div>
-              </div>
+            <div className="flex justify-end mb-4">
+              <Button
+                variant="primary"
+                size="medium"
+                onClick={() => router.push(`/service-centers/${id}/view/services/add`)}
+              >
+                Add Service
+              </Button>
             </div>
 
-            <div className="mt-4 flex justify-end">
-              <Image
-                src="/images/vehicle.jpg"
-                alt="Vehicle mechanics"
-                width={200}
-                height={120}
-                priority
-              />
-            </div>
+            <Table
+              headers={headers}
+              data={tableData}
+              actions={["edit", "delete"]}
+              showSearchBar={false}
+              onAction={handleAction}
+            />
           </div>
         </div>
       </div>
@@ -171,4 +174,4 @@ const DetailsTab: React.FC = () => {
   );
 };
 
-export default DetailsTab;
+export default ServicesTab;
