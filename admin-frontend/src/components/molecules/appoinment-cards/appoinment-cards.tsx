@@ -1,5 +1,6 @@
 import Button from "@/components/atoms/button/button";
 import colors from "@/styles/colors";
+import "@/styles/fonts.css";
 
 interface AppointmentProps {
   appointmentId: string;
