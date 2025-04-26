@@ -1,13 +1,11 @@
+// src/components/atoms/vehicle-details-card/vehicle-details-card.tsx
 import Image from 'next/image'
 import { useRef, useEffect, useState } from 'react'
 
-type Vehicle = {
+export type Vehicle = {
   id: string
   client: string
   pictureSrc: string
-  type: string
-  brand: string
-  model: string
   licenseplate: string
   owner?: string
   transmission?: string
@@ -45,7 +43,7 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle }: Props) => {
 
   const handleClose = () => {
     setShow(false)
-    setTimeout(onClose, 300) // match the duration of Tailwind animation
+    setTimeout(onClose, 300)
   }
 
   if (!vehicle || (!isOpen && !show)) return null
@@ -61,18 +59,7 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle }: Props) => {
         <h2 className="text-blue-600 text-xl font-medium mb-6">Vehicle Details</h2>
 
         <div className="grid grid-cols-2 gap-x-4 gap-y-6">
-          {/* Left Column */}
           <div>
-            <div className="mb-4">
-              <p className="text-gray-500 text-sm">Vehicle Type :</p>
-              <p className="font-medium">{vehicle.type}</p>
-            </div>
-
-            <div className="mb-4">
-              <p className="text-gray-500 text-sm">Vehicle Model :</p>
-              <p className="font-medium">{vehicle.model}</p>
-            </div>
-
             <div className="mb-4">
               <p className="text-gray-500 text-sm">License Plate Number :</p>
               <p className="font-medium">{vehicle.licenseplate}</p>
@@ -89,13 +76,7 @@ const VehicleDetailsModal = ({ isOpen, onClose, vehicle }: Props) => {
             </div>
           </div>
 
-          {/* Right Column */}
           <div>
-            <div className="mb-4">
-              <p className="text-gray-500 text-sm">Vehicle Brand :</p>
-              <p className="font-medium">{vehicle.brand}</p>
-            </div>
-
             <div className="mb-4">
               <p className="text-gray-500 text-sm">Owner :</p>
               <p className="font-medium">{vehicle.owner || vehicle.client}</p>
