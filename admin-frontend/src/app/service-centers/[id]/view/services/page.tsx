@@ -101,7 +101,7 @@ const ServicesTab: React.FC = () => {
     const serviceId = row[0]; // SERVICE ID
     if (action === "edit") {
       console.log(`Editing service: ${serviceId}`);
-      // Navigate to edit page (to be implemented)
+      // Navigate to edit page
       router.push(`/service-centers/${id}/view/services/edit/${serviceId}`);
     } else if (action === "delete") {
       console.log(`Deleting service: ${serviceId}`);
