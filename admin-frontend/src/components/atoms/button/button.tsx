@@ -1,19 +1,19 @@
 "use client";
 
-import React, { useState } from 'react';
-import colors from '../../../styles/colors';
-import * as HeroIcons from '@heroicons/react/24/outline';
+import React, { useState } from "react";
+import colors from "../../../styles/colors";
+import * as HeroIcons from "@heroicons/react/24/outline";
 
 interface ButtonProps {
-  variant: 'primary' | 'secondary' | 'text';
-  size: 'small' | 'medium' | 'large';
+  variant: "primary" | "secondary" | "text";
+  size: "small" | "medium" | "large";
   children: React.ReactNode;
   onClick?: () => void;
   icon?: keyof typeof HeroIcons;
-  iconPosition?: 'left' | 'right';
+  iconPosition?: "left" | "right";
   disabled?: boolean;
   className?: string;
-  type?: 'button' | 'submit' | 'reset';
+  type?: "button" | "submit" | "reset";
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -22,10 +22,10 @@ const Button: React.FC<ButtonProps> = ({
   children,
   onClick,
   icon,
-  iconPosition = 'left',
+  iconPosition = "left",
   disabled = false,
-  className = '',
-  type = 'button',
+  className = "",
+  type = "button",
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isActive, setIsActive] = useState(false);
@@ -39,40 +39,40 @@ const Button: React.FC<ButtonProps> = ({
   const handleMouseUp = () => setIsActive(false);
 
   const baseStyles = {
-    borderRadius: '8px',
-    fontFamily: 'var(--font-family-text)',
-    fontWeight: 'var(--font-weight-semibold)',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    transition: 'all 0.2s ease',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxSizing: 'border-box' as const,
-    gap: '8px',
+    borderRadius: "8px",
+    fontFamily: "var(--font-family-text)",
+    fontWeight: "var(--font-weight-semibold)",
+    cursor: disabled ? "not-allowed" : "pointer",
+    transition: "all 0.2s ease",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxSizing: "border-box" as const,
+    gap: "8px",
     opacity: disabled ? 0.5 : 1,
   };
 
   const sizeStyles = {
     small: {
-      width: '123px',
-      height: '40px',
-      padding: '0 16px',
-      fontSize: 'var(--font-size-sm)',
-      iconSize: '16px',
+      width: "123px",
+      height: "40px",
+      padding: "0 16px",
+      fontSize: "var(--font-size-sm)",
+      iconSize: "16px",
     },
     medium: {
-      width: 'full',
-      height: '48px',
-      padding: '0 24px',
-      fontSize: 'var(--font-size-md)',
-      iconSize: '20px',
+      width: "full",
+      height: "48px",
+      padding: "0 24px",
+      fontSize: "var(--font-size-md)",
+      iconSize: "20px",
     },
     large: {
-      width: '192px',
-      height: '56px',
-      padding: '0 32px',
-      fontSize: 'var(--font-size-lg)',
-      iconSize: '24px',
+      width: "192px",
+      height: "56px",
+      padding: "0 32px",
+      fontSize: "var(--font-size-lg)",
+      iconSize: "24px",
     },
   };
 
@@ -81,17 +81,17 @@ const Button: React.FC<ButtonProps> = ({
       default: {
         backgroundColor: colors.primary[200],
         color: colors.neutral[100],
-        border: 'none',
+        border: "none",
       },
       hover: {
         backgroundColor: colors.primary[300],
         color: colors.neutral[100],
-        border: 'none',
+        border: "none",
       },
       active: {
         backgroundColor: colors.primary[100],
         color: colors.neutral[100],
-        border: 'none',
+        border: "none",
       },
     },
     secondary: {
@@ -113,24 +113,24 @@ const Button: React.FC<ButtonProps> = ({
     },
     text: {
       default: {
-        backgroundColor: 'transparent',
+        backgroundColor: "transparent",
         color: colors.primary[200],
-        border: 'none',
+        border: "none",
       },
       hover: {
-        backgroundColor: 'transparent',
+        backgroundColor: "transparent",
         color: colors.primary[300],
-        border: 'none',
+        border: "none",
       },
       active: {
-        backgroundColor: 'transparent',
+        backgroundColor: "transparent",
         color: colors.primary[100],
-        border: 'none',
+        border: "none",
       },
     },
   };
 
-  const currentState = isActive ? 'active' : isHovered ? 'hover' : 'default';
+  const currentState = isActive ? "active" : isHovered ? "hover" : "default";
   const styles = {
     ...baseStyles,
     ...sizeStyles[size],
@@ -152,7 +152,7 @@ const Button: React.FC<ButtonProps> = ({
       className={`w-full ${className}`}
       suppressHydrationWarning={true} // Suppress hydration warning
     >
-      {icon && iconPosition === 'left' && IconComponent && (
+      {icon && iconPosition === "left" && IconComponent && (
         <IconComponent
           style={{
             width: sizeStyles[size].iconSize,
@@ -162,7 +162,7 @@ const Button: React.FC<ButtonProps> = ({
         />
       )}
       {children}
-      {icon && iconPosition === 'right' && IconComponent && (
+      {icon && iconPosition === "right" && IconComponent && (
         <IconComponent
           style={{
             width: sizeStyles[size].iconSize,
