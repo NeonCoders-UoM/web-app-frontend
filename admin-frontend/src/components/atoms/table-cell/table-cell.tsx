@@ -6,7 +6,7 @@ interface TableCellProps {
 }
 
 const TableCell: React.FC<TableCellProps> = ({ children, className }) => {
-  return <td className={`px-4 py-3 border-b ${className}`}>{children}</td>;
+  return <td className={`px-[24px] py-[22px] border-b border-neutral-300 ${className}`}>{children}</td>;
 };
 
 export default TableCell;

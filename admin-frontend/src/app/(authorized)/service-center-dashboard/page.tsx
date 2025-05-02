@@ -49,9 +49,9 @@ const ServiceCenterDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white p-6">
+    <div className="min-h-screen bg-white p-[58px]">
       {/* Header with user profile */}
-      <div className="flex justify-end mb-8">
+      <div className="flex justify-end mb-[32px]">
         <UserProfileCard
           pictureSrc="/images/profipic.jpg"
           pictureAlt="Moni Roy"
@@ -63,20 +63,20 @@ const ServiceCenterDashboard = () => {
         />
       </div>
 
-      <div className="mb-12">
-        <h1 className="text-2xl font-bold text-neutral-600">Dashboard</h1>
+      <div className="mb-[32px]">
+        <h1 className="text-2xl font-bold">Dashboard</h1>
       </div>
 
       {/* Status Cards */}
-      <div className="flex justify-center gap-16 mb-8">
+      <div className="flex justify-start gap-[67px] mb-[44px]">
         <StatusCard title="Customers" value={dashboardData.customers} icon="customers" />
         <StatusCard title="Vehicles" value={dashboardData.vehicles} icon="vehicles" />
         <StatusCard title="Appointments" value={dashboardData.serviceCenters} icon="serviceCenters" />
       </div>
 
       {/* Table Section */}
-      <div className="bg-white p-6 shadow-md rounded-lg">
-        <h2 className="text-lg font-semibold mb-4">Leading Services</h2>
+      <div className="bg-white pr-[165px]">
+        <h2 className="text-2xl font-semibold">Leading Services</h2>
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-200"></div>

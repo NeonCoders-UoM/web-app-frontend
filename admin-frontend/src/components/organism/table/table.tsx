@@ -90,7 +90,7 @@ const Table: React.FC<TableProps> = ({
         />
       )}
 
-      <table className="w-full border-collapse bg-white shadow-md rounded-lg mt-4">
+      <table className="w-full border-collapse bg-white shadow-md rounded-lg mt-[48px]">
         <TableHead headers={headers} onSort={handleSort} />
         <tbody>
           {paginatedData.map((row, index) => (
@@ -106,17 +106,15 @@ const Table: React.FC<TableProps> = ({
         </tbody>
       </table>
 
-      {filteredData.length > itemsPerPage && (
-        <div className="flex justify-end mt-4">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            itemsPerPage={itemsPerPage}
-            onPageChange={setCurrentPage}
-            onItemsPerPageChange={setItemsPerPage}
-          />
-        </div>
-      )}
+      <div className="flex justify-end mt-[40px]">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+          onItemsPerPageChange={setItemsPerPage}
+        />
+      </div>
     </div>
   );
 };
