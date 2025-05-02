@@ -8,7 +8,7 @@ interface TableHeadProps {
 
 const TableHead: React.FC<TableHeadProps> = ({ headers, onSort }) => {
   return (
-    <thead className="bg-neutral-200">
+    <thead className="bg-neutral-100">
       <tr>
         {headers.map((header, index) => (
           <TableHeader
@@ -18,7 +18,7 @@ const TableHead: React.FC<TableHeadProps> = ({ headers, onSort }) => {
             onSort={() => onSort(index)}
           />
         ))}
-        <th className="w-12 border-b"></th>
+        <th className="w-12 border-b border-neutral-400"></th>
       </tr>
     </thead>
   );

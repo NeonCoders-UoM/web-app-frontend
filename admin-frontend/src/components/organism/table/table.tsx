@@ -81,7 +81,7 @@ const Table: React.FC<TableProps> = ({
   }, [itemsPerPage]);
 
   return (
-    <div className="overflow-x-auto">
+    <div className="">
       {showSearchBar && (
         <SearchBar
           value={searchTerm}
@@ -91,7 +91,7 @@ const Table: React.FC<TableProps> = ({
         />
       )}
 
-      <table className="w-full border-collapse bg-white shadow-md rounded-lg mt-16">
+      <table className="w-full border-collapse bg-white shadow-md rounded-lg mt-[48px]">
         <TableHead headers={headers} onSort={handleSort} />
         <tbody>
           {paginatedData.map((row, index) => (
@@ -107,7 +107,7 @@ const Table: React.FC<TableProps> = ({
         </tbody>
       </table>
 
-      <div className="flex justify-end mt-4">
+      <div className="flex justify-end mt-[40px]">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

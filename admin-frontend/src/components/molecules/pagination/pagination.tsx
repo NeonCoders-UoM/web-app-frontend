@@ -76,16 +76,18 @@ const Pagination: React.FC<PaginationProps> = ({
   };
 
   return (
-    <div className="flex justify-between items-center py-4 w-full">
+    <div className="flex justify-between items-center w-full">
       
-      <div className="w-40">
+      <div className='flex justify-between items-center'>
+        <p className='text-sm text-neutral-400 pr-[16px]'>Show Result:</p>
+        <div className="w-[68px] h-[38px]">
         <Dropdown
-          label="Show result"
           options={['6', '12', '20']}
           placeholder={`${selectedItems}`}
           onSelect={handleItemsPerPageChange}
-          className="w-24"
+          className="w-[68px]"
         />
+      </div>
       </div>
       
       <div className="flex items-center gap-2">
