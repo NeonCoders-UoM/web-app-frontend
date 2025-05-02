@@ -107,9 +107,8 @@ const SuperAdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 p-6">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-semibold text-neutral-900">Dashboard</h1>
+    <div className="min-h-screen bg-white p-6">
+      <div className="flex justify-end items-center mb-[32px]">
         <UserProfileCard
           pictureSrc="/images/profipic.jpg"
           pictureAlt="Moni Roy"
@@ -120,36 +119,42 @@ const SuperAdminDashboard: React.FC = () => {
           onSettingsClick={() => router.push("/settings")} // Updated for consistency
         />
       </div>
+      
+      <div className="px-[182px]">
+      
+        <h1 className="text-2xl font-semibold text-neutral-900 mb-[32px]">Dashboard</h1>
 
-      <div className="flex justify-center gap-16 mb-8">
-        <StatusCard title="Customers" value={stats?.customers || 0} icon="customers" />
-        <StatusCard title="Vehicles" value={stats?.vehicles || 0} icon="vehicles" />
-        <StatusCard title="Service Centers" value={stats?.serviceCenters || 0} icon="serviceCenters" />
-      </div>
-
-      <div>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-neutral-900">Service Centers</h2>
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="primary"
-              size="medium"
-              onClick={() => router.push("/service-centers/add")}
-            >
-              Add Service Center
-            </Button>
-          </div>
+        <div className="flex justify-start gap-[67px] mb-[44px]">
+          <StatusCard title="Customers" value={stats?.customers || 0} icon="customers" />
+          <StatusCard title="Vehicles" value={stats?.vehicles || 0} icon="vehicles" />
+          <StatusCard title="Service Centers" value={stats?.serviceCenters || 0} icon="serviceCenters" />
         </div>
 
-        <Table
-          headers={headers}
-          data={data}
-          actions={actions}
-          showSearchBar={true}
-          onAction={handleAction}
-          onServiceCenterClick={handleServiceCenterClick}
-        />
+        <div>
+          <div className="flex justify-between items-center mb-[32px]">
+            <h2 className="text-xl font-semibold text-neutral-900">Service Centers</h2>
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="primary"
+                size="medium"
+                onClick={() => router.push("/service-centers/add")}
+              >
+                Add Service Center
+              </Button>
+            </div>
+          </div>
+
+          <Table
+            headers={headers}
+            data={data}
+            actions={actions}
+            showSearchBar={true}
+            onAction={handleAction}
+            onServiceCenterClick={handleServiceCenterClick}
+          />
+        </div>
       </div>
+      
     </div>
   );
 };

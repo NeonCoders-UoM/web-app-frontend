@@ -41,7 +41,7 @@ const TableRow: React.FC<TableRowProps> = ({
         </TableCell>
       ))}
       {!hideActions && (
-        <td className="px-4 py-2 text-right border-b">
+        <td className="px-4 py-2 text-right border-b border-neutral-300">
           <KebabMenuWithActions actions={actions} onActionSelect={handleActionSelect} />
         </td>
       )}
