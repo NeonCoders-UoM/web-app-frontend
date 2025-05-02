@@ -1,35 +1,31 @@
-// tailwind.config.js
+/** @type {import('tailwindcss').Config} */
 module.exports = {
-    theme: {
-      extend: {
-        colors: {
-          neutral: {
-            600: '#111112',
-            500: '#1A1A1C',
-            450: '#302E31',
-            400: '#232325',
-            300: '#5A5A5C',
-            200: '#909091',
-            150: '#BFBFBB',
-            100: '#E9E9EA',
-          },
-          primary: {
-            300: '#1D4780',
-            200: '#275FEB',
-            100: '#5D87FF',
-          },
-          states: {
-            overdue: '#D40000', 
-            error: '#CC0202', 
-            completed: '#287475', 
-            ok: '#4CAF50', 
-            scheduled: '#007BFF', 
-            inProgress: '#17A2B8', 
-            upcoming: '#FFB400', 
-            canceled: '#6C757D', 
-           
-          },
+  content: [
+    './app/**/*.{js,ts,jsx,tsx}', // Scan all app files
+    './components/**/*.{js,ts,jsx,tsx}', // Scan all components
+  ],
+  theme: {
+    extend: {
+      colors: {
+        neutral: {
+          50: '#F9FAFB',
+          100: '#F3F4F6',
+          200: '#E5E7EB',
+          300: '#D1D5DB',
+          400: '#9CA3AF',
+          500: '#6B7280',
+          600: '#4B5563',
+          700: '#374151',
+          800: '#1F2937',
+          900: '#111827',
+        },
+        primary: {
+          100: '#DBEAFE',
+          200: '#93C5FD',
+          300: '#60A5FA',
         },
       },
     },
-  };
+  },
+  plugins: [],
+};
