@@ -1,117 +1,176 @@
 "use client";
 
-import React from "react";
-import { Loader2, CheckCircle, XCircle, Save, Send, Trash2 } from "lucide-react";
-import colors from "@/styles/colors";
+import React, { useState } from 'react';
+import colors from '../../../styles/colors';
+import * as HeroIcons from '@heroicons/react/24/outline';
 
-type ButtonProps = {
+interface ButtonProps {
+  variant: 'primary' | 'secondary' | 'text';
+  size: 'small' | 'medium' | 'large';
   children: React.ReactNode;
   onClick?: () => void;
-  type?: "button" | "submit" | "reset";
-  variant?: "primary" | "success" | "danger";
-  size?: "small" | "medium" | "large";
+  icon?: keyof typeof HeroIcons;
+  iconPosition?: 'left' | 'right';
   disabled?: boolean;
-  icon?: "save" | "send" | "check" | "close" | "loading" | "delete" | "plus";
-  iconPosition?: "left" | "right";
   className?: string;
-  style?: React.CSSProperties;
-};
-
-const iconMap = {
-  save: <Save size={16} />,
-  send: <Send size={16} />,
-  check: <CheckCircle size={16} />,
-  close: <XCircle size={16} />,
-  delete: <Trash2 size={16} />,
-  loading: <Loader2 size={16} className="animate-spin" />,
-  plus: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  ),
-};
+  type?: 'button' | 'submit' | 'reset';
+}
 
 const Button: React.FC<ButtonProps> = ({
+  variant,
+  size,
   children,
   onClick,
-  type = "button",
-  variant = "primary",
-  size = "medium",
-  disabled = false,
   icon,
-  iconPosition = "left",
-  className = "",
-  style,
+  iconPosition = 'left',
+  disabled = false,
+  className = '',
+  type = 'button',
 }) => {
-  const baseStyles = "flex items-center justify-center gap-2 rounded-lg font-medium transition duration-200 focus:outline-none";
+  const [isHovered, setIsHovered] = useState(false);
+  const [isActive, setIsActive] = useState(false);
 
-  const sizes = {
-    small: "px-3 py-1 text-sm",
-    medium: "px-4 py-2 text-base",
-    large: "px-6 py-3 text-lg",
+  const handleMouseEnter = () => !disabled && setIsHovered(true);
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setIsActive(false);
+  };
+  const handleMouseDown = () => !disabled && setIsActive(true);
+  const handleMouseUp = () => setIsActive(false);
+
+  const baseStyles = {
+    borderRadius: '8px',
+    fontFamily: 'var(--font-family-text)',
+    fontWeight: 'var(--font-weight-semibold)',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    transition: 'all 0.2s ease',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxSizing: 'border-box' as const,
+    gap: '8px',
+    opacity: disabled ? 0.5 : 1,
   };
 
-  const variants = {
+  const sizeStyles = {
+    small: {
+      width: '123px',
+      height: '40px',
+      padding: '0 16px',
+      fontSize: 'var(--font-size-sm)',
+      iconSize: '16px',
+    },
+    medium: {
+      width: 'full',
+      height: '48px',
+      padding: '0 24px',
+      fontSize: 'var(--font-size-md)',
+      iconSize: '20px',
+    },
+    large: {
+      width: '192px',
+      height: '56px',
+      padding: '0 32px',
+      fontSize: 'var(--font-size-lg)',
+      iconSize: '24px',
+    },
+  };
+
+  const variantStyles = {
     primary: {
-      background: colors.primary[200],
-      hover: colors.primary[300],
-      active: colors.primary[100],
-      text: "#FFFFFF",
+      default: {
+        backgroundColor: colors.primary[200],
+        color: colors.neutral[100],
+        border: 'none',
+      },
+      hover: {
+        backgroundColor: colors.primary[300],
+        color: colors.neutral[100],
+        border: 'none',
+      },
+      active: {
+        backgroundColor: colors.primary[100],
+        color: colors.neutral[100],
+        border: 'none',
+      },
     },
-    success: {
-      background: colors.states.ok,
-      hover: colors.states.ok,
-      active: colors.states.ok,
-      text: "#FFFFFF",
+    secondary: {
+      default: {
+        backgroundColor: colors.neutral[100],
+        color: colors.primary[200],
+        border: `2px solid ${colors.primary[200]}`,
+      },
+      hover: {
+        backgroundColor: colors.neutral[100],
+        color: colors.primary[300],
+        border: `2px solid ${colors.primary[300]}`,
+      },
+      active: {
+        backgroundColor: colors.neutral[100],
+        color: colors.primary[100],
+        border: `2px solid ${colors.primary[100]}`,
+      },
     },
-    danger: {
-      background: colors.states.error,
-      hover: colors.states.error,
-      active: colors.states.error,
-      text: "#FFFFFF",
+    text: {
+      default: {
+        backgroundColor: 'transparent',
+        color: colors.primary[200],
+        border: 'none',
+      },
+      hover: {
+        backgroundColor: 'transparent',
+        color: colors.primary[300],
+        border: 'none',
+      },
+      active: {
+        backgroundColor: 'transparent',
+        color: colors.primary[100],
+        border: 'none',
+      },
     },
   };
 
-  const currentVariant = variants[variant];
+  const currentState = isActive ? 'active' : isHovered ? 'hover' : 'default';
+  const styles = {
+    ...baseStyles,
+    ...sizeStyles[size],
+    ...variantStyles[variant][currentState],
+  };
+
+  const IconComponent = icon ? HeroIcons[icon] : null;
 
   return (
     <button
       type={type}
+      style={styles}
       onClick={onClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
       disabled={disabled}
-      className={`${baseStyles} ${sizes[size]} ${disabled ? "opacity-50 cursor-not-allowed" : ""} ${className}`}
-      style={{
-        backgroundColor: currentVariant.background,
-        color: currentVariant.text,
-        fontFamily: "var(--font-family-text)",
-        fontWeight: "var(--font-weight-medium)",
-        ...style,
-      }}
-      onMouseEnter={(e) => {
-        if (!disabled) {
-          e.currentTarget.style.backgroundColor = currentVariant.hover;
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!disabled) {
-          e.currentTarget.style.backgroundColor = style?.backgroundColor || currentVariant.background;
-        }
-      }}
-      onMouseDown={(e) => {
-        if (!disabled) {
-          e.currentTarget.style.backgroundColor = currentVariant.active;
-        }
-      }}
-      onMouseUp={(e) => {
-        if (!disabled) {
-          e.currentTarget.style.backgroundColor = style?.backgroundColor || currentVariant.background;
-        }
-      }}
-      data-form-type="other" // Prevent browser extensions from targeting this button
+      className={`w-full ${className}`}
+      suppressHydrationWarning={true} // Suppress hydration warning
     >
-      {icon && iconPosition === "left" && iconMap[icon]}
+      {icon && iconPosition === 'left' && IconComponent && (
+        <IconComponent
+          style={{
+            width: sizeStyles[size].iconSize,
+            height: sizeStyles[size].iconSize,
+            color: styles.color,
+          }}
+        />
+      )}
       {children}
-      {icon && iconPosition === "right" && iconMap[icon]}
+      {icon && iconPosition === 'right' && IconComponent && (
+        <IconComponent
+          style={{
+            width: sizeStyles[size].iconSize,
+            height: sizeStyles[size].iconSize,
+            color: styles.color,
+          }}
+        />
+      )}
     </button>
   );
 };

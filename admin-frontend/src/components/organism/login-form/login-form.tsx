@@ -1,138 +1,166 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import { Eye, EyeOff } from "lucide-react"
-import FormField from "@/components/molecules/form-field/form-field"
-import InputField from "@/components/atoms/input-fields/input-fields"
-import Button from "@/components/atoms/button/button"
+import React, { useState, useEffect } from "react";
+import { Eye, EyeOff, ArrowUpIcon } from "lucide-react";
+import Button from "@/components/atoms/button/button";
+import InputField from "@/components/atoms/input-fields/input-fields";
 
 interface LoginFormProps {
-  onSubmit: (data: { email: string; password: string }) => void
-  isLoading?: boolean
+  onSubmit: (data: { email: string; password: string; remember: boolean }) => void;
+  isLoading?: boolean;
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-  })
+    remember: false,
+  });
 
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<{ email: string; password: string }>({
     email: "",
     password: "",
-  })
+  });
 
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  useEffect(() => {
+    const rememberedEmail = localStorage.getItem("rememberedEmail");
+    if (rememberedEmail) {
+      setFormData((prev) => ({ ...prev, email: rememberedEmail, remember: true }));
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-
-    if (errors[name as keyof typeof errors]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }))
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+    if (isSubmitted && errors[name as keyof typeof errors] && name !== "remember") {
+      validateForm();
     }
-  }
+  };
 
-  const validateForm = () => {
-    let valid = true
-    const newErrors = { ...errors }
+  const validateForm = (): boolean => {
+    const newErrors = { email: "", password: "" };
+    let valid = true;
 
     if (!formData.email) {
-      newErrors.email = "Email is required"
-      valid = false
+      newErrors.email = "Email is required";
+      valid = false;
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid"
-      valid = false
-    } else {
-      newErrors.email = ""
+      newErrors.email = "Email is invalid";
+      valid = false;
     }
 
     if (!formData.password) {
-      newErrors.password = "Password is required"
-      valid = false
+      newErrors.password = "Password is required";
+      valid = false;
     } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters"
-      valid = false
-    } else {
-      newErrors.password = ""
+      newErrors.password = "Password must be at least 6 characters";
+      valid = false;
     }
 
-    setErrors(newErrors)
-    return valid
-  }
+    setErrors(newErrors);
+    return valid;
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
+    setIsSubmitted(true);
     if (validateForm()) {
-      onSubmit(formData)
+      onSubmit(formData);
     }
-  }
+  };
 
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword)
-  }
+    setShowPassword(!showPassword);
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <FormField label="Email Address" htmlFor="email" error={errors.email} required>
-        <InputField
-          id="email"
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="Enter your email"
-          ariaLabel="Email Address"
-        />
-      </FormField>
-
-      <FormField label="Password" htmlFor="password" error={errors.password} required>
-        <InputField
-          id="password"
-          name="password"
-          type={showPassword ? "text" : "password"}
-          value={formData.password}
-          onChange={handleChange}
-          placeholder="Enter your password"
-          ariaLabel="Password"
-          rightIcon={
-            showPassword ? (
-              <EyeOff size={20} onClick={togglePasswordVisibility} className="cursor-pointer" />
-            ) : (
-              <Eye size={20} onClick={togglePasswordVisibility} className="cursor-pointer" />
-            )
-          }
-        />
-      </FormField>
-
-      <div className="flex justify-end -mt-3">
-        <a href="#" className="text-sm text-primary-200 hover:text-primary-300 transition-colors">
-          Forgot Password?
-        </a>
+    <form onSubmit={handleSubmit} className="space-y-12">
+      <div className="space-y-12">
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-neutral-600 mb-1">
+            Email Address
+          </label>
+          <InputField
+            id="email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Enter your email"
+            ariaLabel="Email Address"
+            status={errors.email && isSubmitted ? "error" : "default"}
+          />
+          {errors.email && isSubmitted && (
+            <p className="text-sm mt-1 text-red-600">{errors.email}</p>
+          )}
+        </div>
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-neutral-600">
+              Password
+            </label>
+            <div className="text-right">
+              <a href="#" className="text-sm text-blue-600 hover:underline">
+                Forgot Password?
+              </a>
+            </div>
+          </div>
+          <InputField
+            id="password"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Enter your password"
+            ariaLabel="Password"
+            rightIcon={
+              <span
+                onClick={togglePasswordVisibility}
+                className="cursor-pointer text-neutral-400"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </span>
+            }
+            status={errors.password && isSubmitted ? "error" : "default"}
+          />
+          {errors.password && isSubmitted && (
+            <p className="text-sm mt-1 text-red-600">{errors.password}</p>
+          )}
+        </div>
+        <div className="flex items-center">
+          <input
+            id="remember"
+            name="remember"
+            type="checkbox"
+            checked={formData.remember}
+            onChange={handleChange}
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-neutral-300 rounded"
+          />
+          <label htmlFor="remember" className="ml-2 text-sm text-neutral-600">
+            Remember Password
+          </label>
+        </div>
       </div>
-
-      <Button
-        type="submit"
-        variant="primary"
-        size="medium"
-        disabled={isLoading}
-        icon={isLoading ? "loading" : undefined}
-        className="w-full"
-      >
-        {isLoading ? "Logging in..." : "Login"}
-      </Button>
-
-      <div className="text-center pt-2">
-        <p className="text-sm text-neutral-400">
-          Don&apos;t have an account?{" "}
-          <a href="#" className="text-primary-200 hover:text-primary-300 transition-colors">
-            Sign up
-          </a>
-        </p>
+      <div className="flex flex-col items-center space-y-6">
+        <Button variant="primary" size="medium" type="submit" disabled={isLoading}>
+          {isLoading ? (
+            <span className="flex items-center gap-2">
+              <ArrowUpIcon className="w-5 h-5 animate-spin" />
+              Logging in...
+            </span>
+          ) : (
+            "Sign In"
+          )}
+        </Button>
       </div>
     </form>
-  )
-}
+  );
+};
 
-export default LoginForm
+export default LoginForm;
