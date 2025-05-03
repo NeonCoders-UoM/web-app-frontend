@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import AppointmentTable from "@/components/organism/appointment-table/appointment-table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import AppointmentCard from "@/components/molecules/appoinment-cards/appoinment-cards"; 
@@ -26,6 +26,8 @@ const AppointmentsPage = () => {
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentDetail | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const modalRef = useRef<HTMLDivElement | null>(null);
+
   const appointments: AppointmentSummary[] = [
     { id: "#APT-0001", name: "Devon Lane", date: "12-05-2025" },
     { id: "#APT-0002", name: "Devon Lane", date: "12-05-2025" },
@@ -48,19 +50,34 @@ const AppointmentsPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleCloseModal = () => {
+  const closeModal = () => {
     setIsModalOpen(false);
     setSelectedAppointment(null);
   };
 
+  // Close modal when clicking outside
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+          closeModal();
+        }
+      };
+  
+      if (isModalOpen) {
+        document.addEventListener("mousedown", handleClickOutside);
+      }
+  
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, [isModalOpen]);
+
   return (
     <div className="flex min-h-screen bg-white">
       {/* Main Content */}
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-[58px]">
         {/* Header with user profile */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="h2 text-neutral-600">Appointments</h1>
-
+        <div className="flex justify-end items-center mb-[80px]">
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
             pictureAlt="Moni Roy"
@@ -71,23 +88,20 @@ const AppointmentsPage = () => {
             onSettingsClick={() => console.log("Settings clicked")}
           />
         </div>
+        
+        <div className="pr-[50px]">
+          <h1 className="h2 text-neutral-800 mb-[40px]">Appointments Requests</h1>
 
-        {/* Client Table */}
-        <AppointmentTable
-          data={appointments}
-          onView={handleViewAppointment}
-        />
-
+          <AppointmentTable
+            data={appointments}
+            onView={handleViewAppointment}
+          />
+        </div>
+        
         {/* Appointment Modal Popup */}
         {isModalOpen && selectedAppointment && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-neutral-100 rounded-lg p-6 relative w-full max-w-md">
-              <button
-                className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
-                onClick={handleCloseModal}
-              >
-                ✕
-              </button>
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div ref={modalRef} className="relative">
               <AppointmentCard
                 appointmentId={selectedAppointment.appointmentId}
                 owner={selectedAppointment.owner}
@@ -95,6 +109,8 @@ const AppointmentsPage = () => {
                 date={selectedAppointment.date}
                 vehicle={selectedAppointment.vehicle}
                 services={selectedAppointment.services}
+                onAccept={() => console.log(`Accept clicked for appointment ${selectedAppointment.appointmentId}`)}
+                onReject={() => console.log(`Reject clicked for appointment ${selectedAppointment.appointmentId}`)}
               />
             </div>
           </div>
