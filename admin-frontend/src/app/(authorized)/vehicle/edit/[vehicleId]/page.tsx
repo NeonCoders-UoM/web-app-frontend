@@ -74,8 +74,8 @@ export default function EditVehiclePage({ params }: EditVehiclePageProps) {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex justify-end items-center mb-8 p-4">
+    <div className="bg-white p-[58px]">
+      <div className="flex justify-end items-center mb-[36px]">
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
             pictureAlt="Moni Roy"
@@ -86,16 +86,17 @@ export default function EditVehiclePage({ params }: EditVehiclePageProps) {
             onSettingsClick={() => console.log("Settings clicked")}
           />
       </div>
-
-      <div className="mb-8">
-        <h1 className="text-xl font-bold text-neutral-800">Edit Vehicle</h1>
-      </div>
-      
-      <div className="flex justify-center">
-        <DocumentUploadForm 
-          initialData={vehicleData || undefined}
-          onSubmit={handleSubmit} 
-        />
+      <div>
+        <div className="mb-[60px]">
+          <h1 className="text-xl font-bold text-neutral-800">Edit Vehicle</h1>
+        </div>
+        
+        <div className="flex justify-start pr-[22px]">
+          <DocumentUploadForm 
+            initialData={vehicleData || undefined}
+            onSubmit={handleSubmit} 
+          />
+        </div>
       </div>
     </div>
   );
