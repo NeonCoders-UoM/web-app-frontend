@@ -1,4 +1,3 @@
-import Button from "@/components/atoms/button/button";
 import colors from "@/styles/colors";
 import "@/styles/fonts.css";
 
@@ -9,6 +8,8 @@ interface AppointmentProps {
   date: string;
   vehicle: string;
   services: string[];
+  onAccept: () => void;
+  onReject: () => void;
 }
 
 const AppointmentCard: React.FC<AppointmentProps> = ({
@@ -18,35 +19,37 @@ const AppointmentCard: React.FC<AppointmentProps> = ({
   date,
   vehicle,
   services,
+  onAccept,
+  onReject,
 }) => {
   return (
-    <div className="bg-neutral-100 p-6 rounded-lg shadow-md max-w-lg w-full">
-      <h2 className="text-lg font-semibold mb-4" style={{ color: colors.primary[200] }}>
+    <div className="bg-white p-[86px] rounded-[20px] shadow-md w-[715px] h-[638px]">
+      <h2 className="text-lg font-semibold mb-[56px]" style={{ color: colors.primary[200] }}>
         Appointment Details
       </h2>
-      <div className="grid grid-cols-2 gap-2 text-neutral-400 text-sm">
+      <div className="grid grid-cols-2 text-neutral-400 text-sm">
         <div>
-          <span className="font-semibold">Appointment ID:</span>
-          <p className="text-neutral-600">{appointmentId}</p>
+          <span className="font-semibold mb-[8px]">Appointment ID:</span>
+          <p className="text-neutral-600 mb-[22px]">{appointmentId}</p>
         </div>
         <div>
-          <span className="font-semibold">Owner:</span>
-          <p className="text-neutral-600">{owner}</p>
+          <span className="font-semibold mb-[8px]">Owner:</span>
+          <p className="text-neutral-600 mb-[22px]">{owner}</p>
         </div>
         <div>
-          <span className="font-semibold">License Plate Number:</span>
-          <p className="text-neutral-600">{licensePlate}</p>
+          <span className="font-semibold mb-[8px]">License Plate Number:</span>
+          <p className="text-neutral-600 mb-[22px]">{licensePlate}</p>
         </div>
         <div>
-          <span className="font-semibold">Date:</span>
-          <p className="text-neutral-600">{date}</p>
+          <span className="font-semibold mb-[8px]">Date:</span>
+          <p className="text-neutral-600 mb-[22px]">{date}</p>
         </div>
         <div className="col-span-2">
-          <span className="font-semibold">Vehicle:</span>
-          <p className="text-neutral-600">{vehicle}</p>
+          <span className="font-semibold mb-[8px]">Vehicle:</span>
+          <p className="text-neutral-600 mb-[22px]">{vehicle}</p>
         </div>
         <div className="col-span-2">
-          <span className="font-semibold">Services:</span>
+          <span className="font-semibold mb-[8px]">Services:</span>
           <ul className="list-inside mt-1 text-neutral-600">
             {services.map((service, index) => (
               <li key={index}>{service}</li>
@@ -54,13 +57,13 @@ const AppointmentCard: React.FC<AppointmentProps> = ({
           </ul>
         </div>
       </div>
-      <div className="flex justify-end gap-3 mt-4">
-        <Button variant="success" icon="check">
+      <div className="flex justify-end gap-3 mt-[30px]">
+        <button className="w-[123px] h-[40px] px-[16px] rounded-xl text-white text-sm bg-green-500 hover:bg-green-600 active:bg-green-400" onClick={onAccept}>
           Accept
-        </Button>
-        <Button variant="danger" icon="close">
+        </button>
+        <button className="w-[123px] h-[40px] px-[16px] rounded-xl text-white text-sm bg-red-500 hover:bg-red-600 active:bg-red-400" onClick={onReject}>
           Reject
-        </Button>
+        </button>
       </div>
     </div>
   );

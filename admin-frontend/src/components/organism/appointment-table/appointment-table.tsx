@@ -48,6 +48,14 @@ const Table: React.FC<TableProps> = ({ data, onView }) => {
     setCurrentPage(1);
   };
 
+  const handleAccept = (appointment: Appointment) => {
+    console.log(`Accept clicked for appointment ${appointment.id}`);
+  };
+
+  const handleReject = (appointment: Appointment) => {
+    console.log(`Reject clicked for appointment ${appointment.id}`);
+  };
+
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
   const paginatedData = sortedData.slice(
     (currentPage - 1) * itemsPerPage,
@@ -60,12 +68,13 @@ const Table: React.FC<TableProps> = ({ data, onView }) => {
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full border-collapse border-gray-400 bg-white">
+      <table className="w-full border-collapse border-neutral-400 bg-white">
         <TableHead
           headers={[
             { title: "Appointment ID", sortable: true },
             { title: "Name", sortable: true },
             { title: "Date", sortable: true },
+            { title: "", sortable: false },
           ]}
           onSort={handleSort}
         />
@@ -73,32 +82,18 @@ const Table: React.FC<TableProps> = ({ data, onView }) => {
           {paginatedData.map((appointment) => (
             <TableRow
               key={appointment.id}
-              data={[appointment.id, appointment.name, appointment.date]}
-              actions={[
-                {
-                  label: "View",
-                  variant: "primary",
-                  onClick: () => onView(appointment),
-                },
-                {
-                  label: "Accept",
-                  variant: "success",
-                  icon: "check",
-                  onClick: () => console.log("Accept clicked"),
-                },
-                {
-                  label: "Reject",
-                  variant: "danger",
-                  icon: "close",
-                  onClick: () => console.log("Reject clicked"),
-                },
-              ]}
+              appointmentId={appointment.id}
+              name={appointment.name}
+              date={appointment.date}
+              onView={() => onView(appointment)}
+              onAccept={() => handleAccept(appointment)}
+              onReject={() => handleReject(appointment)}
             />
           ))}
         </tbody>
       </table>
 
-      <div className="flex justify-end mt-4">
+      <div className="flex justify-end mt-[40px]">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
