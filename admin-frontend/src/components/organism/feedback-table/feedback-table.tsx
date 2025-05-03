@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import TableHead from "@/components/molecules/table-head/table-head";
 import TableRow from "@/components/molecules/feedback-table-row/feedback-table-row";
 import Pagination from "@/components/molecules/pagination/pagination";
@@ -28,6 +28,8 @@ const FeedbackTable: React.FC<TableProps> = ({ data }) => {
 
   const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const modalRef = useRef<HTMLDivElement | null>(null);
 
   const handleSort = (index: number) => {
     const key = ["clientName", "stars", "serviceCenter", "date", "feedback"][index] as keyof Feedback;
@@ -69,6 +71,23 @@ const FeedbackTable: React.FC<TableProps> = ({ data }) => {
     setSelectedFeedback(null);
   };
 
+  // Close modal when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        closeModal();
+      }
+    };
+
+    if (isModalOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isModalOpen]);
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse bg-white shadow-md rounded-lg">
@@ -108,15 +127,8 @@ const FeedbackTable: React.FC<TableProps> = ({ data }) => {
       </div>
 
       {isModalOpen && selectedFeedback && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 relative">
-            <button
-              onClick={closeModal}
-              className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 text-2xl font-bold"
-            >
-              &times;
-            </button>
-
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div ref={modalRef} className="relative">
             <FeedbackCard
               profileSrc={selectedFeedback.profileSrc}
               profileAlt={selectedFeedback.profileAlt}
