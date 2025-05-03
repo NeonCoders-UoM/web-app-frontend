@@ -81,11 +81,9 @@ const FeedbackPage = () => {
   return (
     <div className="flex min-h-screen bg-white">
       {/* Main Content */}
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-[58px]">
         {/* Header with user profile */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="h2 text-neutral-600">Customer Feedbacks</h1>
-
+        <div className="flex justify-end items-center mb-[36px]">
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
             pictureAlt="Moni Roy"
@@ -96,8 +94,10 @@ const FeedbackPage = () => {
             onSettingsClick={() => console.log("Settings clicked")}
           />
         </div>
+        
+        <h1 className="h2 text-neutral-600 mb-[28px]">Customer Feedbacks</h1>
 
-        <div className="flex justify-center md:justify-start mb-10">
+        <div className="flex justify-center md:justify-start mb-[46px]">
           <ReviewSummaryCard
             average={4.8}
             totalReviews={32256}

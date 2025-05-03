@@ -4,7 +4,6 @@ import React, { useState, useMemo, useEffect } from "react";
 import TableHead from "@/components/molecules/table-head/table-head";
 import TableRow from "@/components/molecules/feedback-table-row/feedback-table-row";
 import Pagination from "@/components/molecules/pagination/pagination";
-import SearchBar from "@/components/atoms/search-bar/search-bar";
 import FeedbackCard from "@/components/molecules/feedback-card/feedback-card";
 
 interface Feedback {
@@ -26,7 +25,6 @@ const FeedbackTable: React.FC<TableProps> = ({ data }) => {
   const [sortConfig, setSortConfig] = useState<{ key: keyof Feedback; direction: "asc" | "desc" } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(6);
-  const [searchTerm, setSearchTerm] = useState("");
 
   const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,29 +38,16 @@ const FeedbackTable: React.FC<TableProps> = ({ data }) => {
     setSortConfig({ key, direction });
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1);
-  };
-
-  const filteredData = useMemo(() => {
-    return data.filter((item) =>
-      Object.values(item).some((value) =>
-        String(value).toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    );
-  }, [data, searchTerm]);
-
   const sortedData = useMemo(() => {
-    if (!sortConfig) return filteredData;
-    return [...filteredData].sort((a, b) => {
+    if (!sortConfig) return data;
+    return [...data].sort((a, b) => {
       const aVal = a[sortConfig.key];
       const bVal = b[sortConfig.key];
       if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
       if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
       return 0;
     });
-  }, [filteredData, sortConfig]);
+  }, [data, sortConfig]);
 
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
   const paginatedData = sortedData.slice(
@@ -86,13 +71,7 @@ const FeedbackTable: React.FC<TableProps> = ({ data }) => {
 
   return (
     <div className="overflow-x-auto">
-      <SearchBar
-        value={searchTerm}
-        onChange={handleSearchChange}
-        placeholder="Search by name, stars, service center..."
-      />
-
-      <table className="w-full border-collapse bg-neutral-100 shadow-md rounded-lg mt-16">
+      <table className="w-full border-collapse bg-white shadow-md rounded-lg">
         <TableHead
           headers={[
             { title: "Client Name", sortable: true },
@@ -118,7 +97,7 @@ const FeedbackTable: React.FC<TableProps> = ({ data }) => {
         </tbody>
       </table>
 
-      <div className="flex justify-end mt-4">
+      <div className="flex justify-end mt-[40px]">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -128,7 +107,6 @@ const FeedbackTable: React.FC<TableProps> = ({ data }) => {
         />
       </div>
 
-      {/* Feedback Card as a Modal Popup */}
       {isModalOpen && selectedFeedback && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full p-6 relative">

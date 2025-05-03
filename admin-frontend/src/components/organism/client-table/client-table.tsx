@@ -105,7 +105,7 @@ const ClientTable: React.FC<TableProps> = ({
         />
       )}
 
-      <table className="w-full border-collapse neutral-100 shadow-md rounded-lg mt-16">
+      <table className="w-full border-collapse bg-white shadow-md rounded-lg mt-[80px]">
         <TableHead headers={headers} onSort={handleSort} />
         <tbody>
           {paginatedData.length > 0 ? (
@@ -132,7 +132,7 @@ const ClientTable: React.FC<TableProps> = ({
         </tbody>
       </table>
 
-      <div className="flex justify-end mt-4">
+      <div className="flex justify-end mt-[40px]">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

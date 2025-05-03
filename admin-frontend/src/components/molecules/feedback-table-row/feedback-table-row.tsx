@@ -22,7 +22,7 @@ const TableRow: React.FC<TableRowProps> = ({ data, onViewClick  }) => {
     <tr className="hover:bg-neutral-100 transition">
       <TableCell>{data.clientName}</TableCell>
       <TableCell>
-        <StarRating maxStars={5} initialRating={data.stars} onChange={() => {}} />
+        <StarRating maxStars={5} initialRating={data.stars} onChange={() => {}} readOnly/>
       </TableCell>
       <TableCell>{data.serviceCenter}</TableCell>
       <TableCell>{data.date}</TableCell>

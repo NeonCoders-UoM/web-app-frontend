@@ -26,15 +26,15 @@ const ReviewSummaryCard: React.FC<ReviewSummaryCardProps> = ({
 
   return (
     <div
-      className="rounded-2xl shadow-md p-10 w-full max-w-xl border"
+      className="rounded-[20px] bg-white shadow-md py-[52px] px-[68px] border w-[607px] h-[382px]"
       style={{
-        backgroundColor: colors.neutral[100],
+        border: `1px solid ${colors.primary[200]}`,
         color: colors.neutral[600],
         fontFamily: "var(--font-family-text)",
       }}
     >
       <h2
-        className="mb-8"
+        className="mb-[12px]"
         style={{
           fontFamily: "var(--font-family-display)",
           fontSize: "var(--font-size-2xl)",
@@ -46,9 +46,9 @@ const ReviewSummaryCard: React.FC<ReviewSummaryCardProps> = ({
         Summary
       </h2>
 
-      <div className="flex flex-col md:flex-row gap-8">
+      <div className="flex flex-col md:flex-row gap-[28px]">
         <RatingSummary average={average} totalReviews={totalReviews} />
-        <div className="flex-1 space-y-4">
+        <div className="flex-1 space-y-[12px]">
           {ratings.map(({ star, count }) => (
             <ReviewBarRow
               key={star}

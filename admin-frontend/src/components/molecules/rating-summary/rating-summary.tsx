@@ -25,14 +25,14 @@ const RatingSummary: React.FC<RatingSummaryProps> = ({ average, totalReviews }) 
         {average.toFixed(1)}
       </p>
 
-      <div className="flex justify-center md:justify-start mt-4">
-        <StarRating initialRating={Math.round(average)} />
+      <div className="flex justify-center md:justify-start mt-2">
+        <StarRating initialRating={Math.round(average)} readOnly/>
       </div>
 
       <p
         className="mt-2"
         style={{
-          color: colors.neutral[200],
+          color: colors.neutral[600],
           fontWeight: "var(--font-weight-medium)",
         }}
       >

@@ -51,7 +51,7 @@ const FeedbackCard: React.FC<FeedbackCardProps> = ({
           </div>
         </div>
         <div className="mt-2">
-          <StarRating initialRating={rating} />
+          <StarRating initialRating={rating} readOnly/>
         </div>
       </div>
       <p

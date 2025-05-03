@@ -13,7 +13,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ value, height = 16 }) => {
     <div
       className="w-full overflow-hidden rounded-full"
       style={{ height,
-        backgroundColor: colors.neutral[200],
+        backgroundColor: colors.neutral[100],
        }}
     >
       <div
