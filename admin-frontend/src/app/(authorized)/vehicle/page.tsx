@@ -126,11 +126,9 @@ const VehiclesPage = () => {
   return (
     <div className="flex min-h-screen bg-white">
       {/* Main Content */}
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-[58px]">
         {/* Header with user profile */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="h2 text-neutral-600">Vehicles</h1>
-
+        <div className="flex justify-end items-center mb-[80px]">
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
             pictureAlt="Moni Roy"
@@ -140,11 +138,10 @@ const VehiclesPage = () => {
             onProfileClick={() => console.log("Profile clicked")}
             onSettingsClick={() => console.log("Settings clicked")}
           />
-          
         </div>
 
         {/* Client Filter */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-[36px]">
           <div className="relative">
             <select
               aria-label="Filter Clients"
