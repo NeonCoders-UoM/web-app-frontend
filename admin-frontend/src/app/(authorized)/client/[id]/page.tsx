@@ -209,7 +209,7 @@ const ClientProfilePage = () => {
 
   const handleEditDetails = () => {
     const vehicleId = clientData?.vehicles[activeTab - 1]?.id
-    router.push(`/vehicles/edit/${vehicleId}`)
+    router.push(`/vehicle/edit/${vehicleId}`)
   }
 
   if (isLoading) {

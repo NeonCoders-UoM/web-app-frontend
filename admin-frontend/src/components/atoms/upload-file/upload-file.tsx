@@ -42,7 +42,7 @@ const UploadFile: React.FC<UploadFileProps> = ({ onChange }) => {
   return (
     <div className="flex flex-col items-center gap-3">
       {/* Label */}
-      <label className="text-sm font-medium text-neutral-600">
+      <label className="text-md font-medium text-center text-neutral-600">
         Update Service Registration Copy
       </label>
 
@@ -52,12 +52,12 @@ const UploadFile: React.FC<UploadFileProps> = ({ onChange }) => {
       </div>
 
       {/* Description */}
-      <p className="text-sm text-neutral-500">
+      <p className="text-sm text-neutral-600">
         Choose a file or drag & drop it here
       </p>
 
       {/* Allowed Formats Note */}
-      <p className="text-xsm text-neutral-500 uppercase">
+      <p className="text-sm text-neutral-500 text-center uppercase">
         JPEG, PNG, PDG, and PDF formats, up to 50MB
       </p>
 

@@ -39,7 +39,7 @@ const UploadPhoto: React.FC<UploadPhotoProps> = ({ onChange }) => {
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <label className="text-sm font-medium text-neutral-600">
+      <label className="text-lg font-medium text-neutral-600">
         Update the Photo
       </label>
       <div
@@ -57,7 +57,7 @@ const UploadPhoto: React.FC<UploadPhotoProps> = ({ onChange }) => {
           className="hidden"
         />
       </div>
-      <p className="text-xsm text-neutral-500 uppercase">
+      <p className="text-sm text-neutral-500 text-center uppercase">
         Allowed JPEG, PNG, JPG formats, up to 3MB
       </p>
     </div>

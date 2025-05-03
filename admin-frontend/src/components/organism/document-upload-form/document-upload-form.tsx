@@ -8,6 +8,7 @@ import Dropdown from "@/components/atoms/dropdown/dropdown";
 import UploadPhoto from "@/components/atoms/upload-photo/upload-photo";
 import UploadFile from "@/components/atoms/upload-file/upload-file";
 import colors from "@/styles/colors";
+import "@/styles/fonts.css";
 import { ServiceCenter } from "@/types";
 
 interface DocumentUploadFormProps {
@@ -139,16 +140,16 @@ export default function DocumentUploadForm({ initialData, onSubmit }: DocumentUp
 
   return (
     <div
-      className="flex gap-5"
+      className="flex gap-[20px]"
       style={{
         width: "1056px",
-        height: "834px",
+        height: "738px",
         fontFamily: "var(--font-family-text)",
       }}
     >
       {/* Left Column - Upload Section */}
       <div
-        className="bg-white p-6 rounded-lg shadow-sm"
+        className="bg-white px-[20px] py-[72px] rounded-lg shadow-sm border border-neutral-300"
         style={{
           width: "308px",
           height: "738px",
@@ -158,43 +159,19 @@ export default function DocumentUploadForm({ initialData, onSubmit }: DocumentUp
           alignItems: "center",
         }}
       >
-        <div className="w-full">
-          <h3
-            className="text-lg font-semibold mb-2"
-            style={{ color: colors.neutral[600], textAlign: "center" }}
-          >
-            UPDATE PHOTO
-          </h3>
+        <div className="w-full mb-[52px]">
           <UploadPhoto onChange={setPhoto} />
-          <p
-            className="text-center mt-2"
-            style={{ color: colors.neutral[400], fontSize: "var(--font-size-xs)" }}
-          >
-            ALLOWED JPEG, PNG, JPG FORMATS, UP TO 5MB
-          </p>
         </div>
         <div className="w-full">
-          <h3
-            className="text-lg font-semibold mb-2"
-            style={{ color: colors.neutral[600], textAlign: "center" }}
-          >
-            UPDATE SERVICE REGISTRATION COPY
-          </h3>
           <UploadFile onChange={setFile} />
-          <p
-            className="text-center mt-2"
-            style={{ color: colors.neutral[400], fontSize: "var(--font-size-xs)" }}
-          >
-            JPEG, PNG, JPG AND FORMATS, UP TO 5MB
-          </p>
         </div>
       </div>
 
       {/* Right Column - Form Section */}
       <div
-        className="bg-white p-6 rounded-lg shadow-sm"
+        className="bg-white px-[16px] py-[24px] rounded-lg shadow-sm border border-neutral-300"
         style={{
-          width: "728px",
+          width: "768px",
           height: "738px",
         }}
       >
