@@ -31,9 +31,9 @@ export default function AppointmentSearch({
       style={{
         width: "967px",
         height: "158px",
-        borderRadius: "10px",
+        borderRadius: "20px",
         backgroundColor: "rgba(72, 128, 255, 0.2)", // #4880FF with 20% opacity
-        padding: "24px",
+        padding: "40px",
         fontFamily: "var(--font-family-text)",
         display: "flex",
         flexDirection: "column",
@@ -43,7 +43,7 @@ export default function AppointmentSearch({
       <form onSubmit={handleSubmit} className="flex flex-col">
         <label
           htmlFor="appointmentId"
-          className="mb-2"
+          className="mb-[6px]"
           style={{
             fontSize: "var(--font-size-sm)",
             fontWeight: "var(--font-weight-medium)",
@@ -53,8 +53,8 @@ export default function AppointmentSearch({
           Appointment ID
         </label>
 
-        <div className="flex gap-4 items-center">
-          <div className="flex-grow">
+        <div className="flex gap-[48px] items-center">
+          <div className="w-[360px]">
             <InputField
               id="appointmentId"
               name="appointmentId"
@@ -64,9 +64,11 @@ export default function AppointmentSearch({
             />
           </div>
 
-          <Button type="submit" variant="primary" size="medium">
-            Search
-          </Button>
+          <div className="flex items-center">
+            <Button type="submit" variant="primary" size="medium">
+              Search
+            </Button>
+          </div>
         </div>
       </form>
     </div>
