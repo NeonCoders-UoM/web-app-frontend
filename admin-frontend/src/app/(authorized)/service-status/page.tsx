@@ -103,8 +103,13 @@ export default function Page() {
             <ServiceStatusDataTable data={services} onToggle={handleToggleService} />
           </div>
 
-          <div className="flex items-center">
-            <Button type="submit" variant="primary" size="medium">
+          <div>
+            <Button
+              variant="primary"
+              size="large"
+              className="w-full"
+              onClick={() => console.log("Saved", services)}
+            >
               Submit
             </Button>
           </div>

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useEffect } from 'react';
 import { TableRow } from '@/components/molecules/loyalty-points-row/loyalty-points-row';
@@ -12,14 +12,15 @@ type RowData = {
 
 type TableProps = {
   data: RowData[];
+  updateData: (data: RowData[]) => void;
 };
 
-export const Table = ({ data }: TableProps) => {
+export const Table = ({ data, updateData }: TableProps) => {
   const [rows, setRows] = useState<RowData[]>(data);
   const [filteredRows, setFilteredRows] = useState<RowData[]>(data);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [itemsPerPage, setItemsPerPage] = useState(6);
 
   const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
 
@@ -28,17 +29,24 @@ export const Table = ({ data }: TableProps) => {
     currentPage * itemsPerPage
   );
 
+  // Sync rows with parent data when it changes
+  useEffect(() => {
+    setRows(data);
+  }, [data]);
+
   // Handle input value change
   const handleChange = (index: number, newValue: number) => {
     const updated = [...rows];
     updated[index].value = newValue;
     setRows(updated);
+    updateData(updated);
   };
 
   // Handle row deletion
   const handleDelete = (index: number) => {
     const updated = rows.filter((_, i) => i !== index);
     setRows(updated);
+    updateData(updated);
   };
 
   // Filter based on search term
@@ -64,7 +72,7 @@ export const Table = ({ data }: TableProps) => {
         placeholder="Search by label..."
       />
 
-      <table className="w-full border-separate border-spacing-y-2">
+      <table className="w-full border-separate border-spacing-y-2 mt-[36px] mb-[24px]">
         <tbody>
           {paginatedRows.map((row, index) => (
             <TableRow
