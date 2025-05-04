@@ -148,7 +148,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) =>
         </div>
       </div>
       <div className="flex flex-col items-center space-y-6">
-        <Button variant="primary" size="medium" type="submit" disabled={isLoading}>
+        <Button variant="primary" size="large" type="submit" disabled={isLoading}>
           {isLoading ? (
             <span className="flex items-center gap-2">
               <ArrowUpIcon className="w-5 h-5 animate-spin" />

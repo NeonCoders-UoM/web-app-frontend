@@ -1,31 +1,31 @@
-"use client";
+'use client';
 
 import React from "react";
+import Image from "next/image";
 import SidebarButton from "@/components/atoms/sidebar-button/sidebar-button";
 import { useRouter, usePathname } from "next/navigation";
 
 interface SidebarProps {
   role: "super-admin" | "service-center-admin" | "cashier" | "data-operator";
-  serviceCenters?: { id: string; name: string }[]; // For super-admin to navigate service centers
+  serviceCenters?: { id: string; name: string }[];
   logo?: string;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   role,
   serviceCenters = [],
-  logo = "V PASS",
 }) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Define sidebar options with corresponding routes
   const sidebarOptions: Record<string, { label: string; route: string }[]> = {
     "super-admin": [
+      { label: "Dashboard", route: "/service-center-dashboard" },
       { label: "Clients", route: "/client" },
       { label: "Vehicles", route: "/vehicle" },
       { label: "Appointments", route: "/appointment" },
       { label: "Feedback", route: "/feedback" },
-      { label: "Users", route: "/users" },
+      { label: "Users", route: "/user-managment" },
       { label: "Service Status", route: "/service-status" },
       { label: "Closure Schedule", route: "/closure-schedule" },
       { label: "Loyalty Points", route: "/loyalty-points" },
@@ -59,22 +59,26 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const sections = sidebarOptions[role] || [];
 
-  // Determine active section based on current pathname
   const activeSection =
     sections.find((section) => pathname.startsWith(section.route))?.label ||
     sections[0]?.label ||
     "";
 
-  // Handle service center navigation for super-admin
   const handleServiceCenterClick = (centerId: string) => {
     router.push(`/service-center/${centerId}/dashboard`);
   };
 
   return (
-    <div className="w-64 min-h-screen flex flex-col bg-neutral-100 shadow-md">
+    <div className="w-64 min-h-screen flex flex-col bg-neutral-50 shadow-md">
       {/* Logo */}
       <div className="p-4 flex items-center justify-center">
-        <span className="text-xl font-bold text-primary-200">{logo}</span>
+        <Image
+          src="/images/logo1.png"
+          alt="Logo"
+          width={150}
+          height={40}
+          className="object-contain"
+        />
       </div>
 
       {/* Service Centers for Super Admin */}

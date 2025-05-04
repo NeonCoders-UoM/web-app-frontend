@@ -78,7 +78,8 @@ const SuperAdminDashboard: React.FC = () => {
   };
 
   const handleServiceCenterClick = (id: string) => {
-    router.push(`/service-centers/${id}/admin`);
+    console.log("Navigating to:", `/service-centers/${id}/view`);
+    router.push(`/service-center-dashboard`);
   };
 
   const handleAction = (action: string, row: string[]) => {
