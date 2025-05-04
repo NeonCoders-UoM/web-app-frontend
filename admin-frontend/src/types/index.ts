@@ -1,4 +1,3 @@
-
 export interface ServiceCenter {
   id: string;
   serviceCenterName: string;
@@ -14,40 +13,85 @@ export interface ServiceCenter {
   photoUrl?: string;
   registrationCopyUrl?: string;
 }
-  
-  export interface Client {
-    id: string;
-    client: string;
-    profilePicture: string;
-    email: string;
-    phoneno: string;
-    address: string;
-  }
-  
-  export interface User {
-    id: string;
-    firstname: string;
-    lastname: string;
-    email: string;
-    userrole: string;
-    profilePicture: string;
-  }
-  
-  export interface ShiftCard {
-    day: string;
-    status: string;
-  }
-  
-  export interface Service {
-    id: string;
-    label: string;
-    checked: boolean;
-  }
-  
-  export type UserRole = "admin" | "super-admin" | "service-center-admin" | "cashier" | "data-operator";
-  
-  export interface DashboardStats {
-    customers: number;
-    vehicles: number;
-    serviceCenters: number;
-  }
+
+export interface Tier {
+  name: string;
+  threshold: number;
+}
+
+export interface Vehicle {
+  id: number;
+  type: string;
+  brand: string;
+  model: string;
+  year: string;
+  fuelType: string;
+  licensePlate: string;
+  transmission: string;
+  vin: string;
+}
+
+export interface ServiceHistoryItem {
+  id: string;
+  title: string;
+  price: number;
+  originalPrice: number;
+  type: string;
+  date: string;
+  serviceCenter: string;
+  status: "Completed" | "Pending" | "Cancelled";
+  image: string;
+}
+
+export interface Appointment {
+  appointmentId: string;
+  owner: string;
+  licensePlate: string;
+  date: string;
+  vehicle: string;
+  services: string[];
+  serviceCenter: string;
+}
+
+export interface Client {
+  id: string;
+  client: string; // This corresponds to `name` in ClientProfilePage
+  profilePicture: string;
+  email: string;
+  phoneno: string; // This corresponds to `phone` in ClientProfilePage
+  address: string;
+  nic?: string;
+  points?: number;
+  tiers?: Tier[];
+  vehicles?: Vehicle[];
+  serviceHistory?: ServiceHistoryItem[];
+  appointments?: Appointment[];
+}
+
+export interface User {
+  id: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  userrole: string;
+  profilePicture: string;
+}
+
+export interface ShiftCard {
+  day: string;
+  status: string;
+}
+
+export interface Service {
+  id: string;
+  label: string;
+  checked: boolean;
+}
+
+export type UserRole = "admin" | "super-admin" | "service-center-admin" | "cashier" | "data-operator";
+
+export interface DashboardStats {
+  customers: number;
+  vehicles: number;
+  serviceCenters: number;
+}

@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import RegistrationForm from "@/components/organism/registration-form/registration-form"
 import UserProfileCard from "@/components/molecules/user-card/user-card"
-import colors from "@/styles/colors"
 
 interface User {
   id: string
@@ -45,7 +44,7 @@ const EditUserPage = () => {
           <div className="w-[151px] h-[44px] bg-neutral-100 animate-pulse rounded"></div>
         </div>
         <div className="flex flex-col items-start min-h-screen pt-16 pl-16">
-          <h1 className="text-2xl font-bold mb-8 text-neutral-600">EDIT USER</h1>
+          <h1 className="text-lg font-bold mb-8 text-neutral-600">EDIT USER</h1>
           <div className="w-[620px] h-[380px] bg-neutral-50 rounded-lg animate-pulse border border-primary-100"></div>
         </div>
       </div>
@@ -77,19 +76,10 @@ const EditUserPage = () => {
 
       {/* "EDIT USER" heading and form */}
       <div className="flex flex-col items-start min-h-screen pt-16 pl-16">
-        <h1
-          className="text-2xl font-bold mb-8"
-          style={{
-            color: colors.primary[200],
-            fontWeight: "var(--font-weight-medium)",
-          }}
-        >
-          EDIT USER
-        </h1>
 
         {/* Centered form */}
-        <div className="w-full flex justify-center">
-          <div className="border border-primary-100 rounded-lg shadow-sm">
+        <div className="w-full flex justify-center px-4 py-8">
+          <div className="border border-neutral-200 rounded-lg shadow-sm">
             <RegistrationForm user={user} isEditMode={true} />
           </div>
         </div>

@@ -225,7 +225,7 @@ export default function CustomerUpdateForm({ onSubmit, initialData }: CustomerUp
           <div className="flex justify-end mt-6">
             <Button
               type="submit"
-              variant="success"
+              variant="primary"
               size="medium"
             >
               Update

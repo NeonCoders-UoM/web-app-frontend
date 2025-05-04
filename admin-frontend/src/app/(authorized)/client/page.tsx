@@ -1,13 +1,33 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import ClientTable from "@/components/organism/client-table/client-table"
-import UserProfileCard from "@/components/molecules/user-card/user-card"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import ClientTable from "@/components/organism/client-table/client-table";
+import UserProfileCard from "@/components/molecules/user-card/user-card";
+import { fetchClients } from "@/utils/api";
+import { Client } from "@/types";
 
 const ClientsPage = () => {
-  const router = useRouter()
-  const [clientFilter, setClientFilter] = useState("All Clients")
+  const router = useRouter();
+  const [clientFilter, setClientFilter] = useState("All Clients");
+  const [clientsData, setClientsData] = useState<Client[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const clients = await fetchClients();
+        setClientsData(clients);
+        console.log("Fetched clientsData:", clients); // Debug log
+      } catch (error) {
+        console.error("Error fetching clients:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const tableHeaders = [
     { title: "Id", sortable: true },
@@ -15,80 +35,21 @@ const ClientsPage = () => {
     { title: "Email", sortable: true },
     { title: "Phone No.", sortable: true },
     { title: "Address", sortable: true },
-  ]
-
-  const clientsData = [
-    {
-      id: "#CLI-0001",
-      client: "Devon Lane",
-      profilePicture: "/placeholder.svg?height=40&width=40",
-      email: "mariarodriguez@gmail.com",
-      phoneno: "+1 (961) 523-4453",
-      address: "456 Ocean Avenue, Miami, FL 12345",
-    },
-    {
-      id: "#CLI-0002",
-      client: "Kathryn Murphy",
-      profilePicture: "/placeholder.svg?height=40&width=40",
-      email: "juan.rodriguez@gmail.com",
-      phoneno: "+1 (961) 523-4453",
-      address: "234 Oak Street, Flat 7",
-    },
-    {
-      id: "#CLI-0003",
-      client: "Eleanor Pena",
-      profilePicture: "/placeholder.svg?height=40&width=40",
-      email: "mariarodriguez@gmail.com",
-      phoneno: "+1 (961) 523-4453",
-      address: "234 Oak Street, Flat 7",
-    },
-    {
-      id: "#CLI-0004",
-      client: "Kathryn Murphy",
-      profilePicture: "/placeholder.svg?height=40&width=40",
-      email: "juan.rodriguez@gmail.com",
-      phoneno: "+1 (961) 523-4453",
-      address: "456 Ocean Avenue, Miami, FL 12345",
-    },
-    {
-      id: "#CLI-0005",
-      client: "Devon Lane",
-      profilePicture: "/placeholder.svg?height=40&width=40",
-      email: "mariarodriguez@gmail.com",
-      phoneno: "+1 (961) 523-4453",
-      address: "234 Oak Street, Flat 7",
-    },
-    {
-      id: "#CLI-0006",
-      client: "Eleanor Pena",
-      profilePicture: "/placeholder.svg?height=40&width=40",
-      email: "mariarodriguez@gmail.com",
-      phoneno: "+1 (961) 523-4453",
-      address: "234 Oak Street, Flat 7",
-    },
-    {
-      id: "#CLI-0007",
-      client: "Devon Lane",
-      profilePicture: "/placeholder.svg?height=40&width=40",
-      email: "juan.rodriguez@gmail.com",
-      phoneno: "+1 (961) 523-4453",
-      address: "456 Ocean Avenue, Miami, FL 12345",
-    },
-  ]
+  ];
 
   // Handler for kebab menu actions
   const handleActionSelect = (action: string, clientId: string) => {
     // Normalize clientId to match the format expected by the routes (e.g., "client-1" instead of "#CLI-0001")
-    const normalizedClientId = clientId.replace("#CLI-00", "client-")
+    const normalizedClientId = clientId.replace("#CLI-00", "client-");
 
     if (action === "View") {
-      router.push(`/client/${normalizedClientId}`)
+      router.push(`/client/${normalizedClientId}`);
     } else if (action === "Edit") {
-      router.push(`/client/${normalizedClientId}/edit`)
+      router.push(`/client/${normalizedClientId}/edit`);
     } else if (action === "Loyalty Points") {
-      console.log(`Viewing loyalty points for client with ID: ${clientId}`)
+      console.log(`Viewing loyalty points for client with ID: ${clientId}`);
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -96,9 +57,9 @@ const ClientsPage = () => {
       <div className="flex-1 p-6">
         {/* Header with user profile */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-neutral-600">Clients</h1>
+          <h1 className="text-xl font-bold text-neutral-600">Clients</h1>
           <UserProfileCard
-            pictureSrc="/images/profipic.jpg" // Updated to a valid image path
+            pictureSrc="/images/profipic.jpg"
             pictureAlt="Moni Roy"
             name="Moni Roy"
             role="admin"
@@ -129,17 +90,23 @@ const ClientsPage = () => {
         </div>
 
         {/* Client Table */}
-        <ClientTable
-          headers={tableHeaders}
-          data={clientsData}
-          actions={["view", "edit", "delete"]}
-          showSearchBar={true}
-          showClientCell={true}
-          onActionSelect={handleActionSelect}
-        />
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-200"></div>
+          </div>
+        ) : (
+          <ClientTable
+            headers={tableHeaders}
+            data={clientsData as unknown as Record<string, string>[]} // Type assertion to resolve TypeScript error
+            actions={["view", "edit", "delete"]}
+            showSearchBar={true}
+            showClientCell={true}
+            onActionSelect={handleActionSelect}
+          />
+        )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ClientsPage
+export default ClientsPage;

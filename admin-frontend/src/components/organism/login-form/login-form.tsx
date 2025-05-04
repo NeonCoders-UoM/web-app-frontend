@@ -80,8 +80,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) =>
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-12">
-      <div className="space-y-12">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-6">
+        {/* Email Field */}
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-neutral-600 mb-1">
             Email Address
@@ -100,16 +101,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) =>
             <p className="text-sm mt-1 text-red-600">{errors.email}</p>
           )}
         </div>
+
+        {/* Password Field */}
         <div>
           <div className="flex items-center justify-between mb-1">
             <label htmlFor="password" className="block text-sm font-medium text-neutral-600">
               Password
             </label>
-            <div className="text-right">
-              <a href="#" className="text-sm text-blue-600 hover:underline">
-                Forgot Password?
-              </a>
-            </div>
+            <a href="#" className="text-sm text-blue-600 hover:underline">
+              Forgot Password?
+            </a>
           </div>
           <InputField
             id="password"
@@ -120,10 +121,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) =>
             placeholder="Enter your password"
             ariaLabel="Password"
             rightIcon={
-              <span
-                onClick={togglePasswordVisibility}
-                className="cursor-pointer text-neutral-400"
-              >
+              <span onClick={togglePasswordVisibility} className="cursor-pointer text-neutral-400">
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </span>
             }
@@ -133,6 +131,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) =>
             <p className="text-sm mt-1 text-red-600">{errors.password}</p>
           )}
         </div>
+
+        {/* Remember Me */}
         <div className="flex items-center">
           <input
             id="remember"
@@ -147,7 +147,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) =>
           </label>
         </div>
       </div>
-      <div className="flex flex-col items-center space-y-6">
+
+      {/* Submit Button */}
+      <div className="flex justify-center">
         <Button variant="primary" size="large" type="submit" disabled={isLoading}>
           {isLoading ? (
             <span className="flex items-center gap-2">

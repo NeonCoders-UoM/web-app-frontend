@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import UserProfileCard from "@/components/molecules/user-card/user-card"
 import RegistrationForm from "@/components/organism/registration-form/registration-form"
-import colors from "@/styles/colors"
 
 const AddUserPage = () => {
   const [isClient, setIsClient] = useState(false)
@@ -45,19 +44,9 @@ const AddUserPage = () => {
 
       {/* "NEW USER" heading and form */}
       <div className="flex flex-col items-start min-h-screen pt-16 pl-16">
-        <h1
-          className="text-2xl font-bold mb-8"
-          style={{
-            color: colors.primary[200],
-            fontWeight: "var(--font-weight-medium)",
-          }}
-        >
-          NEW USER
-        </h1>
-
         {/* Centered form */}
-        <div className="w-full flex justify-center">
-          <div className="border border-primary-100 rounded-lg shadow-sm">
+        <div className="w-full flex justify-center px-4 py-10">
+          <div className="border border-neutral-200 rounded-lg shadow-sm">
             <RegistrationForm isEditMode={false} />
           </div>
         </div>

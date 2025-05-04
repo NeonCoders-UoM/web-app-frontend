@@ -71,7 +71,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <div className="w-64 min-h-screen flex flex-col bg-neutral-50 shadow-md">
       {/* Logo */}
-      <div className="p-4 flex items-center justify-center">
+      <div className="p-3 flex items-center justify-center">
         <Image
           src="/images/logo1.png"
           alt="Logo"

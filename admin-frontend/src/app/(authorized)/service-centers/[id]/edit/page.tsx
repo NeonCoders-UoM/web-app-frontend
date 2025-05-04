@@ -55,7 +55,7 @@ const EditServiceCenter: React.FC = () => {
 
   if (!serviceCenter) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex justify-center items-center">
+      <div className="min-h-screen bg-neutral-50 flex justify-center items-center p-6">
         <p className="text-neutral-900 text-lg">Service Center not found.</p>
       </div>
     );
@@ -80,8 +80,8 @@ const EditServiceCenter: React.FC = () => {
       </div>
 
       {/* Centered Form */}
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-2xl">
+         <div className="flex justify-center px-4 py-8">
+        <div className="w-256 max-w-l">
           <DocumentUploadForm initialData={serviceCenter} onSubmit={handleSubmit} />
         </div>
       </div>

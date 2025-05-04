@@ -67,7 +67,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ user, isEditMode = 
               email: formData.email,
               userrole: formData.userRole,
             }
-          : u
+          : u,
       )
       localStorage.setItem("users", JSON.stringify(updatedUsers))
     } else {
@@ -94,167 +94,135 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ user, isEditMode = 
   }
 
   // Define user role options
-  const userRoleOptions = [
-    "Admin",
-    "Super Admin",
-    "Service Center Admin",
-    "Cashier",
-    "Data Operator",
-  ]
+  const userRoleOptions = ["Admin", "Super Admin", "Service Center Admin", "Cashier", "Data Operator"]
 
   return (
     <div
-      className="w-[620px] h-[380px] p-6 flex flex-col justify-between"
+      className="w-full max-w-[700px] p-8 bg-white rounded-lg shadow-md mx-auto"
       style={{
         fontFamily: "var(--font-family-text)",
       }}
     >
-      <div>
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-2 gap-4 mb-3">
-            <div>
-              <label
-                htmlFor="firstName"
-                className="block mb-1 text-sm font-medium"
-                style={{ color: colors.neutral[600] }}
-              >
-                First Name
-              </label>
-              <InputField
-                id="firstName"
-                name="firstName"
-                placeholder="First Name"
-                value={formData.firstName}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="lastName"
-                className="block mb-1 text-sm font-medium"
-                style={{ color: colors.neutral[600] }}
-              >
-                Last Name
-              </label>
-              <InputField
-                id="lastName"
-                name="lastName"
-                placeholder="Last Name"
-                value={formData.lastName}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <h2 className="text-2xl font-semibold mb-6" style={{ color: colors.neutral[600] }}>
+          {isEditMode ? "Edit User" : "Create New User"}
+        </h2>
 
-          <div className="grid grid-cols-2 gap-4 mb-3">
-            <div>
-              <label
-                htmlFor="email"
-                className="block mb-1 text-sm font-medium"
-                style={{ color: colors.neutral[600] }}
-              >
-                Email
-              </label>
-              <InputField
-                id="email"
-                name="email"
-                type="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              {isEditMode ? (
-                <>
-                  <label
-                    htmlFor="currentPassword"
-                    className="block mb-1 text-sm font-medium"
-                    style={{ color: colors.neutral[600] }}
-                  >
-                    Current Password
-                  </label>
-                  <InputField
-                    id="currentPassword"
-                    name="currentPassword"
-                    type="password"
-                    placeholder="Current Password"
-                    value={formData.currentPassword}
-                    onChange={handleChange}
-                  />
-                </>
-              ) : (
-                <>
-                  <label
-                    htmlFor="password"
-                    className="block mb-1 text-sm font-medium"
-                    style={{ color: colors.neutral[600] }}
-                  >
-                    Password
-                  </label>
-                  <InputField
-                    id="password"
-                    name="newPassword"
-                    type="password"
-                    placeholder="Password"
-                    value={formData.newPassword}
-                    onChange={handleChange}
-                  />
-                </>
-              )}
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <label htmlFor="firstName" className="block text-sm font-medium" style={{ color: colors.neutral[600] }}>
+              First Name
+            </label>
+            <InputField
+              id="firstName"
+              name="firstName"
+              placeholder="First Name"
+              value={formData.firstName}
+              onChange={handleChange}
+            />
           </div>
+          <div className="space-y-2">
+            <label htmlFor="lastName" className="block text-sm font-medium" style={{ color: colors.neutral[600] }}>
+              Last Name
+            </label>
+            <InputField
+              id="lastName"
+              name="lastName"
+              placeholder="Last Name"
+              value={formData.lastName}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
 
-          {isEditMode && (
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <label htmlFor="email" className="block text-sm font-medium" style={{ color: colors.neutral[600] }}>
+              Email
+            </label>
+            <InputField
+              id="email"
+              name="email"
+              type="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="space-y-2">
+            {isEditMode ? (
+              <>
                 <label
-                  htmlFor="newPassword"
-                  className="block mb-1 text-sm font-medium"
+                  htmlFor="currentPassword"
+                  className="block text-sm font-medium"
                   style={{ color: colors.neutral[600] }}
                 >
-                  New Password
+                  Current Password
                 </label>
                 <InputField
-                  id="newPassword"
+                  id="currentPassword"
+                  name="currentPassword"
+                  type="password"
+                  placeholder="Current Password"
+                  value={formData.currentPassword}
+                  onChange={handleChange}
+                />
+              </>
+            ) : (
+              <>
+                <label htmlFor="password" className="block text-sm font-medium" style={{ color: colors.neutral[600] }}>
+                  Password
+                </label>
+                <InputField
+                  id="password"
                   name="newPassword"
                   type="password"
-                  placeholder="New Password"
+                  placeholder="Password"
                   value={formData.newPassword}
                   onChange={handleChange}
                 />
-              </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {isEditMode && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label htmlFor="newPassword" className="block text-sm font-medium" style={{ color: colors.neutral[600] }}>
+                New Password
+              </label>
+              <InputField
+                id="newPassword"
+                name="newPassword"
+                type="password"
+                placeholder="New Password"
+                value={formData.newPassword}
+                onChange={handleChange}
+              />
             </div>
-          )}
-
-          <div className="mb-6">
-            <label
-              className="block mb-1 text-sm font-medium"
-              style={{ color: colors.neutral[600] }}
-            >
-              User Role
-            </label>
-            <Dropdown
-              options={userRoleOptions}
-              placeholder="Select the User Role"
-              onSelect={handleRoleSelect}
-              className="w-full"
-              selectedOption={formData.userRole}
-            />
           </div>
+        )}
 
-          <div className="flex justify-end">
-            <Button
-              type="submit"
-              variant="primary"
-              size="medium"
-              className="px-6 py-2"
-            >
-              {isEditMode ? "SAVE CHANGES" : "CREATE USER"}
-            </Button>
-          </div>
-        </form>
-      </div>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium" style={{ color: colors.neutral[600] }}>
+            User Role
+          </label>
+          <Dropdown
+            options={userRoleOptions}
+            placeholder="Select the User Role"
+            onSelect={handleRoleSelect}
+            className="w-full"
+            selectedOption={formData.userRole}
+          />
+        </div>
+
+        <div className="pt-4 flex justify-end">
+          <Button type="submit" variant="primary" size="medium" className="px-8 py-2.5 font-medium">
+            {isEditMode ? "SAVE CHANGES" : "CREATE USER"}
+          </Button>
+        </div>
+      </form>
     </div>
   )
 }

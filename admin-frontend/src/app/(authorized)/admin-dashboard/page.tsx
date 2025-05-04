@@ -1,76 +1,45 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Search, SlidersHorizontal, Plus } from "lucide-react"
-import StatusCard from "@/components/atoms/status-cards/status-card"
-import Table from "@/components/organism/table/table"
-import Button from "@/components/atoms/button/button"
-import UserProfileCard from "@/components/molecules/user-card/user-card"
+import { useState, useEffect } from "react";
+import { Search, SlidersHorizontal, Plus } from "lucide-react";
+import StatusCard from "@/components/atoms/status-cards/status-card";
+import Table from "@/components/organism/table/table";
+import Button from "@/components/atoms/button/button";
+import UserProfileCard from "@/components/molecules/user-card/user-card";
+import Image from "next/image";
+import { fetchDashboardStats, fetchServiceCenters } from "@/utils/api";
 
 const AdminDashboard = () => {
-  const [dashboardData] = useState({
-    customers: 40689,
-    vehicles: 10293,
-    serviceCenters: 200,
-  })
-
-  const [serviceCenters, setServiceCenters] = useState<string[][]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
+  const [dashboardData, setDashboardData] = useState({ customers: 0, vehicles: 0, serviceCenters: 0 });
+  const [serviceCenters, setServiceCenters] = useState<string[][]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    // Simulate API call to fetch data
     const fetchData = async () => {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
-        // This would be replaced with actual API calls
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-
-        // Mock service centers data
-        const mockServiceCenters = [
-          [
-            "#SC-0001",
-            "Speed Motors",
-            "maria.rodriguez@gmail.com",
-            "+1 (961) 523-4453",
-            "456 Ocean Avenue, Miami, FL 33146",
-          ],
-          ["#SC-0002", "AutoFix Hub", "juan.rodriguez@gmail.com", "+1 (961) 523-4453", "234 Oak Street, Flat 7"],
-          ["#SC-0003", "Rapid Repairs", "maria.rodriguez@gmail.com", "+1 (961) 523-4453", "234 Oak Street, Flat 7"],
-          [
-            "#SC-0004",
-            "NextGen Motors",
-            "juan.rodriguez@gmail.com",
-            "+1 (961) 523-4453",
-            "456 Ocean Avenue, Miami, FL 33146",
-          ],
-          ["#SC-0005", "Prime AutoCare", "maria.rodriguez@gmail.com", "+1 (961) 523-4453", "234 Oak Street, Flat 7"],
-          [
-            "#SC-0006",
-            "Elite Vehicle Care",
-            "maria.rodriguez@gmail.com",
-            "+1 (961) 523-4453",
-            "234 Oak Street, Flat 7",
-          ],
-          [
-            "#SC-0007",
-            "TurboTune Auto",
-            "juan.rodriguez@gmail.com",
-            "+1 (961) 523-4453",
-            "456 Ocean Avenue, Miami, FL 33146",
-          ],
-        ]
-
-        setServiceCenters(mockServiceCenters)
+        const stats = await fetchDashboardStats();
+        const centers = await fetchServiceCenters();
+        setDashboardData(stats);
+        setServiceCenters(
+          centers.map((sc) => [
+            sc.id,
+            sc.serviceCenterName,
+            sc.email,
+            sc.telephoneNumber,
+            sc.address,
+          ])
+        );
       } catch (error) {
-        console.error("Error fetching dashboard data:", error)
+        console.error("Error fetching dashboard data:", error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   const tableHeaders = [
     { title: "Id", sortable: true },
@@ -78,14 +47,20 @@ const AdminDashboard = () => {
     { title: "Email", sortable: true },
     { title: "Phone No.", sortable: true },
     { title: "Address", sortable: true },
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-white p-6">
       {/* Header with logo and user profile */}
       <div className="flex justify-between items-center mb-[32px]">
         <div className="flex items-center">
-          <img src="/v-pass-logo.svg" alt="V PASS" className="h-8" />
+          <Image
+                    src="/images/logo1.png"
+                    alt="Logo"
+                    width={100}
+                    height={20}
+                    className="object-contain"
+                  />
         </div>
         <div className="w-auto">
           <UserProfileCard />
@@ -93,7 +68,6 @@ const AdminDashboard = () => {
       </div>
 
       <div className="px-[182px]">
-        
         <h1 className="text-2xl font-bold mb-[32px]">Dashboard</h1>
 
         {/* Status Cards */}
@@ -112,6 +86,7 @@ const AdminDashboard = () => {
               <select
                 className="appearance-none bg-white border border-neutral-150 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-primary-100"
                 defaultValue="all"
+                suppressHydrationWarning
               >
                 <option value="all">All Service Centers</option>
                 <option value="active">Active Centers</option>
@@ -125,7 +100,7 @@ const AdminDashboard = () => {
             </div>
 
             <div className="flex items-center space-x-4">
-              <Button variant="primary" size="medium" icon="save" iconPosition="left">
+              <Button variant="primary" size="medium" icon="PlusIcon" iconPosition="left">
                 <span className="flex items-center">
                   <Plus size={16} className="mr-1" />
                   Add Service Center
@@ -146,9 +121,13 @@ const AdminDashboard = () => {
                 className="pl-10 pr-4 py-2.5 w-full border border-neutral-150 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-100"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                suppressHydrationWarning
               />
             </div>
-            <button className="px-4 py-2 border border-neutral-150 rounded-md flex items-center gap-2 text-neutral-400">
+            <button
+              className="px-4 py-2 border border-neutral-150 rounded-md flex items-center gap-2 text-neutral-400"
+              suppressHydrationWarning
+            >
               <SlidersHorizontal size={18} />
               Filters
             </button>
@@ -164,14 +143,12 @@ const AdminDashboard = () => {
               data={serviceCenters}
               actions={["view", "edit", "delete"]}
               showSearchBar={false}
-              // itemsPerPage={6} // Removed as it is not part of TableProps
             />
           )}
-          {/* Uncomment and use itemsPerPage={6} if needed */}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AdminDashboard
+export default AdminDashboard;

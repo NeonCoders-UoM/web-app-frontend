@@ -1,39 +1,39 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
-import UserProfileCard from "@/components/molecules/user-card/user-card"
-import CustomerUpdateForm from "@/components/organism/customer-update-form/customer-update-form"
-import colors from "@/styles/colors"
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import UserProfileCard from "@/components/molecules/user-card/user-card";
+import CustomerUpdateForm from "@/components/organism/customer-update-form/customer-update-form";
+import colors from "@/styles/colors";
 
 interface ClientData {
-  id: string
-  name: string
-  email: string
-  nic: string
-  phone: string
-  address: string
-  profilePicture: string
+  id: string;
+  name: string;
+  email: string;
+  nic: string;
+  phone: string;
+  address: string;
+  profilePicture: string;
 }
 
 const ClientEditPage = () => {
-  const router = useRouter()
-  const params = useParams()
-  const clientId = params.id as string
-  const [isLoading, setIsLoading] = useState(true)
-  const [clientData, setClientData] = useState<ClientData | null>(null)
+  const router = useRouter();
+  const params = useParams();
+  const clientId = params.id as string;
+  const [isLoading, setIsLoading] = useState(true);
+  const [clientData, setClientData] = useState<ClientData | null>(null);
 
   useEffect(() => {
     const fetchClientData = async () => {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        let clientName = "Devon Lane"
+        let clientName = "Devon Lane";
         if (clientId === "client-2" || clientId === "client-4") {
-          clientName = "Kathryn Murphy"
+          clientName = "Kathryn Murphy";
         } else if (clientId === "client-3" || clientId === "client-6") {
-          clientName = "Eleanor Pena"
+          clientName = "Eleanor Pena";
         }
 
         setClientData({
@@ -44,28 +44,28 @@ const ClientEditPage = () => {
           phone: "+1 (961) 523-4453",
           address: "456 Ocean Avenue, Miami, FL 12345",
           profilePicture: "https://placehold.co/80x80/svg?text=Client",
-        })
+        });
       } catch (error) {
-        console.error("Error fetching client data:", error)
+        console.error("Error fetching client data:", error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchClientData()
-  }, [clientId])
+    fetchClientData();
+  }, [clientId]);
 
   const handleFormSubmit = (data: {
-    customerName: string
-    email: string
-    nicNumber: string
-    telephoneNumber: string
-    address: string
-    photo: File | null
+    customerName: string;
+    email: string;
+    nicNumber: string;
+    telephoneNumber: string;
+    address: string;
+    photo: File | null;
   }) => {
-    console.log("Updating client with data:", data)
-    router.push(`/client/${clientId}`)
-  }
+    console.log("Updating client with data:", data);
+    router.push(`/client/${clientId}`);
+  };
 
   if (isLoading) {
     return (
@@ -74,7 +74,7 @@ const ClientEditPage = () => {
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-200"></div>
         </div>
       </div>
-    )
+    );
   }
 
   if (!clientData) {
@@ -86,7 +86,7 @@ const ClientEditPage = () => {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -133,7 +133,7 @@ const ClientEditPage = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ClientEditPage
+export default ClientEditPage;

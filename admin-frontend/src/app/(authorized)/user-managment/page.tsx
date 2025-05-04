@@ -1,92 +1,65 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import ClientTable from "@/components/organism/client-table/client-table"
-import UserProfileCard from "@/components/molecules/user-card/user-card"
-import Button from "@/components/atoms/button/button"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import ClientTable from "@/components/organism/client-table/client-table";
+import UserProfileCard from "@/components/molecules/user-card/user-card";
+import Button from "@/components/atoms/button/button";
+import { fetchUsers } from "@/utils/api";
+import { User } from "@/types";
 
 const UsersPage = () => {
-  const router = useRouter()
-  const [userFilter, setUserFilter] = useState("All Users")
-  const [isClient, setIsClient] = useState(false) // Track if we're on the client
+  const router = useRouter();
+  const [userFilter, setUserFilter] = useState("All Users");
+  const [usersData, setUsersData] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
 
-  // Only render the main content on the client side
   useEffect(() => {
-    setIsClient(true)
-  }, [])
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const users = await fetchUsers();
+        setUsersData(users);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   const tableHeaders = [
-    { title: "Employee ID", sortable: true },
+    { title: "ID", sortable: true },
     { title: "First Name", sortable: true },
     { title: "Last Name", sortable: true },
     { title: "Email", sortable: true },
     { title: "User Role", sortable: true },
-  ]
-
-  const usersData = [
-    {
-      id: "EMP-0001",
-      firstname: "Eleanor",
-      lastname: "Pena",
-      email: "eleanor.pena@gmail.com",
-      userrole: "Admin",
-      profilePicture: "/images/userpic.jpg",
-    },
-    {
-      id: "EMP-0002",
-      firstname: "Kathryn",
-      lastname: "Murphy",
-      email: "kathryn.murphy@gmail.com",
-      userrole: "Service Staff",
-      profilePicture: "/images/userpic.jpg",
-    },
-    {
-      id: "EMP-0003",
-      firstname: "Devon",
-      lastname: "Lane",
-      email: "devon.lane@gmail.com",
-      userrole: "Service Staff",
-      profilePicture: "/images/userpic.jpg",
-    },
-    {
-      id: "EMP-0004",
-      firstname: "Eleanor",
-      lastname: "Pena",
-      email: "eleanor.pena2@gmail.com",
-      userrole: "Service Staff",
-      profilePicture: "/images/userpic.jpg",
-    },
-    {
-      id: "EMP-0005",
-      firstname: "Devon",
-      lastname: "Lane",
-      email: "devon.lane2@gmail.com",
-      userrole: "Data Operator",
-      profilePicture: "/images/userpic.jpg",
-    },
-  ]
+  ];
 
   const handleActionSelect = (action: string, userId: string) => {
     if (action === "Edit") {
-      router.push(`/user-managment/edit/${userId}`)
+      router.push(`/user-managment/edit/${userId}`);
     } else if (action === "Delete") {
-      console.log(`Deleting user with ID: ${userId}`)
+      console.log(`Deleting user with ID: ${userId}`);
     }
-  }
+  };
 
   const handleCreateUser = () => {
-  router.push("/user-managment/add-user")
-}
+    router.push("/user-managment/add-user");
+  };
 
-  // Render a minimal placeholder on the server, full content on the client
   if (!isClient) {
     return (
       <div className="flex min-h-screen bg-white">
         <div className="flex-1 p-6">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-2xl font-bold text-neutral-600">User List</h1>
-            {/* Minimal placeholder for UserProfileCard */}
+            <h1 className="text-lg font-bold text-neutral-600">User List</h1>
             <div className="w-[151px] h-[44px]"></div>
           </div>
           <div className="flex justify-between items-center mb-6">
@@ -96,13 +69,12 @@ const UsersPage = () => {
           <div className="w-full h-[400px] bg-neutral-50 rounded-lg"></div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="flex min-h-screen bg-white">
       <div className="flex-1 p-6">
-        {/* Header with user profile */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-neutral-600">User List</h1>
           <UserProfileCard
@@ -116,7 +88,6 @@ const UsersPage = () => {
           />
         </div>
 
-        {/* Filter and Create User Button */}
         <div className="flex justify-between items-center mb-6">
           <div className="relative">
             <select
@@ -141,27 +112,32 @@ const UsersPage = () => {
           </div>
           <Button
             variant="primary"
-            size="small"
+            size="medium"
             onClick={handleCreateUser}
-            icon="plus"
+            icon="PlusIcon"
             iconPosition="left"
           >
             Create User
           </Button>
         </div>
 
-        {/* User Table */}
-        <ClientTable
-          headers={tableHeaders}
-          data={usersData}
-          actions={["edit", "delete"]}
-          showSearchBar={true}
-          showClientCell={true}
-          onActionSelect={handleActionSelect}
-        />
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-200"></div>
+          </div>
+        ) : (
+          <ClientTable
+            headers={tableHeaders}
+            data={usersData as unknown as Record<string, string>[]} // Type assertion to resolve TypeScript error
+            actions={["edit", "delete"]}
+            showSearchBar={true}
+            showClientCell={true}
+            onActionSelect={handleActionSelect}
+          />
+        )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default UsersPage
+export default UsersPage;
