@@ -52,8 +52,8 @@ export default function EditServicePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center" style={{ backgroundColor: colors.neutral[100] }}>
-      <div className="w-full px-6 py-4 flex justify-end items-center">
+    <div className="min-h-screen flex flex-col items-center bg-white p-6">
+      <div className="w-full flex justify-end items-center mb-[80px]">
         <UserProfileCard
           pictureSrc="/images/profipic.jpg"
           pictureAlt="Moni Roy"
@@ -65,12 +65,12 @@ export default function EditServicePage() {
         />
       </div>
 
-      <div className="flex flex-col p-4 w-1/2">
+      <div className="flex-1 flex flex-col p-4 w-[1074px] h-[760]">
         <TabNavigation tabs={tabs} activeTab="Services" onTabChange={handleTabChange} />
 
-        <div className="flex-1 flex justify-center items-center py-4">
+        <div className="flex-1 flex justify-center items-center p-[28px] bg-neutral-100 rounded-xl">
           <div
-            className="rounded-lg shadow-md p-6 w-full"
+            className="rounded-lg shadow-md p-6 w-full max-w-2xl"
             style={{
               backgroundColor: "#FFFFFF",
               border: `1px solid ${colors.primary[100]}`,

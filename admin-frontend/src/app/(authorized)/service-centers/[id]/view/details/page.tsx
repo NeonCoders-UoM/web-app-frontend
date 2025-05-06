@@ -83,13 +83,11 @@ const DetailsTab: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col items-center">
+    <div className="min-h-screen bg-white flex flex-col items-center">
       {/* Removed fixed-size frame */}
-      <div className="w-full max-w-5xl flex flex-col">
+      <div className="w-full max-w-5xl flex flex-col p-6">
         {/* Header */}
-        <div className="p-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-semibold text-neutral-900">Service Center Details</h1>
+          <div className="flex justify-end items-center mb-[80px]">
             <UserProfileCard
               pictureSrc="/images/profipic.jpg"
               pictureAlt="Moni Roy"
@@ -100,13 +98,13 @@ const DetailsTab: React.FC = () => {
               onSettingsClick={() => router.push("/settings")}
             />
           </div>
-        </div>
-
+        
+        <h1 className="text-xl font-semibold text-neutral-800 mb-[40px]">Service Center Details</h1>
         {/* Tab Navigation and Content */}
         <div className="flex-1 flex flex-col">
           <TabNavigation tabs={tabs} activeTab="Details" onTabChange={handleTabChange} />
 
-          <div className="flex-1 p-6">
+          <div className="flex-1 p-12 bg-neutral-100 w-[1074px] h-[760]">
             <div className="grid grid-cols-2 gap-x-4 gap-y-6">
               {/* Left Column */}
               <div>
@@ -155,7 +153,7 @@ const DetailsTab: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-4 flex justify-end">
+            <div className="flex justify-end">
               <Image
                 src="/images/vehicle.jpg"
                 alt="Vehicle mechanics"
