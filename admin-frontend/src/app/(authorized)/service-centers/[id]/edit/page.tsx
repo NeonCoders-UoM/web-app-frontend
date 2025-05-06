@@ -62,11 +62,10 @@ const EditServiceCenter: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col p-6">
       {/* Header */}
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-semibold text-neutral-900">Service Center Edit</h1>
+      <div>
+        <div className="flex justify-end items-center mb-[64px]">
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
             pictureAlt="Moni Roy"
@@ -78,11 +77,14 @@ const EditServiceCenter: React.FC = () => {
           />
         </div>
       </div>
-
-      {/* Centered Form */}
-         <div className="flex justify-center px-4 py-8">
-        <div className="w-256 max-w-l">
-          <DocumentUploadForm initialData={serviceCenter} onSubmit={handleSubmit} />
+      
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center">
+          <h1 className="text-xl font-bold text-neutral-600 mb-[40px]">Service Center Edit</h1>
+          {/* Centered Form */}
+            <div>
+              <DocumentUploadForm initialData={serviceCenter} onSubmit={handleSubmit} />
+            </div>
         </div>
       </div>
     </div>
