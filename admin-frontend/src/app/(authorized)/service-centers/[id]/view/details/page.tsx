@@ -141,14 +141,8 @@ const DetailsTab: React.FC = () => {
                   <p className="font-medium">{serviceCenter.registrationNumber}</p>
                 </div>
                 <div className="mb-4">
-                  <p className="text-gray-500 text-sm">Commission Date :</p>
-                  <p className="font-medium">{serviceCenter.commissionDate}</p>
-                </div>
-                <div className="mb-4">
-                  <p className="text-gray-500 text-sm">Service Hours :</p>
-                  <p className="font-medium">
-                    {serviceCenter.serviceHours.start} - {serviceCenter.serviceHours.end}
-                  </p>
+                  <p className="text-gray-500 text-sm">Commission Rate :</p>
+                  <p className="font-medium">{serviceCenter.commissionRate}</p>
                 </div>
               </div>
             </div>

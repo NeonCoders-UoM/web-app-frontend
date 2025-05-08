@@ -52,7 +52,7 @@ export default function Page() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen p-[58px] md:p-10 bg-white">
+    <div className="flex flex-col min-h-screen p-[58px] bg-white">
       <div className="flex justify-end items-center mb-[74px]">
         <UserProfileCard
           pictureSrc="/images/profipic.jpg"
