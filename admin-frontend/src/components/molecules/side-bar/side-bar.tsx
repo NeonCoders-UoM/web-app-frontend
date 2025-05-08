@@ -20,7 +20,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const sidebarOptions: Record<string, { label: string; route: string }[]> = {
     "super-admin": [
-      { label: "Dashboard", route: "/service-center-dashboard" },
+      { label: "Dashboard", route: "/service-center-dashboard/${id}" },
       { label: "Clients", route: "/client" },
       { label: "Vehicles", route: "/vehicle" },
       { label: "Appointments", route: "/appointment" },
