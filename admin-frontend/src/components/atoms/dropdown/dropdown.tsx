@@ -54,6 +54,7 @@ const Dropdown: React.FC<DropdownProps> = ({
       <div className="relative">
         {/* Dropdown Button */}
         <button
+          type="button"
           className="w-full flex items-center justify-between px-4 py-2 bg-neutral-100 border border-neutral-400 rounded-md shadow-sm focus:ring-2 focus:ring-primary-100"
           onClick={() => setIsOpen(!isOpen)}
           suppressHydrationWarning
