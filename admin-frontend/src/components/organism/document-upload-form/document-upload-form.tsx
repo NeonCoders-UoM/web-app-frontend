@@ -1,10 +1,9 @@
 // src/components/organism/document-upload-form/document-upload-form.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Button from "@/components/atoms/button/button";
 import InputField from "@/components/atoms/input-fields/input-fields";
-import Dropdown from "@/components/atoms/dropdown/dropdown";
 import UploadPhoto from "@/components/atoms/upload-photo/upload-photo";
 import UploadFile from "@/components/atoms/upload-file/upload-file";
 import colors from "@/styles/colors";
@@ -25,9 +24,8 @@ export default function DocumentUploadForm({ initialData, onSubmit }: DocumentUp
     ownersName: "",
     vatNumber: "",
     registrationNumber: "",
-    commissionDate: "",
+    commissionRate: "",
     availableServices: [],
-    serviceHours: { start: "", end: "" },
     photoUrl: "",
     registrationCopyUrl: "",
   });
@@ -35,6 +33,8 @@ export default function DocumentUploadForm({ initialData, onSubmit }: DocumentUp
   const [photo, setPhoto] = useState<File | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof Omit<ServiceCenter, "id">, string>>>({});
+  const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Prefill form with initial data if provided (for edit mode)
   useEffect(() => {
@@ -47,9 +47,8 @@ export default function DocumentUploadForm({ initialData, onSubmit }: DocumentUp
         ownersName: initialData.ownersName || "",
         vatNumber: initialData.vatNumber || "",
         registrationNumber: initialData.registrationNumber || "",
-        commissionDate: "",
+        commissionRate: "",
         availableServices: initialData.availableServices || [],
-        serviceHours: initialData.serviceHours || { start: "", end: "" },
         photoUrl: initialData.photoUrl || "",
         registrationCopyUrl: initialData.registrationCopyUrl || "",
       });
@@ -57,26 +56,18 @@ export default function DocumentUploadForm({ initialData, onSubmit }: DocumentUp
   }, [initialData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    if (name === "serviceHoursStart") {
-      setFormData((prev) => ({
-        ...prev,
-        serviceHours: { ...prev.serviceHours, start: value },
-      }));
-    } else if (name === "serviceHoursEnd") {
-      setFormData((prev) => ({
-        ...prev,
-        serviceHours: { ...prev.serviceHours, end: value },
-      }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-    setErrors((prev) => ({ ...prev, [name]: undefined }));
-  };
+      const { name, value } = e.target;
+      setFormData(prev => ({ ...prev, [name]: value }));
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    };
 
-  const handleServiceSelect = (option: string) => {
-    setFormData((prev) => ({ ...prev, availableServices: [option] }));
-    setErrors((prev) => ({ ...prev, availableServices: undefined }));
+  const toggleService = (service: string) => {
+    setFormData(prev => {
+      const updated = prev.availableServices.includes(service)
+        ? prev.availableServices.filter(s => s !== service)
+        : [...prev.availableServices, service];
+      return { ...prev, availableServices: updated };
+    });
   };
 
   const validateForm = (): boolean => {
@@ -109,9 +100,6 @@ export default function DocumentUploadForm({ initialData, onSubmit }: DocumentUp
     }
     if (formData.availableServices.length === 0) {
       newErrors.availableServices = "At least one service must be selected";
-    }
-    if (!formData.serviceHours.start || !formData.serviceHours.end) {
-      newErrors.serviceHours = "Service Hours are required";
     }
 
     setErrors(newErrors);
@@ -341,56 +329,30 @@ export default function DocumentUploadForm({ initialData, onSubmit }: DocumentUp
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-4">
-            <div>
-              <Dropdown
-                label="Choose Available Services"
-                options={availableServiceOptions}
-                placeholder="Choose Available Services"
-                onSelect={handleServiceSelect}
-                selectedOption={formData.availableServices[0] || ""}
-                className="w-full"
-              />
-              {errors.availableServices && (
-                <p className="text-red-500 text-sm mt-1">{errors.availableServices}</p>
-              )}
+          <div className="col-span-2 relative" ref={dropdownRef}>
+            <label className="block mb-1" style={{ color: colors.neutral[600] }}>Available Services</label>
+            <div onClick={() => setDropdownOpen(!isDropdownOpen)} className="border border-neutral-600 rounded px-3 py-2 cursor-pointer">
+              {formData.availableServices.length > 0 ? formData.availableServices.join(", ") : "Select services"}
             </div>
-            <div>
-              <label
-                className="block mb-1"
-                style={{
-                  color: colors.neutral[600],
-                  fontSize: "var(--font-size-sm)",
-                  fontWeight: "var(--font-weight-regular)",
-                }}
-              >
-                Service Hours
-              </label>
-              <div className="flex gap-x-2">
-                <div className="flex-1">
-                  <InputField
-                    id="serviceHoursStart"
-                    name="serviceHoursStart"
-                    type="time"
-                    placeholder="Start Time"
-                    value={formData.serviceHours.start}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="flex-1">
-                  <InputField
-                    id="serviceHoursEnd"
-                    name="serviceHoursEnd"
-                    type="time"
-                    placeholder="End Time"
-                    value={formData.serviceHours.end}
-                    onChange={handleChange}
-                  />
-                </div>
+            {isDropdownOpen && (
+              <div className="absolute z-10 mt-1 w-full bg-white border border-neutral-600 rounded shadow-md max-h-48 overflow-auto">
+                {availableServiceOptions.map(service => (
+                  <label key={service} className="flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.availableServices.includes(service)}
+                      onChange={() => toggleService(service)}
+                      className="mr-2"
+                    />
+                    {service}
+                  </label>
+                ))}
               </div>
-              {errors.serviceHours && (
-                <p className="text-red-500 text-sm mt-1">{errors.serviceHours}</p>
-              )}
-            </div>
+            )}
+            {errors.availableServices && (
+              <p className="text-red-500 text-sm mt-1">{errors.availableServices}</p>
+            )}
+          </div>
           </div>
 
           <div className="mt-auto flex justify-end">

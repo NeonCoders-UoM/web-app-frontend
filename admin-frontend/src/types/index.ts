@@ -7,9 +7,8 @@ export interface ServiceCenter {
   ownersName: string;
   vatNumber: string;
   registrationNumber: string;
-  commissionDate: string;
+  commissionRate: string;
   availableServices: string[];
-  serviceHours: { start: string; end: string };
   photoUrl?: string;
   registrationCopyUrl?: string;
 }
