@@ -604,7 +604,6 @@ const dashboardData: DashboardStats = {
 // Fetch all service centers (used in SuperAdminDashboard)
 export const fetchServiceCenters = async (): Promise<ServiceCenter[]> => {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 500));
     return mockServiceCenters.map((sc) => ({
       ...sc,
       id: sc.id,
@@ -630,7 +629,6 @@ export const fetchServiceCenters = async (): Promise<ServiceCenter[]> => {
 // Fetch all clients
 export const fetchClients = async (): Promise<Client[]> => {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 500));
     return mockClients;
   } catch (error) {
     console.error("Error in fetchClients:", error);
@@ -641,7 +639,6 @@ export const fetchClients = async (): Promise<Client[]> => {
 // Fetch a single client by ID (used in ClientProfilePage)
 export const fetchClientById = async (id: string): Promise<Client | null> => {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 500));
     const client = mockClients.find((c) => c.id === id);
     return client || null;
   } catch (error) {
@@ -653,7 +650,6 @@ export const fetchClientById = async (id: string): Promise<Client | null> => {
 // Fetch all users
 export const fetchUsers = async (): Promise<User[]> => {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 500));
     return mockUsers;
   } catch (error) {
     console.error("Error in fetchUsers:", error);
@@ -664,7 +660,6 @@ export const fetchUsers = async (): Promise<User[]> => {
 // Fetch a single service center by ID (used in EditServiceCenter)
 export const fetchServiceCenterById = async (id: string): Promise<ServiceCenter | null> => {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 500));
     const serviceCenter = mockServiceCenters.find((sc) => sc.id === id);
     return serviceCenter || null;
   } catch (error) {
@@ -676,7 +671,6 @@ export const fetchServiceCenterById = async (id: string): Promise<ServiceCenter 
 // Fetch dashboard stats (used in SuperAdminDashboard)
 export const fetchDashboardStats = async (): Promise<DashboardStats> => {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 500));
     return dashboardData;
   } catch (error) {
     console.error("Error in fetchDashboardStats:", error);
@@ -715,7 +709,6 @@ export const updateServiceCenter = async (id: string, data: Omit<ServiceCenter, 
 // Create a new service center (used in AddServiceCenter)
 export const createServiceCenter = async (data: Omit<ServiceCenter, "id">): Promise<ServiceCenter> => {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 500));
     const newId = (mockServiceCenters.length + 1).toString();
     const newServiceCenter: ServiceCenter = { id: newId, ...data };
     mockServiceCenters.push(newServiceCenter);

@@ -56,7 +56,7 @@ const ServiceCenterDashboard = () => {
           pictureSrc="/images/profipic.jpg"
           pictureAlt="Moni Roy"
           name="Moni Roy"
-          role="admin"
+          role="super-admin"
           onLogout={() => console.log("Logout clicked")}
           onProfileClick={() => console.log("Profile clicked")}
           onSettingsClick={() => console.log("Settings clicked")}

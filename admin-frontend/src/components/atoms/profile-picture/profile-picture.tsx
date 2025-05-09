@@ -5,6 +5,7 @@ import Image from 'next/image';
 
 interface ProfilePictureProps {
   alt: string;
+  src?: string;
 }
 
 const ProfilePicture: React.FC<ProfilePictureProps> = ({ alt }) => {
