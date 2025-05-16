@@ -57,7 +57,7 @@ const ClientsPage = () => {
       <div className="flex-1 p-6">
         {/* Header with user profile */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-xl font-bold text-neutral-600">Clients</h1>
+          <h1 className="text-xl font-bold text-neutral-600"></h1>
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
             pictureAlt="Moni Roy"

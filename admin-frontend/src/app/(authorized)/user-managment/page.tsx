@@ -76,7 +76,7 @@ const UsersPage = () => {
     <div className="flex min-h-screen bg-white">
       <div className="flex-1 p-6">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-neutral-600">User List</h1>
+          <h1 className="text-lg font-bold text-neutral-600">User List</h1>
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
             pictureAlt="Moni Roy"

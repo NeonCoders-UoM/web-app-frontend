@@ -99,7 +99,7 @@ const ClientEditPage = () => {
             className="text-xl font-bold"
             style={{ color: colors.primary[200] }}
           >
-            V-PASS
+          
           </h1>
           <UserProfileCard
             pictureSrc="/images/profipic.jpg" // Already updated to use local image
@@ -113,7 +113,7 @@ const ClientEditPage = () => {
         </div>
 
         {/* Page Title */}
-        <h2 className="text-2xl font-bold text-neutral-600 mb-6">
+        <h2 className="text-lg font-bold text-neutral-600 mb-6">
           Edit Customer Details
         </h2>
 

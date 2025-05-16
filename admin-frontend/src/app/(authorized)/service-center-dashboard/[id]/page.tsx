@@ -63,20 +63,16 @@ const ServiceCenterDashboard = () => {
         />
       </div>
 
-      <div className="mb-[32px]">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-      </div>
-
       {/* Status Cards */}
-      <div className="flex justify-start gap-[67px] mb-[44px]">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         <StatusCard title="Customers" value={dashboardData.customers} icon="customers" />
         <StatusCard title="Vehicles" value={dashboardData.vehicles} icon="vehicles" />
         <StatusCard title="Appointments" value={dashboardData.serviceCenters} icon="serviceCenters" />
       </div>
 
       {/* Table Section */}
-      <div className="bg-white pr-[165px]">
-        <h2 className="text-2xl font-semibold">Leading Services</h2>
+      <div className="bg-white ">
+        <h2 className="text-xl font-semibold mb-4">Leading Services</h2>
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-200"></div>

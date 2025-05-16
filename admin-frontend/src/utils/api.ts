@@ -1,5 +1,6 @@
-import { ServiceCenter, DashboardStats, Client, User } from "@/types";
+import { ServiceCenter, DashboardStats, Client, User, Vehicle } from "@/types";
 
+// Mock data (as provided)
 const mockServiceCenters: ServiceCenter[] = [
   {
     id: "1",
@@ -426,7 +427,7 @@ const mockClients: Client[] = [
       {
         id: 1,
         type: "Honda",
-        brand: "Amaze",
+        brand: "Am cardiologistsaze",
         model: "VX I-DTEC",
         year: "2007",
         fuelType: "Petrol",
@@ -591,7 +592,37 @@ const dashboardData: DashboardStats = {
   serviceCenters: mockServiceCenters.length,
 };
 
-// Fetch all service centers (used in SuperAdminDashboard)
+// Fetch all vehicles
+export const fetchVehicles = async (): Promise<{
+  id: string;
+  client: string;
+  pictureSrc: string;
+  type: string;
+  brand: string;
+  model: string;
+  licenseplate: string;
+}[]> => {
+  try {
+    const clients = await fetchClients();
+    const vehicles = clients.flatMap((client, index) =>
+      (client.vehicles || []).map((vehicle: Vehicle) => ({
+        id: `#${(index * 1000 + vehicle.id).toString().padStart(4, "0")}`,
+        client: client.client,
+        pictureSrc: client.profilePicture,
+        type: vehicle.type,
+        brand: vehicle.brand,
+        model: vehicle.model,
+        licenseplate: vehicle.licensePlate,
+      }))
+    );
+    return vehicles;
+  } catch (error) {
+    console.error("Error in fetchVehicles:", error);
+    throw error;
+  }
+};
+
+// Fetch all service centers
 export const fetchServiceCenters = async (): Promise<ServiceCenter[]> => {
   try {
     return mockServiceCenters.map((sc) => ({
@@ -604,7 +635,7 @@ export const fetchServiceCenters = async (): Promise<ServiceCenter[]> => {
       ownersName: sc.ownersName || "",
       vatNumber: sc.vatNumber || "",
       registrationNumber: sc.registrationNumber || "",
-      commissionDate: sc.commissionRate || "",
+      commissionRate: sc.commissionRate || "",
       availableServices: sc.availableServices || [],
       photoUrl: sc.photoUrl || "",
       registrationCopyUrl: sc.registrationCopyUrl || "",
@@ -625,7 +656,7 @@ export const fetchClients = async (): Promise<Client[]> => {
   }
 };
 
-// Fetch a single client by ID (used in ClientProfilePage)
+// Fetch a single client by ID
 export const fetchClientById = async (id: string): Promise<Client | null> => {
   try {
     const client = mockClients.find((c) => c.id === id);
@@ -646,7 +677,7 @@ export const fetchUsers = async (): Promise<User[]> => {
   }
 };
 
-// Fetch a single service center by ID (used in EditServiceCenter)
+// Fetch a single service center by ID
 export const fetchServiceCenterById = async (id: string): Promise<ServiceCenter | null> => {
   try {
     const serviceCenter = mockServiceCenters.find((sc) => sc.id === id);
@@ -657,7 +688,7 @@ export const fetchServiceCenterById = async (id: string): Promise<ServiceCenter 
   }
 };
 
-// Fetch dashboard stats (used in SuperAdminDashboard)
+// Fetch dashboard stats
 export const fetchDashboardStats = async (): Promise<DashboardStats> => {
   try {
     return dashboardData;
@@ -667,7 +698,7 @@ export const fetchDashboardStats = async (): Promise<DashboardStats> => {
   }
 };
 
-// Delete a service center (used in SuperAdminDashboard)
+// Delete a service center
 export const deleteServiceCenter = async (id: string): Promise<void> => {
   try {
     const index = mockServiceCenters.findIndex((sc) => sc.id === id);
@@ -681,7 +712,7 @@ export const deleteServiceCenter = async (id: string): Promise<void> => {
   }
 };
 
-// Update a service center (used in EditServiceCenter)
+// Update a service center
 export const updateServiceCenter = async (id: string, data: Omit<ServiceCenter, "id">): Promise<void> => {
   try {
     const index = mockServiceCenters.findIndex((sc) => sc.id === id);
@@ -695,7 +726,7 @@ export const updateServiceCenter = async (id: string, data: Omit<ServiceCenter, 
   }
 };
 
-// Create a new service center (used in AddServiceCenter)
+// Create a new service center
 export const createServiceCenter = async (data: Omit<ServiceCenter, "id">): Promise<ServiceCenter> => {
   try {
     const newId = (mockServiceCenters.length + 1).toString();

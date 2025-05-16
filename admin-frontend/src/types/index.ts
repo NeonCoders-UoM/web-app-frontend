@@ -54,10 +54,10 @@ export interface Appointment {
 
 export interface Client {
   id: string;
-  client: string; // This corresponds to `name` in ClientProfilePage
+  client: string;
   profilePicture: string;
   email: string;
-  phoneno: string; // This corresponds to `phone` in ClientProfilePage
+  phoneno: string;
   address: string;
   nic?: string;
   points?: number;
@@ -94,3 +94,16 @@ export interface DashboardStats {
   vehicles: number;
   serviceCenters: number;
 }
+
+export {
+  fetchServiceCenters,
+  fetchClients,
+  fetchClientById,
+  fetchUsers,
+  fetchServiceCenterById,
+  fetchDashboardStats,
+  deleteServiceCenter,
+  updateServiceCenter,
+  createServiceCenter,
+  fetchVehicles,
+} from "@/utils/api";
