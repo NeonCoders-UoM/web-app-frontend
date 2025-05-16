@@ -69,9 +69,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <div className="w-64 min-h-screen flex flex-col bg-neutral-50 shadow-md">
+    <div className="w-64 min-h-screen flex flex-col bg-white shadow-lg">
       {/* Logo */}
-      <div className="p-3 flex items-center justify-center">
+      <div className="pb-1 pt-3 flex items-center justify-center">
         <Image
           src="/images/logo1.png"
           alt="Logo"
@@ -99,7 +99,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       {/* Sidebar Sections */}
-      <div className="flex-1 px-4 space-y-2 mt-4">
+      <div className="flex-1 px-2 space-y-2">
         {sections.map((section) => (
           <SidebarButton
             key={section.label}
