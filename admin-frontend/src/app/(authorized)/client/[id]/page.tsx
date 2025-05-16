@@ -70,7 +70,7 @@ const ClientProfilePage = () => {
   const activeVehicle = clientData.vehicles?.[activeTab - 1];
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-white">  
       {/* Main Content */}
       <div className="flex-1 p-6">
         {/* Header with user profile */}
