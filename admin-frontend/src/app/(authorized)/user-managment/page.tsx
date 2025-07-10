@@ -10,20 +10,16 @@ import { User } from "@/types";
 
 const UsersPage = () => {
   const router = useRouter();
-  const [userFilter, setUserFilter] = useState("All Users");
+  const [userFilter, setUserFilter] = useState("Admin/all-users");
   const [usersData, setUsersData] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
         const users = await fetchUsers();
+        console.log("Fetched users:", users);
         setUsersData(users);
       } catch (error) {
         console.error("Error fetching users:", error);
@@ -31,16 +27,18 @@ const UsersPage = () => {
         setIsLoading(false);
       }
     };
+
     fetchData();
   }, []);
 
   const tableHeaders = [
-    { title: "ID", sortable: true },
-    { title: "First Name", sortable: true },
-    { title: "Last Name", sortable: true },
-    { title: "Email", sortable: true },
-    { title: "User Role", sortable: true },
-  ];
+  { title: "ID", sortable: true },
+  { title: "First Name", sortable: true },
+  { title: "Last Name", sortable: true },
+  { title: "Email", sortable: true },
+  { title: "User Role", sortable: true },
+];
+
 
   const handleActionSelect = (action: string, userId: string) => {
     if (action === "Edit") {
@@ -54,24 +52,6 @@ const UsersPage = () => {
     router.push("/user-managment/add-user");
   };
 
-  if (!isClient) {
-    return (
-      <div className="flex min-h-screen bg-white">
-        <div className="flex-1 p-6">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-lg font-bold text-neutral-600">User List</h1>
-            <div className="w-[151px] h-[44px]"></div>
-          </div>
-          <div className="flex justify-between items-center mb-6">
-            <div className="w-[150px] h-[36px]"></div>
-            <div className="w-[120px] h-[28px]"></div>
-          </div>
-          <div className="w-full h-[400px] bg-neutral-50 rounded-lg"></div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex min-h-screen bg-white">
       <div className="flex-1 p-6">
@@ -82,7 +62,10 @@ const UsersPage = () => {
             pictureAlt="Moni Roy"
             name="Moni Roy"
             role="admin"
-            onLogout={() => console.log("Logout clicked")}
+            onLogout={() => {
+              localStorage.removeItem("token");
+              router.push("/login");
+            }}
             onProfileClick={() => console.log("Profile clicked")}
             onSettingsClick={() => console.log("Settings clicked")}
           />
@@ -110,6 +93,7 @@ const UsersPage = () => {
               </svg>
             </div>
           </div>
+
           <Button
             variant="primary"
             size="medium"
@@ -128,7 +112,14 @@ const UsersPage = () => {
         ) : (
           <ClientTable
             headers={tableHeaders}
-            data={usersData as unknown as Record<string, string>[]} // Type assertion to resolve TypeScript error
+            data={usersData.map((u) => ({
+            id: u.userId.toString(),
+            firstname: u.firstName,
+            lastname: u.lastName,
+            email: u.email,
+            userrole: u.role,
+          }))}
+          
             actions={["edit", "delete"]}
             showSearchBar={true}
             showClientCell={true}

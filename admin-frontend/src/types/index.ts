@@ -68,13 +68,14 @@ export interface Client {
 }
 
 export interface User {
-  id: string;
-  firstname: string;
-  lastname: string;
+  userId: number;     // ✅ matches JSON
+  firstName: string;
+  lastName: string;
   email: string;
-  userrole: string;
-  profilePicture: string;
+  role: string;       // ✅ not UserRoleName
 }
+
+
 
 export interface ShiftCard {
   day: string;
