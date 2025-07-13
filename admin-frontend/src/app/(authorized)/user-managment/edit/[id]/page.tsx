@@ -1,43 +1,58 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import RegistrationForm from "@/components/organism/registration-form/registration-form"
 import UserProfileCard from "@/components/molecules/user-card/user-card"
+import axiosInstance from "@/utils/axios"
 
 interface User {
   id: string
-  firstname: string
-  lastname: string
+  firstName: string
+  lastName: string
   email: string
-  userrole: string
-  profilePicture?: string
+  userRole: string
 }
 
 const EditUserPage = () => {
+  const router = useRouter();
   const [isClient, setIsClient] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
   const params = useParams()
-  const userId = params.id as string
+  const userId = params?.id as string ?? ""
 
-  // Log the userId for debugging
-  useEffect(() => {
-    console.log(`EditUserPage accessed with userId: ${userId}`)
-  }, [userId])
-
-  // Load user data from localStorage
   useEffect(() => {
     setIsClient(true)
-    const storedUsers = JSON.parse(localStorage.getItem("users") || "[]")
-    const foundUser = storedUsers.find((u: User) => u.id === userId)
-    setUser(foundUser || null)
-    if (!foundUser) {
-      console.log(`User with ID ${userId} not found in localStorage`)
+    
+    const fetchUser = async () => {
+      try {
+  setLoading(true)
+  const res = await axiosInstance.get(`/Admin/${userId}`)
+  console.log("Response:", res.data)
+  setUser({
+    id: res.data.userId,
+    firstName: res.data.firstName,
+    lastName: res.data.lastName,
+    email: res.data.email,
+    userRole: res.data.role
+  })
+} catch (err) {
+  console.error("API failed:", err)
+} finally {
+  setLoading(false)
+}
+
+    }
+
+    if (userId) {
+      fetchUser()
     }
   }, [userId])
 
+
   // Server-side fallback
-  if (!isClient) {
+  if (!isClient || loading) {
     return (
       <div className="relative min-h-screen bg-white">
         <div className="absolute top-0 right-0 mt-4 mr-4">
@@ -51,7 +66,7 @@ const EditUserPage = () => {
     )
   }
 
-  if (!user) {
+ if (!user) {
     return (
       <div className="flex flex-col items-center min-h-screen pt-16">
         <p className="text-neutral-600">User not found</p>
@@ -64,14 +79,17 @@ const EditUserPage = () => {
       {/* UserProfileCard at the top-right */}
       <div className="absolute top-0 right-0 mt-4 mr-4">
         <UserProfileCard
-          pictureSrc="/images/profipic.jpg"
-          pictureAlt="Moni Roy"
-          name="Moni Roy"
-          role="admin"
-          onLogout={() => console.log("Logout clicked")}
-          onProfileClick={() => console.log("Profile clicked")}
-          onSettingsClick={() => console.log("Settings clicked")}
-        />
+            pictureSrc="/images/profipic.jpg"
+            pictureAlt="Moni Roy"
+            name="Moni Roy"
+            role="admin"
+            onLogout={() => {
+              localStorage.removeItem("token");
+              router.push("/login");
+            }}
+            onProfileClick={() => console.log("Profile clicked")}
+            onSettingsClick={() => console.log("Settings clicked")}
+          />
       </div>
 
       {/* "EDIT USER" heading and form */}
