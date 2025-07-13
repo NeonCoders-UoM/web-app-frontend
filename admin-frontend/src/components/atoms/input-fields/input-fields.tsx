@@ -31,8 +31,8 @@ const InputField: React.FC<InputFieldProps> = ({
   status = 'default',
 }) => {
   const sizeClasses = {
-    sm: 'text-sm h-10',
-    md: 'text-md h-12',
+    sm: 'text-xsm h-10',
+    md: 'text-sm h-12',
   };
 
   const selectedSizeClass = sizeClasses[size];
@@ -52,8 +52,8 @@ const InputField: React.FC<InputFieldProps> = ({
   return (
     <div className="w-full">
       <div
-        className={`flex items-center bg-${colors.neutral[100]} border border-${colors.neutral[300]} rounded-md shadow-sm ${selectedSizeClass} gap-2`}
-        style={{ height: '52px' }}
+        className={`flex items-center bg-neutral-100 focus:ring-1 focus:ring-primary-300 border border-neutral-200 rounded-md ${selectedSizeClass} gap-2`}
+        style={{ height: '48px' }}
       >
         <input
           id={id}

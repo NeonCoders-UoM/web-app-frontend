@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import LoginForm from "@/components/organism/login-form/login-form";
+import colors from "@/styles/colors";
 import axiosInstance from "@/utils/axios";
 
 const LoginPage = () => {
@@ -28,15 +29,15 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white">
+    
+    <div className="flex items-center shadow-md justify-center min-h-screen bg-white">
       <div
-        className="rounded-[10px] shadow-md p-12"
-        style={{ width: "600px", height: "548px", outline: '4px solid white' }}
+        className="rounded-[10px] shadow-lg p-12"
       >
-        <h2 className="text-2xl font-bold text-center text-neutral-600 mb-2">
+        <h2 className="text-2xl font-bold text-center mb-2" style={{ color: colors.primary[100] }}>
           Welcome to Vehicle Hub
         </h2>
-        <p className="text-sm text-center text-neutral-300 mb-6">
+        <p className="text-sm text-center text-neutral-500 mb-12">
           Please enter your email and password to continue
         </p>
 

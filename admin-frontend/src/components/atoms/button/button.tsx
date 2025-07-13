@@ -39,9 +39,9 @@ const Button: React.FC<ButtonProps> = ({
   const handleMouseUp = () => setIsActive(false);
 
   const baseStyles = {
-    borderRadius: '8px',
+    borderRadius: '4px',
     fontFamily: 'var(--font-family-text)',
-    fontWeight: 'var(--font-weight-semibold)',
+    fontWeight: 'var(--font-weight-medium)',
     cursor: disabled ? 'not-allowed' : 'pointer',
     transition: 'all 0.2s ease',
     display: 'inline-flex',
@@ -55,19 +55,20 @@ const Button: React.FC<ButtonProps> = ({
 
   const sizeStyles = {
     small: {
-      padding: '4px 12px',
-      fontSize: 'var(--font-size-sm)',
+      padding: '8px 16px',
+      fontSize: 'var(--font-size-xsm)',
       iconSize: '16px',
     },
     medium: {
-      padding: '8px 16px',
-      fontSize: 'var(--font-size-md)',
+      padding: '12px 20px',
+      fontSize: 'var(--font-size-sm)',
       iconSize: '20px',
     },
     large: {
-      padding: '12px 20px',
-      fontSize: 'var(--font-size-lg)',
+      padding: '16px 24px',
+      fontSize: 'var(--font-size-md)',
       iconSize: '24px',
+      width:"450px"
     },
   };
 

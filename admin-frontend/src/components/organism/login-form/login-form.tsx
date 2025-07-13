@@ -215,7 +215,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       </div>
 
       {/* Submit Button */}
-      <div className="flex justify-center">
+      <div className="flex justify-center w-full">
         <Button variant="primary" size="large" type="submit" disabled={isLoading}>
           {isLoading ? (
             <span className="flex items-center gap-2">
