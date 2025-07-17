@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import type React from "react"
-import Button from "@/components/atoms/button/button"
+import type React from "react";
+// import Button from "@/components/atoms/button/button";
 
 interface VehicleDetailsProps {
-  vehicleType: string
-  vehicleBrand: string
-  vin: string
-  vehicleModel: string
-  year: string
-  fuelType: string
-  licensePlate: string
-  transmission: string
-  onEditDetails: () => void
+  vehicleType: string;
+  vehicleBrand: string;
+  vin: string;
+  vehicleModel: string;
+  year: string;
+  fuelType: string;
+  licensePlate: string;
+  transmission: string;
+  onEditDetails: () => void;
 }
 
 const VehicleDetails: React.FC<VehicleDetailsProps> = ({
@@ -24,15 +24,17 @@ const VehicleDetails: React.FC<VehicleDetailsProps> = ({
   fuelType,
   licensePlate,
   transmission,
-  onEditDetails,
+  // onEditDetails,
 }) => {
   return (
     <div className="bg-white rounded-lg p-6">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-semibold text-neutral-600">Vehicle Details</h3>
-        <Button variant="primary" size="small" onClick={onEditDetails}>
+        <h3 className="text-lg font-semibold text-neutral-600">
+          Vehicle Details
+        </h3>
+        {/* <Button variant="primary" size="small" onClick={onEditDetails}>
           Edit Details
-        </Button>
+        </Button> */}
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -70,7 +72,7 @@ const VehicleDetails: React.FC<VehicleDetailsProps> = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default VehicleDetails
+export default VehicleDetails;

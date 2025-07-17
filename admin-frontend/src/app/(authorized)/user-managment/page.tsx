@@ -33,31 +33,34 @@ const UsersPage = () => {
   }, []);
 
   const tableHeaders = [
-  { title: "ID", sortable: true },
-  { title: "First Name", sortable: true },
-  { title: "Last Name", sortable: true },
-  { title: "Email", sortable: true },
-  { title: "User Role", sortable: true },
-];
-
+    { title: "ID", sortable: true },
+    { title: "First Name", sortable: true },
+    { title: "Last Name", sortable: true },
+    { title: "Email", sortable: true },
+    { title: "User Role", sortable: true },
+  ];
 
   const handleActionSelect = async (action: string, userId: string) => {
-  if (action === "Edit") {
-    router.push(`/user-managment/edit/${userId}`);
-  } else if (action === "Delete") {
-    const confirmDelete = window.confirm("Are you sure you want to delete this user?");
-    if (!confirmDelete) return;
+    if (action === "Edit") {
+      router.push(`/user-managment/edit/${userId}`);
+    } else if (action === "Delete") {
+      const confirmDelete = window.confirm(
+        "Are you sure you want to delete this user?"
+      );
+      if (!confirmDelete) return;
 
-    try {
-      await axiosInstance.delete(`/Admin/${userId}`);
-      alert("User deleted successfully!");
-      setUsersData((prev) => prev.filter((u) => u.userId !== parseInt(userId, 10)));
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      alert("Failed to delete user. Please try again.");
+      try {
+        await axiosInstance.delete(`/Admin/${userId}`);
+        alert("User deleted successfully!");
+        setUsersData((prev) =>
+          prev.filter((u) => u.userId !== parseInt(userId, 10))
+        );
+      } catch (error) {
+        console.error("Error deleting user:", error);
+        alert("Failed to delete user. Please try again.");
+      }
     }
-  }
-};
+  };
 
   const handleCreateUser = () => {
     router.push("/user-managment/add-user");
@@ -124,13 +127,12 @@ const UsersPage = () => {
           <ClientTable
             headers={tableHeaders}
             data={usersData.map((u) => ({
-            id: u.userId.toString(),
-            firstname: u.firstName,
-            lastname: u.lastName,
-            email: u.email,
-            userrole: u.role,
-          }))}
-          
+              id: u.userId.toString(),
+              firstname: u.firstName,
+              lastname: u.lastName,
+              email: u.email,
+              userrole: u.role,
+            }))}
             actions={["edit", "delete"]}
             showSearchBar={true}
             showClientCell={true}

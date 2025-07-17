@@ -1,52 +1,90 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import InputField from "@/components/atoms/input-fields/input-fields"
-import UploadPhoto from "@/components/atoms/upload-photo/upload-photo"
-import Button from "@/components/atoms/button/button" 
-import colors from "@/styles/colors"
+import type React from "react";
+import { useState } from "react";
+import InputField from "@/components/atoms/input-fields/input-fields";
+// import UploadPhoto from "@/components/atoms/upload-photo/upload-photo";
+import Button from "@/components/atoms/button/button";
+import colors from "@/styles/colors";
 
 interface CustomerUpdateFormProps {
-  onSubmit?: (data: { customerName: string; email: string; nicNumber: string; telephoneNumber: string; address: string; photo: File | null }) => void
+  onSubmit?: (data: {
+    customerName: string;
+    email: string;
+    nicNumber: string;
+    telephoneNumber: string;
+    address: string;
+    photo: File | null;
+  }) => void;
   initialData?: {
-    customerName: string
-    email: string
-    nicNumber: string
-    telephoneNumber: string
-    address: string
-    photo: File | null
-  }
+    customerName: string;
+    email: string;
+    nicNumber: string;
+    telephoneNumber: string;
+    address: string;
+    photo: File | null;
+  };
 }
 
-export default function CustomerUpdateForm({ onSubmit, initialData }: CustomerUpdateFormProps) {
+export default function CustomerUpdateForm({
+  onSubmit,
+  initialData,
+}: CustomerUpdateFormProps) {
+  // Split the customer name into first and last name for display
+  const splitName = (fullName: string) => {
+    const nameParts = fullName.trim().split(" ");
+    const firstName = nameParts[0] || "";
+    const lastName = nameParts.slice(1).join(" ") || "";
+    return { firstName, lastName };
+  };
+
+  const { firstName: initialFirstName, lastName: initialLastName } = splitName(
+    initialData?.customerName || ""
+  );
+
   const [formData, setFormData] = useState({
-    customerName: initialData?.customerName || "",
+    firstName: initialFirstName,
+    lastName: initialLastName,
     email: initialData?.email || "",
     nicNumber: initialData?.nicNumber || "",
     telephoneNumber: initialData?.telephoneNumber || "",
     address: initialData?.address || "",
-  })
+  });
 
-  const [photo, setPhoto] = useState<File | null>(initialData?.photo || null)
+  // const [photo, setPhoto] = useState<File | null>(initialData?.photo || null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const handlePhotoChange = (file: File | null) => {
-    setPhoto(file)
-  }
+  // const handlePhotoChange = (file: File | null) => {
+  //   setPhoto(file);
+  // };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
+    const customerName = `${formData.firstName} ${formData.lastName}`.trim();
     if (onSubmit) {
-      onSubmit({ ...formData, photo })
+      onSubmit({
+        customerName,
+        email: formData.email,
+        nicNumber: formData.nicNumber,
+        telephoneNumber: formData.telephoneNumber,
+        address: formData.address,
+        photo: null,
+      });
     } else {
-      console.log("Form submitted:", { ...formData, photo })
+      console.log("Form submitted:", {
+        customerName,
+        email: formData.email,
+        nicNumber: formData.nicNumber,
+        telephoneNumber: formData.telephoneNumber,
+        address: formData.address,
+        photo: null,
+      });
     }
-  }
+  };
 
   return (
     <div
@@ -58,7 +96,7 @@ export default function CustomerUpdateForm({ onSubmit, initialData }: CustomerUp
         fontFamily: "var(--font-family-text)",
       }}
     >
-      <div
+      {/* <div
         style={{
           width: "320px",
           height: "370px",
@@ -98,7 +136,7 @@ export default function CustomerUpdateForm({ onSubmit, initialData }: CustomerUp
         >
           Not Required
         </p>
-      </div>
+      </div> */}
 
       <div
         style={{
@@ -111,10 +149,9 @@ export default function CustomerUpdateForm({ onSubmit, initialData }: CustomerUp
       >
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-           
             <div>
               <label
-                htmlFor="customerName"
+                htmlFor="firstName"
                 className="block mb-1"
                 style={{
                   color: colors.neutral[600],
@@ -122,18 +159,38 @@ export default function CustomerUpdateForm({ onSubmit, initialData }: CustomerUp
                   fontWeight: "var(--font-weight-regular)",
                 }}
               >
-                Customer Name
+                First Name
               </label>
               <InputField
-                id="customerName"
-                name="customerName"
-                placeholder="Customer Name"
-                value={formData.customerName}
+                id="firstName"
+                name="firstName"
+                placeholder="First Name"
+                value={formData.firstName}
                 onChange={handleChange}
               />
             </div>
 
-      
+            <div>
+              <label
+                htmlFor="lastName"
+                className="block mb-1"
+                style={{
+                  color: colors.neutral[600],
+                  fontSize: "var(--font-size-sm)",
+                  fontWeight: "var(--font-weight-regular)",
+                }}
+              >
+                Last Name
+              </label>
+              <InputField
+                id="lastName"
+                name="lastName"
+                placeholder="Last Name"
+                value={formData.lastName}
+                onChange={handleChange}
+              />
+            </div>
+
             <div>
               <label
                 htmlFor="email"
@@ -177,7 +234,6 @@ export default function CustomerUpdateForm({ onSubmit, initialData }: CustomerUp
               />
             </div>
 
-          
             <div>
               <label
                 htmlFor="telephoneNumber"
@@ -223,16 +279,12 @@ export default function CustomerUpdateForm({ onSubmit, initialData }: CustomerUp
           </div>
 
           <div className="flex justify-end mt-6">
-            <Button
-              type="submit"
-              variant="primary"
-              size="medium"
-            >
+            <Button type="submit" variant="primary" size="medium">
               Update
             </Button>
           </div>
         </form>
       </div>
     </div>
-  )
+  );
 }

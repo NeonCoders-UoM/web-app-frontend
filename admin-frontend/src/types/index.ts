@@ -20,26 +20,47 @@ export interface Tier {
 
 export interface Vehicle {
   id: number;
+  vehicleId?: number; // Backend ID
+  customerId?: number; // Owner's customer ID
   type: string;
   brand: string;
   model: string;
   year: string;
-  fuelType: string;
-  licensePlate: string;
-  transmission: string;
-  vin: string;
+  fuelType?: string;
+  fuel?: string; // Backend uses 'fuel' instead of 'fuelType'
+  licensePlate?: string;
+  registrationNumber?: string; // Backend uses 'registrationNumber'
+  transmission?: string;
+  vin?: string;
+  chassisNumber?: string; // Backend uses 'chassisNumber'
+  mileage?: number;
 }
 
 export interface ServiceHistoryItem {
-  id: string;
-  title: string;
-  price: number;
-  originalPrice: number;
-  type: string;
-  date: string;
-  serviceCenter: string;
-  status: "Completed" | "Pending" | "Cancelled";
-  image: string;
+  serviceHistoryId: number;
+  vehicleId: number;
+  serviceType: string;
+  description: string;
+  serviceCenterId?: number;
+  servicedByUserId?: number;
+  serviceCenterName?: string;
+  servicedByUserName?: string;
+  serviceDate: string;
+  cost: number;
+  mileage?: number;
+  isVerified: boolean;
+  externalServiceCenterName?: string;
+  receiptDocumentPath?: string;
+  // Legacy fields for backward compatibility
+  id?: string;
+  title?: string;
+  price?: number;
+  originalPrice?: number;
+  type?: string;
+  date?: string;
+  serviceCenter?: string;
+  status?: "Completed" | "Pending" | "Cancelled";
+  image?: string;
 }
 
 export interface Appointment {
@@ -53,13 +74,19 @@ export interface Appointment {
 }
 
 export interface Client {
-  id: string;
-  client: string;
-  profilePicture: string;
+  customerId: number;
+  firstName: string;
+  lastName: string;
   email: string;
-  phoneno: string;
-  address: string;
+  phoneNumber: string;
+  address?: string;
   nic?: string;
+  loyaltyPoints?: number;
+  // Legacy fields for backward compatibility
+  id?: string;
+  client?: string;
+  profilePicture?: string;
+  phoneno?: string;
   points?: number;
   tiers?: Tier[];
   vehicles?: Vehicle[];

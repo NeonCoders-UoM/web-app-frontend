@@ -146,440 +146,271 @@ const mockServiceCenters: ServiceCenter[] = [
   },
 ];
 
-const mockClients: Client[] = [
+// Fallback client data for development/testing when backend is not available
+const fallbackClients: Client[] = [
   {
-    id: "#CLI-0001",
-    client: "Devon Lane",
-    profilePicture: "/placeholder.svg?height=40&width=40",
-    email: "mariarodriguez@gmail.com",
-    phoneno: "+1 (961) 523-4453",
+    customerId: 1,
+    firstName: "Devon",
+    lastName: "Lane",
+    email: "devon.lane@gmail.com",
+    phoneNumber: "+1 (961) 523-4453",
     address: "456 Ocean Avenue, Miami, FL 12345",
     nic: "2000345682",
+    loyaltyPoints: 13654,
+    // Legacy fields for backward compatibility
+    id: "client-1",
+    client: "Devon Lane",
+    phoneno: "+1 (961) 523-4453",
     points: 13654,
+    profilePicture: "https://placehold.co/80x80/svg?text=Client",
     tiers: [
       { name: "Bronze", threshold: 5000 },
       { name: "Silver", threshold: 10000 },
       { name: "Gold", threshold: 20000 },
     ],
-    vehicles: [
-      {
-        id: 1,
-        type: "Honda",
-        brand: "Amaze",
-        model: "VX I-DTEC",
-        year: "2007",
-        fuelType: "Petrol",
-        licensePlate: "KW - 4324",
-        transmission: "Manual",
-        vin: "JH4DA9350LS001234",
-      },
-      {
-        id: 2,
-        type: "Toyota",
-        brand: "Corolla",
-        model: "XLi",
-        year: "2015",
-        fuelType: "Petrol",
-        licensePlate: "KW - 7890",
-        transmission: "Automatic",
-        vin: "JT2BF22K1W0123456",
-      },
-      {
-        id: 3,
-        type: "Nissan",
-        brand: "Altima",
-        model: "SV",
-        year: "2018",
-        fuelType: "Petrol",
-        licensePlate: "KW - 1234",
-        transmission: "CVT",
-        vin: "1N4AL3AP8JC231456",
-      },
-    ],
-    serviceHistory: [
-      {
-        id: "#20240001",
-        title: "Engine Repair",
-        price: 1200,
-        originalPrice: 1500,
-        type: "Product",
-        date: "2024-10-23",
-        serviceCenter: "AutoCare Hub",
-        status: "Completed",
-        image: "/placeholder.svg?height=40&width=40",
-      },
-      {
-        id: "#20240002",
-        title: "Battery Replacement",
-        price: 300,
-        originalPrice: 300,
-        type: "Emergency",
-        date: "2024-10-19",
-        serviceCenter: "NextGen Motors",
-        status: "Pending",
-        image: "/placeholder.svg?height=40&width=40",
-      },
-      {
-        id: "#20240003",
-        title: "Oil Change",
-        price: 80,
-        originalPrice: 100,
-        type: "Maintenance",
-        date: "2024-09-15",
-        serviceCenter: "Speed Motors",
-        status: "Completed",
-        image: "/placeholder.svg?height=40&width=40",
-      },
-    ],
-    appointments: [
-      {
-        appointmentId: "SAPT-0005",
-        owner: "Devon Lane",
-        licensePlate: "KW - 4324",
-        date: "Dec 23, 2024",
-        vehicle: "Honda Amaze VX I-DTEC (2007)",
-        services: ["Oil Change", "Brake Inspection", "Tire Rotation"],
-        serviceCenter: "Speed Motors, Colombo",
-      },
-      {
-        appointmentId: "SAPT-0007",
-        owner: "Devon Lane",
-        licensePlate: "KW - 7890",
-        date: "Dec 25, 2024",
-        vehicle: "Toyota Corolla XLi (2015)",
-        services: ["Full Service", "AC Repair"],
-        serviceCenter: "AutoCare Hub, Dehiwala",
-      },
-    ],
+    vehicles: [],
+    serviceHistory: [],
+    appointments: [],
   },
   {
-    id: "#CLI-0002",
-    client: "Kathryn Murphy",
-    profilePicture: "/placeholder.svg?height=40&width=40",
-    email: "juan.rodriguez@gmail.com",
-    phoneno: "+1 (961) 523-4453",
+    customerId: 2,
+    firstName: "Kathryn",
+    lastName: "Murphy",
+    email: "kathryn.murphy@gmail.com",
+    phoneNumber: "+1 (961) 523-4454",
     address: "234 Oak Street, Flat 7",
     nic: "2000345683",
+    loyaltyPoints: 12500,
+    // Legacy fields for backward compatibility
+    id: "client-2",
+    client: "Kathryn Murphy",
+    phoneno: "+1 (961) 523-4454",
     points: 12500,
+    profilePicture: "https://placehold.co/80x80/svg?text=Client",
     tiers: [
       { name: "Bronze", threshold: 5000 },
       { name: "Silver", threshold: 10000 },
       { name: "Gold", threshold: 20000 },
     ],
-    vehicles: [
-      {
-        id: 1,
-        type: "Honda",
-        brand: "Amaze",
-        model: "VX I-DTEC",
-        year: "2007",
-        fuelType: "Petrol",
-        licensePlate: "KW - 4324",
-        transmission: "Manual",
-        vin: "JH4DA9350LS001234",
-      },
-      {
-        id: 2,
-        type: "Toyota",
-        brand: "Corolla",
-        model: "XLi",
-        year: "2015",
-        fuelType: "Petrol",
-        licensePlate: "KW - 7890",
-        transmission: "Automatic",
-        vin: "JT2BF22K1W0123456",
-      },
-      {
-        id: 3,
-        type: "Nissan",
-        brand: "Altima",
-        model: "SV",
-        year: "2018",
-        fuelType: "Petrol",
-        licensePlate: "KW - 1234",
-        transmission: "CVT",
-        vin: "1N4AL3AP8JC231456",
-      },
-    ],
-    serviceHistory: [
-      {
-        id: "#20240004",
-        title: "Tire Replacement",
-        price: 400,
-        originalPrice: 500,
-        type: "Maintenance",
-        date: "2024-10-20",
-        serviceCenter: "AutoFix Hub",
-        status: "Completed",
-        image: "/placeholder.svg?height=40&width=40",
-      },
-      {
-        id: "#20240005",
-        title: "Brake Service",
-        price: 600,
-        originalPrice: 700,
-        type: "Product",
-        date: "2024-10-18",
-        serviceCenter: "Rapid Repairs",
-        status: "Completed",
-        image: "/placeholder.svg?height=40&width=40",
-      },
-    ],
-    appointments: [
-      {
-        appointmentId: "SAPT-0008",
-        owner: "Kathryn Murphy",
-        licensePlate: "KW - 4324",
-        date: "Dec 26, 2024",
-        vehicle: "Honda Amaze VX I-DTEC (2007)",
-        services: ["Oil Change", "Tire Rotation"],
-        serviceCenter: "Speed Motors, Colombo",
-      },
-    ],
+    vehicles: [],
+    serviceHistory: [],
+    appointments: [],
   },
   {
-    id: "#CLI-0003",
-    client: "Eleanor Pena",
-    profilePicture: "/placeholder.svg?height=40&width=40",
-    email: "mariarodriguez@gmail.com",
-    phoneno: "+1 (961) 523-4453",
+    customerId: 3,
+    firstName: "Eleanor",
+    lastName: "Pena",
+    email: "eleanor.pena@gmail.com",
+    phoneNumber: "+1 (961) 523-4455",
     address: "234 Oak Street, Flat 7",
     nic: "2000345684",
-    points: 18000,
-    tiers: [
-      { name: "Bronze", threshold: 5000 },
-      { name: "Silver", threshold: 10000 },
-      { name: "Gold", threshold: 20000 },
-    ],
-    vehicles: [
-      {
-        id: 1,
-        type: "Honda",
-        brand: "Amaze",
-        model: "VX I-DTEC",
-        year: "2007",
-        fuelType: "Petrol",
-        licensePlate: "KW - 4324",
-        transmission: "Manual",
-        vin: "JH4DA9350LS001234",
-      },
-      {
-        id: 2,
-        type: "Toyota",
-        brand: "Corolla",
-        model: "XLi",
-        year: "2015",
-        fuelType: "Petrol",
-        licensePlate: "KW - 7890",
-        transmission: "Automatic",
-        vin: "JT2BF22K1W0123456",
-      },
-      {
-        id: 3,
-        type: "Nissan",
-        brand: "Altima",
-        model: "SV",
-        year: "2018",
-        fuelType: "Petrol",
-        licensePlate: "KW - 1234",
-        transmission: "CVT",
-        vin: "1N4AL3AP8JC231456",
-      },
-    ],
-    serviceHistory: [
-      {
-        id: "#20240006",
-        title: "AC Repair",
-        price: 500,
-        originalPrice: 600,
-        type: "Emergency",
-        date: "2024-10-22",
-        serviceCenter: "NextGen Motors",
-        status: "Pending",
-        image: "/placeholder.svg?height=40&width=40",
-      },
-    ],
-    appointments: [
-      {
-        appointmentId: "SAPT-0009",
-        owner: "Eleanor Pena",
-        licensePlate: "KW - 7890",
-        date: "Dec 27, 2024",
-        vehicle: "Toyota Corolla XLi (2015)",
-        services: ["Full Service"],
-        serviceCenter: "AutoCare Hub, Dehiwala",
-      },
-    ],
-  },
-  {
-    id: "#CLI-0004",
-    client: "Kathryn Murphy",
-    profilePicture: "/placeholder.svg?height=40&width=40",
-    email: "juan.rodriguez@gmail.com",
-    phoneno: "+1 (961) 523-4453",
-    address: "456 Ocean Avenue, Miami, FL 12345",
-    nic: "2000345685",
-    points: 9500,
-    tiers: [
-      { name: "Bronze", threshold: 5000 },
-      { name: "Silver", threshold: 10000 },
-      { name: "Gold", threshold: 20000 },
-    ],
-    vehicles: [
-      {
-        id: 1,
-        type: "Honda",
-        brand: "Am cardiologistsaze",
-        model: "VX I-DTEC",
-        year: "2007",
-        fuelType: "Petrol",
-        licensePlate: "KW - 4324",
-        transmission: "Manual",
-        vin: "JH4DA9350LS001234",
-      },
-    ],
-    serviceHistory: [
-      {
-        id: "#20240007",
-        title: "Oil Change",
-        price: 80,
-        originalPrice: 100,
-        type: "Maintenance",
-        date: "2024-10-21",
-        serviceCenter: "Speed Motors",
-        status: "Completed",
-        image: "/placeholder.svg?height=40&width=40",
-      },
-    ],
-    appointments: [],
-  },
-  {
-    id: "#CLI-0005",
-    client: "Devon Lane",
-    profilePicture: "/placeholder.svg?height=40&width=40",
-    email: "mariarodriguez@gmail.com",
-    phoneno: "+1 (961) 523-4453",
-    address: "234 Oak Street, Flat 7",
-    nic: "2000345686",
-    points: 11000,
-    tiers: [
-      { name: "Bronze", threshold: 5000 },
-      { name: "Silver", threshold: 10000 },
-      { name: "Gold", threshold: 20000 },
-    ],
-    vehicles: [
-      {
-        id: 1,
-        type: "Toyota",
-        brand: "Corolla",
-        model: "XLi",
-        year: "2015",
-        fuelType: "Petrol",
-        licensePlate: "KW - 7890",
-        transmission: "Automatic",
-        vin: "JT2BF22K1W0123456",
-      },
-    ],
-    serviceHistory: [],
-    appointments: [],
-  },
-  {
-    id: "#CLI-0006",
+    loyaltyPoints: 18000,
+    // Legacy fields for backward compatibility
+    id: "client-3",
     client: "Eleanor Pena",
-    profilePicture: "/placeholder.svg?height=40&width=40",
-    email: "mariarodriguez@gmail.com",
-    phoneno: "+1 (961) 523-4453",
-    address: "234 Oak Street, Flat 7",
-    nic: "2000345687",
-    points: 22000,
+    phoneno: "+1 (961) 523-4455",
+    points: 18000,
+    profilePicture: "https://placehold.co/80x80/svg?text=Client",
     tiers: [
       { name: "Bronze", threshold: 5000 },
       { name: "Silver", threshold: 10000 },
       { name: "Gold", threshold: 20000 },
     ],
-    vehicles: [
-      {
-        id: 1,
-        type: "Nissan",
-        brand: "Altima",
-        model: "SV",
-        year: "2018",
-        fuelType: "Petrol",
-        licensePlate: "KW - 1234",
-        transmission: "CVT",
-        vin: "1N4AL3AP8JC231456",
-      },
-    ],
-    serviceHistory: [],
-    appointments: [],
-  },
-  {
-    id: "#CLI-0007",
-    client: "Devon Lane",
-    profilePicture: "/placeholder.svg?height=40&width=40",
-    email: "juan.rodriguez@gmail.com",
-    phoneno: "+1 (961) 523-4453",
-    address: "456 Ocean Avenue, Miami, FL 12345",
-    nic: "2000345688",
-    points: 8500,
-    tiers: [
-      { name: "Bronze", threshold: 5000 },
-      { name: "Silver", threshold: 10000 },
-      { name: "Gold", threshold: 20000 },
-    ],
-    vehicles: [
-      {
-        id: 1,
-        type: "Honda",
-        brand: "Amaze",
-        model: "VX I-DTEC",
-        year: "2007",
-        fuelType: "Petrol",
-        licensePlate: "KW - 4324",
-        transmission: "Manual",
-        vin: "JH4DA9350LS001234",
-      },
-    ],
+    vehicles: [],
     serviceHistory: [],
     appointments: [],
   },
 ];
 
+// ========== Vehicle API Functions ==========
 
-
-
-const dashboardData: DashboardStats = {
-  customers: 40689,
-  vehicles: 10293,
-  serviceCenters: mockServiceCenters.length,
-};
-
-// Fetch all vehicles
-export const fetchVehicles = async (): Promise<{
-  id: string;
-  client: string;
-  pictureSrc: string;
-  type: string;
+// Backend vehicle response interface (matching your CustomersController)
+interface VehicleResponse {
+  vehicleId: number;
+  registrationNumber: string;
   brand: string;
   model: string;
-  licenseplate: string;
-}[]> => {
+  chassisNumber: string;
+  mileage?: number;
+  fuel: string;
+  year: string;
+}
+
+// Vehicle registration DTO (for creating/updating vehicles)
+export interface VehicleRegistrationDto {
+  registrationNumber: string;
+  brand: string;
+  model: string;
+  chassisNumber: string;
+  mileage?: number;
+  fuel: string;
+  year: string;
+}
+
+// Frontend vehicle interface (for display)
+interface VehicleDisplay {
+  id: string;
+  vehicleId: number;
+  customerId: number;
+  client: string;
+  clientEmail: string;
+  pictureSrc: string;
+  type: string; // We'll derive this from fuel type or set as "Car"
+  brand: string;
+  model: string;
+  licenseplate: string; // This will be registrationNumber
+  registrationNumber: string;
+  chassisNumber: string;
+  mileage?: number;
+  fuel: string;
+  year: string;
+}
+
+// Fetch all vehicles from all customers
+export const fetchVehicles = async (): Promise<VehicleDisplay[]> => {
   try {
-    const clients = await fetchClients();
-    const vehicles = clients.flatMap((client, index) =>
-      (client.vehicles || []).map((vehicle: Vehicle) => ({
-        id: `#${(index * 1000 + vehicle.id).toString().padStart(4, "0")}`,
-        client: client.client,
-        pictureSrc: client.profilePicture,
-        type: vehicle.type,
-        brand: vehicle.brand,
-        model: vehicle.model,
-        licenseplate: vehicle.licensePlate,
-      }))
-    );
-    return vehicles;
+    // First fetch all customers
+    const customers = await fetchClients();
+    const allVehicles: VehicleDisplay[] = [];
+
+    // For each customer, fetch their vehicles
+    for (const customer of customers) {
+      try {
+        const response = await axiosInstance.get(`/Customers/${customer.customerId}/vehicles`);
+        const customerVehicles: VehicleResponse[] = response.data;
+
+        // Transform each vehicle to display format
+        const transformedVehicles = customerVehicles.map((vehicle) => ({
+          id: `#${vehicle.vehicleId.toString().padStart(4, "0")}`,
+          vehicleId: vehicle.vehicleId,
+          customerId: customer.customerId,
+          client: customer.client || `${customer.firstName} ${customer.lastName}`,
+          clientEmail: customer.email,
+          pictureSrc: customer.profilePicture || "https://placehold.co/80x80/svg?text=Client",
+          type: getVehicleType(vehicle.fuel), // Derive type from fuel
+          brand: vehicle.brand,
+          model: vehicle.model,
+          licenseplate: vehicle.registrationNumber,
+          registrationNumber: vehicle.registrationNumber,
+          chassisNumber: vehicle.chassisNumber,
+          mileage: vehicle.mileage,
+          fuel: vehicle.fuel,
+          year: vehicle.year,
+        }));
+
+        allVehicles.push(...transformedVehicles);
+      } catch (error) {
+        console.warn(`Failed to fetch vehicles for customer ${customer.customerId}:`, error);
+        // Continue with other customers even if one fails
+      }
+    }
+
+    return allVehicles;
   } catch (error) {
     console.error("Error in fetchVehicles:", error);
+    
+    // Fallback data for development/testing
+    const fallbackVehicles: VehicleDisplay[] = [
+      {
+        id: "#0001",
+        vehicleId: 1,
+        customerId: 1,
+        client: "Devon Lane",
+        clientEmail: "devon.lane@gmail.com",
+        pictureSrc: "https://placehold.co/80x80/svg?text=Client",
+        type: "Sedan",
+        brand: "Toyota",
+        model: "Camry",
+        licenseplate: "ABC-1234",
+        registrationNumber: "ABC-1234",
+        chassisNumber: "1HGCM82633A123456",
+        mileage: 45000,
+        fuel: "Petrol",
+        year: "2020",
+      },
+      {
+        id: "#0002",
+        vehicleId: 2,
+        customerId: 2,
+        client: "Kathryn Murphy",
+        clientEmail: "kathryn.murphy@gmail.com",
+        pictureSrc: "https://placehold.co/80x80/svg?text=Client",
+        type: "SUV",
+        brand: "Honda",
+        model: "CR-V",
+        licenseplate: "XYZ-5678",
+        registrationNumber: "XYZ-5678",
+        chassisNumber: "2HGCM82633A654321",
+        mileage: 32000,
+        fuel: "Hybrid",
+        year: "2021",
+      }
+    ];
+    
+    return fallbackVehicles;
+  }
+};
+
+// Helper function to derive vehicle type from fuel type
+const getVehicleType = (fuel: string): string => {
+  const fuelLower = fuel.toLowerCase();
+  if (fuelLower.includes('diesel')) return 'Truck';
+  if (fuelLower.includes('hybrid')) return 'Hybrid';
+  if (fuelLower.includes('electric')) return 'Electric';
+  return 'Car'; // Default type
+};
+
+// Fetch vehicles for a specific customer
+export const fetchCustomerVehicles = async (customerId: number): Promise<VehicleResponse[]> => {
+  try {
+    const response = await axiosInstance.get(`/Customers/${customerId}/vehicles`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching vehicles for customer ${customerId}:`, error);
+    throw error;
+  }
+};
+
+// Fetch a specific vehicle
+export const fetchVehicleById = async (customerId: number, vehicleId: number): Promise<VehicleResponse | null> => {
+  try {
+    const response = await axiosInstance.get(`/Customers/${customerId}/vehicles/${vehicleId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching vehicle ${vehicleId} for customer ${customerId}:`, error);
+    return null;
+  }
+};
+
+// Register a new vehicle for a customer
+export const registerVehicle = async (customerId: number, vehicleData: VehicleRegistrationDto): Promise<VehicleResponse> => {
+  try {
+    const response = await axiosInstance.post(`/Customers/${customerId}/vehicles`, vehicleData);
+    return response.data;
+  } catch (error) {
+    console.error(`Error registering vehicle for customer ${customerId}:`, error);
+    throw error;
+  }
+};
+
+// Update a vehicle
+export const updateVehicle = async (customerId: number, vehicleId: number, vehicleData: VehicleRegistrationDto): Promise<boolean> => {
+  try {
+    await axiosInstance.put(`/Customers/${customerId}/vehicles/${vehicleId}`, vehicleData);
+    return true;
+  } catch (error) {
+    console.error(`Error updating vehicle ${vehicleId} for customer ${customerId}:`, error);
+    throw error;
+  }
+};
+
+// Delete a vehicle
+export const deleteVehicle = async (customerId: number, vehicleId: number): Promise<boolean> => {
+  try {
+    await axiosInstance.delete(`/Customers/${customerId}/vehicles/${vehicleId}`);
+    return true;
+  } catch (error) {
+    console.error(`Error deleting vehicle ${vehicleId} for customer ${customerId}:`, error);
     throw error;
   }
 };
@@ -608,24 +439,113 @@ export const fetchServiceCenters = async (): Promise<ServiceCenter[]> => {
   }
 };
 
+// Backend customer response interface
+interface CustomerResponse {
+  customerId: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  loyaltyPoints: number;
+  address?: string;
+  nic?: string;
+}
+
 // Fetch all clients
 export const fetchClients = async (): Promise<Client[]> => {
   try {
-    return mockClients;
+    const response = await axiosInstance.get("/Customers");
+    
+    // Transform the backend data to match frontend expectations
+    return response.data.map((customer: CustomerResponse) => ({
+      customerId: customer.customerId,
+      firstName: customer.firstName,
+      lastName: customer.lastName,
+      email: customer.email,
+      phoneNumber: customer.phoneNumber,
+      loyaltyPoints: customer.loyaltyPoints,
+      address: customer.address || "",
+      nic: customer.nic || "",
+      // Legacy fields for backward compatibility
+      id: `client-${customer.customerId}`,
+      client: `${customer.firstName} ${customer.lastName}`,
+      phoneno: customer.phoneNumber,
+      points: customer.loyaltyPoints,
+      profilePicture: "https://placehold.co/80x80/svg?text=Client",
+    }));
   } catch (error) {
     console.error("Error in fetchClients:", error);
-    throw error;
+    // Fallback to static client data if API call fails
+    return fallbackClients;
   }
 };
 
 // Fetch a single client by ID
 export const fetchClientById = async (id: string): Promise<Client | null> => {
   try {
-    const client = mockClients.find((c) => c.id === id);
-    return client || null;
+    // Extract numeric ID from client-X format
+    const numericId = id.startsWith('client-') ? id.replace('client-', '') : id;
+    
+    const response = await axiosInstance.get(`/Customers/${numericId}`);
+    const customer = response.data;
+    
+    // Fetch customer's vehicles
+    let vehicles: Vehicle[] = [];
+    try {
+      const vehiclesResponse = await axiosInstance.get(`/Customers/${numericId}/vehicles`);
+      vehicles = vehiclesResponse.data.map((vehicle: VehicleResponse) => ({
+        id: vehicle.vehicleId,
+        vehicleId: vehicle.vehicleId,
+        customerId: parseInt(numericId),
+        type: getVehicleType(vehicle.fuel),
+        brand: vehicle.brand,
+        model: vehicle.model,
+        year: vehicle.year,
+        fuel: vehicle.fuel,
+        fuelType: vehicle.fuel, // For backward compatibility
+        licensePlate: vehicle.registrationNumber,
+        registrationNumber: vehicle.registrationNumber,
+        transmission: "Manual", // Default value as backend doesn't have this
+        vin: vehicle.chassisNumber, // Use chassis number as VIN
+        chassisNumber: vehicle.chassisNumber,
+        mileage: vehicle.mileage,
+      }));
+    } catch (vehicleError) {
+      console.warn(`Failed to fetch vehicles for customer ${numericId}:`, vehicleError);
+      // Continue without vehicles if fetch fails
+    }
+    
+    // Transform the backend data to match frontend expectations
+    return {
+      customerId: customer.customerId,
+      firstName: customer.firstName,
+      lastName: customer.lastName,
+      email: customer.email,
+      phoneNumber: customer.phoneNumber,
+      address: customer.address,
+      nic: customer.nic,
+      loyaltyPoints: customer.loyaltyPoints,
+      // Legacy fields for backward compatibility
+      id: `client-${customer.customerId}`,
+      client: `${customer.firstName} ${customer.lastName}`,
+      phoneno: customer.phoneNumber,
+      points: customer.loyaltyPoints,
+      profilePicture: "https://placehold.co/80x80/svg?text=Client",
+      vehicles: vehicles,
+      // Default empty arrays for other fields
+      tiers: [
+        { name: "Bronze", threshold: 5000 },
+        { name: "Silver", threshold: 10000 },
+        { name: "Gold", threshold: 20000 },
+      ],
+      serviceHistory: [], // Will be loaded separately by service history component
+      appointments: [], // Will be loaded separately if needed
+    };
   } catch (error) {
-    console.error("Error in fetchClientById:", error);
-    throw error;
+    console.error("Error in fetchClientById, using fallback data:", error);
+    // Fallback to static data if API call fails
+    const numericId = id.startsWith('client-') ? parseInt(id.replace('client-', '')) : parseInt(id);
+    return fallbackClients.find(client => client.customerId === numericId) || null;
   }
 };
 
@@ -655,10 +575,25 @@ export const fetchServiceCenterById = async (id: string): Promise<ServiceCenter 
 // Fetch dashboard stats
 export const fetchDashboardStats = async (): Promise<DashboardStats> => {
   try {
-    return dashboardData;
+    // Get real counts from the backend
+    const [clients, vehicles] = await Promise.all([
+      fetchClients(),
+      fetchVehicles(),
+    ]);
+    
+    return {
+      customers: clients.length,
+      vehicles: vehicles.length,
+      serviceCenters: mockServiceCenters.length,
+    };
   } catch (error) {
     console.error("Error in fetchDashboardStats:", error);
-    throw error;
+    // Fallback to static data if API calls fail
+    return {
+      customers: 0,
+      vehicles: 0,
+      serviceCenters: mockServiceCenters.length,
+    };
   }
 };
 
@@ -699,6 +634,203 @@ export const createServiceCenter = async (data: Omit<ServiceCenter, "id">): Prom
     return newServiceCenter;
   } catch (error) {
     console.error("Error in createServiceCenter:", error);
+    throw error;
+  }
+};
+
+// Update customer data
+export const updateCustomer = async (customerId: number, customerData: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  nic: string;
+}): Promise<boolean> => {
+  try {
+    // Note: You'll need to add a PUT endpoint in your backend for updating customers
+    // For now, this will call the endpoint when it's available
+    await axiosInstance.put(`/Customers/${customerId}`, customerData);
+    return true;
+  } catch (error) {
+    console.error("Error in updateCustomer:", error);
+    throw error;
+  }
+};
+
+// Create new customer
+export const createCustomer = async (customerData: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  nic: string;
+}): Promise<number> => {
+  try {
+    const response = await axiosInstance.post('/Customers', customerData);
+    return response.data.customerId;
+  } catch (error) {
+    console.error("Error in createCustomer:", error);
+    throw error;
+  }
+};
+
+// Delete customer
+export const deleteCustomer = async (customerId: number): Promise<boolean> => {
+  try {
+    await axiosInstance.delete(`/Customers/${customerId}`);
+    return true;
+  } catch (error) {
+    console.error("Error in deleteCustomer:", error);
+    throw error;
+  }
+};
+
+// ========== Vehicle Service History API Functions ==========
+
+// Interface for Service History DTO (matching backend)
+export interface ServiceHistoryDTO {
+  serviceHistoryId: number;
+  vehicleId: number;
+  serviceType: string;
+  description: string;
+  serviceCenterId?: number;
+  servicedByUserId?: number;
+  serviceCenterName?: string;
+  servicedByUserName?: string;
+  serviceDate: string;
+  cost: number;
+  mileage?: number;
+  isVerified: boolean;
+  externalServiceCenterName?: string;
+  receiptDocumentPath?: string;
+}
+
+// Interface for adding new service history
+export interface AddServiceHistoryDTO {
+  vehicleId: number;
+  serviceType: string;
+  description: string;
+  serviceCenterId?: number;
+  servicedByUserId?: number;
+  serviceDate: string;
+  cost: number;
+  mileage?: number;
+  externalServiceCenterName?: string;
+  receiptDocument?: string; // Base64 encoded PDF
+}
+
+// Interface for updating service history
+export interface UpdateServiceHistoryDTO {
+  serviceHistoryId: number;
+  serviceType: string;
+  description: string;
+  serviceCenterId?: number;
+  servicedByUserId?: number;
+  serviceDate: string;
+  cost: number;
+  mileage?: number;
+  externalServiceCenterName?: string;
+  receiptDocument?: string; // Base64 encoded PDF
+}
+
+// Get service history for a specific vehicle
+export const fetchVehicleServiceHistory = async (vehicleId: number): Promise<ServiceHistoryDTO[]> => {
+  try {
+    const response = await axiosInstance.get(`/VehicleServiceHistory/Vehicle/${vehicleId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching vehicle service history:", error);
+    
+    // Fallback data for development/testing
+    const fallbackServiceHistory: ServiceHistoryDTO[] = [
+      {
+        serviceHistoryId: 1,
+        vehicleId: vehicleId,
+        serviceType: "Oil Change",
+        description: "Regular oil change and filter replacement",
+        serviceCenterId: 1,
+        serviceCenterName: "AutoCare Plus",
+        serviceDate: "2024-01-15",
+        cost: 50.00,
+        mileage: 15000,
+        isVerified: true,
+        servicedByUserName: "John Doe"
+      },
+      {
+        serviceHistoryId: 2,
+        vehicleId: vehicleId,
+        serviceType: "Brake Service",
+        description: "Brake pad replacement and brake fluid change",
+        serviceCenterId: 2,
+        serviceCenterName: "QuickFix Motors",
+        serviceDate: "2024-02-20",
+        cost: 150.00,
+        mileage: 16500,
+        isVerified: true,
+        servicedByUserName: "Jane Smith"
+      },
+      {
+        serviceHistoryId: 3,
+        vehicleId: vehicleId,
+        serviceType: "Engine Diagnostic",
+        description: "Complete engine diagnostic and tune-up",
+        externalServiceCenterName: "Local Garage",
+        serviceDate: "2024-03-10",
+        cost: 200.00,
+        mileage: 17200,
+        isVerified: false
+      }
+    ];
+    
+    return fallbackServiceHistory;
+  }
+};
+
+// Get specific service history record
+export const fetchServiceHistory = async (vehicleId: number, serviceHistoryId: number): Promise<ServiceHistoryDTO | null> => {
+  try {
+    const response = await axiosInstance.get(`/VehicleServiceHistory/${vehicleId}/${serviceHistoryId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching service history record:", error);
+    return null;
+  }
+};
+
+// Add new service history record
+export const addServiceHistory = async (vehicleId: number, serviceData: Omit<AddServiceHistoryDTO, 'vehicleId'>): Promise<ServiceHistoryDTO> => {
+  try {
+    const response = await axiosInstance.post(`/VehicleServiceHistory/${vehicleId}`, {
+      ...serviceData,
+      vehicleId
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error adding service history:", error);
+    throw error;
+  }
+};
+
+// Update service history record
+export const updateServiceHistory = async (vehicleId: number, serviceHistoryId: number, serviceData: UpdateServiceHistoryDTO): Promise<boolean> => {
+  try {
+    await axiosInstance.put(`/VehicleServiceHistory/${vehicleId}/${serviceHistoryId}`, serviceData);
+    return true;
+  } catch (error) {
+    console.error("Error updating service history:", error);
+    throw error;
+  }
+};
+
+// Delete service history record
+export const deleteServiceHistory = async (vehicleId: number, serviceHistoryId: number): Promise<boolean> => {
+  try {
+    await axiosInstance.delete(`/VehicleServiceHistory/${vehicleId}/${serviceHistoryId}`);
+    return true;
+  } catch (error) {
+    console.error("Error deleting service history:", error);
     throw error;
   }
 };

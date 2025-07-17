@@ -4,47 +4,23 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import CustomerUpdateForm from "@/components/organism/customer-update-form/customer-update-form";
+import { fetchClientById, updateCustomer } from "@/utils/api";
+import { Client } from "@/types";
 import colors from "@/styles/colors";
-
-interface ClientData {
-  id: string;
-  name: string;
-  email: string;
-  nic: string;
-  phone: string;
-  address: string;
-  profilePicture: string;
-}
 
 const ClientEditPage = () => {
   const router = useRouter();
   const params = useParams();
   const clientId = params.id as string;
   const [isLoading, setIsLoading] = useState(true);
-  const [clientData, setClientData] = useState<ClientData | null>(null);
+  const [clientData, setClientData] = useState<Client | null>(null);
 
   useEffect(() => {
     const fetchClientData = async () => {
       setIsLoading(true);
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        let clientName = "Devon Lane";
-        if (clientId === "client-2" || clientId === "client-4") {
-          clientName = "Kathryn Murphy";
-        } else if (clientId === "client-3" || clientId === "client-6") {
-          clientName = "Eleanor Pena";
-        }
-
-        setClientData({
-          id: clientId,
-          name: clientName,
-          email: "mariarodriguez@gmail.com",
-          nic: "2000345682",
-          phone: "+1 (961) 523-4453",
-          address: "456 Ocean Avenue, Miami, FL 12345",
-          profilePicture: "https://placehold.co/80x80/svg?text=Client",
-        });
+        const client = await fetchClientById(clientId);
+        setClientData(client);
       } catch (error) {
         console.error("Error fetching client data:", error);
       } finally {
@@ -55,7 +31,7 @@ const ClientEditPage = () => {
     fetchClientData();
   }, [clientId]);
 
-  const handleFormSubmit = (data: {
+  const handleFormSubmit = async (data: {
     customerName: string;
     email: string;
     nicNumber: string;
@@ -63,8 +39,26 @@ const ClientEditPage = () => {
     address: string;
     photo: File | null;
   }) => {
-    console.log("Updating client with data:", data);
-    router.push(`/client/${clientId}`);
+    if (!clientData) return;
+
+    try {
+      const [firstName, ...lastNameParts] = data.customerName.split(" ");
+      const lastName = lastNameParts.join(" ");
+
+      await updateCustomer(clientData.customerId, {
+        firstName,
+        lastName,
+        email: data.email,
+        phoneNumber: data.telephoneNumber,
+        address: data.address,
+        nic: data.nicNumber,
+      });
+
+      console.log("Customer updated successfully");
+      router.push(`/client/${clientId}`);
+    } catch (error) {
+      console.error("Error updating customer:", error);
+    }
   };
 
   if (isLoading) {
@@ -98,9 +92,7 @@ const ClientEditPage = () => {
           <h1
             className="text-xl font-bold"
             style={{ color: colors.primary[200] }}
-          >
-          
-          </h1>
+          ></h1>
           <UserProfileCard
             pictureSrc="/images/profipic.jpg" // Already updated to use local image
             pictureAlt="Moni Roy"
@@ -121,11 +113,11 @@ const ClientEditPage = () => {
         <div className="flex justify-center">
           <CustomerUpdateForm
             initialData={{
-              customerName: clientData.name,
+              customerName: `${clientData.firstName} ${clientData.lastName}`,
               email: clientData.email,
-              nicNumber: clientData.nic,
-              telephoneNumber: clientData.phone,
-              address: clientData.address,
+              nicNumber: clientData.nic || "",
+              telephoneNumber: clientData.phoneNumber,
+              address: clientData.address || "",
               photo: null,
             }}
             onSubmit={handleFormSubmit}

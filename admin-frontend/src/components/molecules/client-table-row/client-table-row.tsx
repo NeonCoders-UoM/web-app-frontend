@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import React from "react"
-import TableCell from "@/components/atoms/table-cell/table-cell"
-import { ClientCell } from "@/components/molecules/client-cell/client-cell"
-import KebabMenuWithActions from "@/components/molecules/kebab-menu-with-actions/kebab-menu-with-actions"
+import React from "react";
+import TableCell from "@/components/atoms/table-cell/table-cell";
+import { ClientCell } from "@/components/molecules/client-cell/client-cell";
+import KebabMenuWithActions from "@/components/molecules/kebab-menu-with-actions/kebab-menu-with-actions";
 
 interface TableRowProps {
-  row: Record<string, string>
-  actions: ("edit" | "delete" | "view" | "loyaltyPoints")[]
-  columns: string[]
-  showClientCell?: boolean
-  onActionSelect?: (action: string, clientId: string) => void
+  row: Record<string, string>;
+  actions: ("edit" | "delete" | "view" | "loyaltyPoints")[];
+  columns: string[];
+  showClientCell?: boolean;
+  onActionSelect?: (action: string, clientId: string) => void;
 }
 
 export const TableRow: React.FC<TableRowProps> = ({
@@ -20,21 +20,30 @@ export const TableRow: React.FC<TableRowProps> = ({
   showClientCell = false,
   onActionSelect,
 }) => {
+  // Debug the entire row and columns
+  console.log("TableRow - Full row data:", row);
+  console.log("TableRow - Columns to render:", columns);
+
   return (
     <tr className="hover:bg-neutral-100 transition-colors">
       {columns.map((key, index) => {
-        const value = row[key] || ""
-        console.log(`Key: ${key}, Value: ${value}`) // Debug the key-value pair
+        const value = row[key] || "";
+        console.log(
+          `TableRow - Key: "${key}", Value: "${value}", Index: ${index}`
+        ); // Debug the key-value pair
 
         if (showClientCell && key === "client") {
           return (
             <TableCell key={index}>
-              <ClientCell name={value} pictureSrc={row.pictureSrc || row.profilePicture || ""} />
+              <ClientCell
+                name={value}
+                pictureSrc={row.pictureSrc || row.profilePicture || ""}
+              />
             </TableCell>
-          )
+          );
         }
 
-        return <TableCell key={index}>{value}</TableCell>
+        return <TableCell key={index}>{value}</TableCell>;
       })}
 
       <TableCell>
@@ -44,5 +53,5 @@ export const TableRow: React.FC<TableRowProps> = ({
         />
       </TableCell>
     </tr>
-  )
-}
+  );
+};
