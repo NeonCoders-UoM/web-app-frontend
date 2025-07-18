@@ -8,7 +8,11 @@ import axiosInstance from "@/utils/axios";
 import { useRouter } from "next/navigation";
 
 interface LoginFormProps {
-  onSuccess?: (data: { email: string; password: string; remember: boolean }) => void;
+  onSuccess?: (data: {
+    email: string;
+    password: string;
+    remember: boolean;
+  }) => void;
   isLoading?: boolean;
 }
 
@@ -33,45 +37,59 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   useEffect(() => {
     const rememberedEmail = localStorage.getItem("rememberedEmail");
     if (rememberedEmail) {
-      setFormData((prev) => ({ ...prev, email: rememberedEmail, remember: true }));
+      setFormData((prev) => ({
+        ...prev,
+        email: rememberedEmail,
+        remember: true,
+      }));
     }
   }, []);
 
-   const redirectToDashboard = (role: string) => {
-    switch (role.toLowerCase()) {
-      case "admin":
+  const redirectToDashboard = (roleId: string | number) => {
+    // Convert roleId to string for consistent comparison
+    const roleIdStr = String(roleId);
+
+    switch (roleIdStr) {
+      case "1": // Super Admin
+        router.push("/super-admin");
+        break;
+      case "2": // Admin
         router.push("/admin/dashboard");
         break;
-      case "superadmin":
-        router.push("/super-admin/dashboard");
-        break;
-      case "service-center-admin":
+      case "3": // Service Center Admin
         router.push("/service-center/dashboard");
         break;
-      case "cashier":
+      case "4": // Cashier
         router.push("/cashier/dashboard");
         break;
-      case "data-operator":
+      case "5": // Data Operator
         router.push("/data-operator/dashboard");
         break;
       default:
-        throw new Error("Invalid role");
+        throw new Error(`Invalid role ID: ${roleIdStr}`);
     }
   };
 
-  const handleLogin = async (data: { email: string; password: string; remember: boolean }) => {
+  const handleLogin = async (data: {
+    email: string;
+    password: string;
+    remember: boolean;
+  }) => {
     setIsLoading(true);
     setError("");
 
     try {
-      const response = await axiosInstance.post('auth/login', {
+      const response = await axiosInstance.post("auth/login", {
         email: data.email,
         password: data.password,
       });
 
-      const { token } = response.data;
+      const { token, userId, userRole, userRoleId } = response.data;
 
-      localStorage.setItem('token', token);
+      localStorage.setItem("token", token);
+      localStorage.setItem("userId", userId.toString());
+      localStorage.setItem("userRole", userRole);
+      localStorage.setItem("userRoleId", userRoleId.toString());
 
       if (data.remember) {
         localStorage.setItem("rememberedEmail", data.email);
@@ -79,12 +97,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         localStorage.removeItem("rememberedEmail");
       }
 
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const role = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || '';
-
-      console.log("Decoded role:", role);
-      redirectToDashboard(role);
-
+      console.log("Login response:", { userId, userRole, userRoleId });
+      console.log("Using role ID for dashboard redirect:", userRoleId);
+      redirectToDashboard(userRoleId);
     } catch (err) {
       console.error("Login failed:", err);
       setError("Invalid credentials");
@@ -99,7 +114,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-    if (isSubmitted && errors[name as keyof typeof errors] && name !== "remember") {
+    if (
+      isSubmitted &&
+      errors[name as keyof typeof errors] &&
+      name !== "remember"
+    ) {
       validateForm();
     }
   };
@@ -150,7 +169,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
       <div className="space-y-6">
         {/* Email Field */}
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-neutral-600 mb-1">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-neutral-600 mb-1"
+          >
             Email Address
           </label>
           <InputField
@@ -171,7 +193,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         {/* Password Field */}
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label htmlFor="password" className="block text-sm font-medium text-neutral-600">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-neutral-600"
+            >
               Password
             </label>
             <a href="#" className="text-sm text-blue-600 hover:underline">
@@ -187,7 +212,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
             placeholder="Enter your password"
             ariaLabel="Password"
             rightIcon={
-              <span onClick={togglePasswordVisibility} className="cursor-pointer text-neutral-400">
+              <span
+                onClick={togglePasswordVisibility}
+                className="cursor-pointer text-neutral-400"
+              >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </span>
             }
@@ -216,7 +244,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
 
       {/* Submit Button */}
       <div className="flex justify-center w-full">
-        <Button variant="primary" size="large" type="submit" disabled={isLoading}>
+        <Button
+          variant="primary"
+          size="large"
+          type="submit"
+          disabled={isLoading}
+        >
           {isLoading ? (
             <span className="flex items-center gap-2">
               <ArrowUpIcon className="w-5 h-5 animate-spin" />

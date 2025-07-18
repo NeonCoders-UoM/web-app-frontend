@@ -1,16 +1,83 @@
 export interface ServiceCenter {
-  id: string;
-  serviceCenterName: string;
-  email: string;
-  address: string;
-  telephoneNumber: string;
-  ownersName: string;
+  id: string; // For frontend compatibility
+  Station_id?: number; // Backend ID
+  serviceCenterName: string; // Frontend field
+  Station_name?: string; // Backend field
+  email: string; // Common field
+  Email?: string; // Backend field
+  address: string; // Frontend field
+  Address?: string; // Backend field
+  telephoneNumber: string; // Frontend field
+  Telephone?: string; // Backend field
+  ownersName?: string; // Frontend field
+  OwnerName?: string; // Backend field
+  vatNumber?: string; // Frontend field
+  VATNumber?: string; // Backend field
+  registrationNumber?: string; // Frontend field
+  RegisterationNumber?: string; // Backend field (note spelling)
+  commissionRate?: string; // Frontend only
+  availableServices?: string[]; // Frontend only
+  photoUrl?: string; // Frontend only
+  registrationCopyUrl?: string; // Frontend only
+  Station_status?: string; // Backend field
+}
+
+// Backend DTO interfaces
+export interface ServiceCenterDTO {
+  station_id: number;
+  ownerName: string;
   vatNumber: string;
-  registrationNumber: string;
-  commissionRate: string;
-  availableServices: string[];
-  photoUrl?: string;
-  registrationCopyUrl?: string;
+  registerationNumber: string;
+  station_name: string;
+  email: string;
+  telephone: string;
+  address: string;
+  station_status: string;
+}
+
+export interface CreateServiceCenterDTO {
+  ownerName: string;
+  vatNumber: string;
+  registerationNumber: string;
+  station_name: string;
+  email: string;
+  telephone: string;
+  address: string;
+  station_status: string;
+}
+
+export interface UpdateServiceCenterDTO {
+  ownerName?: string;
+  vatNumber?: string;
+  registerationNumber?: string;
+  station_name?: string;
+  email?: string;
+  telephone?: string;
+  address?: string;
+  station_status?: string;
+}
+
+export interface ServiceCenterServiceDTO {
+  ServiceCenterServiceId: number;
+  Station_id: number;
+  ServiceId: number;
+  CustomPrice?: number;
+  IsAvailable: boolean;
+  Notes?: string;
+  ServiceName: string;
+  ServiceDescription: string;
+  BasePrice: number;
+  LoyaltyPoints: number;
+  Category: string;
+  StationName: string;
+}
+
+export interface CreateServiceCenterServiceDTO {
+  Station_id: number;
+  ServiceId: number;
+  CustomPrice?: number;
+  IsAvailable: boolean;
+  Notes?: string;
 }
 
 export interface Tier {
@@ -125,6 +192,11 @@ export interface DashboardStats {
 
 export {
   fetchServiceCenters,
+  fetchServiceCentersByStatus,
+  fetchServiceCenterServices,
+  addServiceToServiceCenter,
+  removeServiceFromServiceCenter,
+  updateServiceCenterStatus,
   fetchClients,
   fetchClientById,
   fetchUsers,

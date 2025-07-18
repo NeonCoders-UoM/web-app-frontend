@@ -1,4 +1,15 @@
-import { ServiceCenter, DashboardStats, Client, User, Vehicle } from "@/types";
+import { 
+  ServiceCenter, 
+  DashboardStats, 
+  Client, 
+  User, 
+  Vehicle,
+  ServiceCenterDTO,
+  CreateServiceCenterDTO,
+  UpdateServiceCenterDTO,
+  ServiceCenterServiceDTO,
+  CreateServiceCenterServiceDTO
+} from "@/types";
 import axiosInstance from "./axios";
 
 
@@ -418,24 +429,51 @@ export const deleteVehicle = async (customerId: number, vehicleId: number): Prom
 // Fetch all service centers
 export const fetchServiceCenters = async (): Promise<ServiceCenter[]> => {
   try {
-    return mockServiceCenters.map((sc) => ({
+    console.log("Fetching service centers from API...");
+    const response = await axiosInstance.get("/ServiceCenters");
+    console.log("API Response:", response.data);
+    
+    // Transform backend data to frontend format
+    const transformedData = response.data.map((sc: ServiceCenterDTO) => ({
+      id: sc.station_id?.toString() || "",
+      Station_id: sc.station_id,
+      serviceCenterName: sc.station_name || "",
+      Station_name: sc.station_name,
+      email: sc.email || "",
+      Email: sc.email,
+      address: sc.address || "",
+      Address: sc.address,
+      telephoneNumber: sc.telephone || "",
+      Telephone: sc.telephone,
+      ownersName: sc.ownerName || "",
+      OwnerName: sc.ownerName,
+      vatNumber: sc.vatNumber || "",
+      VATNumber: sc.vatNumber,
+      registrationNumber: sc.registerationNumber || "",
+      RegisterationNumber: sc.registerationNumber,
+      Station_status: sc.station_status,
+      commissionRate: "",
+      availableServices: [],
+      photoUrl: "",
+      registrationCopyUrl: "",
+    }));
+    
+    console.log("Transformed data:", transformedData);
+    return transformedData;
+  } catch (error) {
+    console.error("Error in fetchServiceCenters:", error);
+    console.log("Falling back to mock data...");
+    // Fallback to mock data if API fails
+    const mockData = mockServiceCenters.map((sc) => ({
       ...sc,
       id: sc.id,
       serviceCenterName: sc.serviceCenterName,
       email: sc.email,
-      address: sc.address,
       telephoneNumber: sc.telephoneNumber,
-      ownersName: sc.ownersName || "",
-      vatNumber: sc.vatNumber || "",
-      registrationNumber: sc.registrationNumber || "",
-      commissionRate: sc.commissionRate || "",
-      availableServices: sc.availableServices || [],
-      photoUrl: sc.photoUrl || "",
-      registrationCopyUrl: sc.registrationCopyUrl || "",
+      address: sc.address,
     }));
-  } catch (error) {
-    console.error("Error in fetchServiceCenters:", error);
-    throw error;
+    console.log("Using mock data:", mockData);
+    return mockData;
   }
 };
 
@@ -559,16 +597,41 @@ export const fetchUsers = async (): Promise<User[]> => {
     throw error;
   }
 };
-// /utils/api.ts
-
 // Fetch a single service center by ID
 export const fetchServiceCenterById = async (id: string): Promise<ServiceCenter | null> => {
   try {
-    const serviceCenter = mockServiceCenters.find((sc) => sc.id === id);
-    return serviceCenter || null;
+    const response = await axiosInstance.get(`/ServiceCenters/${id}`);
+    const sc = response.data;
+    
+    // Transform backend data to frontend format
+    return {
+      id: sc.station_id?.toString() || "",
+      Station_id: sc.station_id,
+      serviceCenterName: sc.station_name || "",
+      Station_name: sc.station_name,
+      email: sc.email || "",
+      Email: sc.email,
+      address: sc.address || "",
+      Address: sc.address,
+      telephoneNumber: sc.telephone || "",
+      Telephone: sc.telephone,
+      ownersName: sc.ownerName || "",
+      OwnerName: sc.ownerName,
+      vatNumber: sc.vatNumber || "",
+      VATNumber: sc.vatNumber,
+      registrationNumber: sc.registerationNumber || "",
+      RegisterationNumber: sc.registerationNumber,
+      Station_status: sc.station_status,
+      commissionRate: "",
+      availableServices: [],
+      photoUrl: "",
+      registrationCopyUrl: "",
+    };
   } catch (error) {
     console.error("Error in fetchServiceCenterById:", error);
-    throw error;
+    // Fallback to mock data if API fails
+    const serviceCenter = mockServiceCenters.find((sc) => sc.id === id);
+    return serviceCenter || null;
   }
 };
 
@@ -576,15 +639,16 @@ export const fetchServiceCenterById = async (id: string): Promise<ServiceCenter 
 export const fetchDashboardStats = async (): Promise<DashboardStats> => {
   try {
     // Get real counts from the backend
-    const [clients, vehicles] = await Promise.all([
+    const [clients, vehicles, serviceCenters] = await Promise.all([
       fetchClients(),
       fetchVehicles(),
+      fetchServiceCenters(),
     ]);
     
     return {
       customers: clients.length,
       vehicles: vehicles.length,
-      serviceCenters: mockServiceCenters.length,
+      serviceCenters: serviceCenters.length,
     };
   } catch (error) {
     console.error("Error in fetchDashboardStats:", error);
@@ -592,7 +656,7 @@ export const fetchDashboardStats = async (): Promise<DashboardStats> => {
     return {
       customers: 0,
       vehicles: 0,
-      serviceCenters: mockServiceCenters.length,
+      serviceCenters: 0,
     };
   }
 };
@@ -600,11 +664,7 @@ export const fetchDashboardStats = async (): Promise<DashboardStats> => {
 // Delete a service center
 export const deleteServiceCenter = async (id: string): Promise<void> => {
   try {
-    const index = mockServiceCenters.findIndex((sc) => sc.id === id);
-    if (index === -1) {
-      throw new Error(`Service Center with ID ${id} not found`);
-    }
-    mockServiceCenters.splice(index, 1);
+    await axiosInstance.delete(`/ServiceCenters/${id}`);
   } catch (error) {
     console.error("Error in deleteServiceCenter:", error);
     throw error;
@@ -614,11 +674,18 @@ export const deleteServiceCenter = async (id: string): Promise<void> => {
 // Update a service center
 export const updateServiceCenter = async (id: string, data: Omit<ServiceCenter, "id">): Promise<void> => {
   try {
-    const index = mockServiceCenters.findIndex((sc) => sc.id === id);
-    if (index === -1) {
-      throw new Error(`Service Center with ID ${id} not found`);
-    }
-    mockServiceCenters[index] = { id, ...data };
+    const updateData: UpdateServiceCenterDTO = {
+      ownerName: data.ownersName || data.OwnerName,
+      vatNumber: data.vatNumber || data.VATNumber,
+      registerationNumber: data.registrationNumber || data.RegisterationNumber,
+      station_name: data.serviceCenterName || data.Station_name,
+      email: data.email || data.Email,
+      telephone: data.telephoneNumber || data.Telephone,
+      address: data.address || data.Address,
+      station_status: data.Station_status || "Active",
+    };
+    
+    await axiosInstance.put(`/ServiceCenters/${id}`, updateData);
   } catch (error) {
     console.error("Error in updateServiceCenter:", error);
     throw error;
@@ -628,12 +695,129 @@ export const updateServiceCenter = async (id: string, data: Omit<ServiceCenter, 
 // Create a new service center
 export const createServiceCenter = async (data: Omit<ServiceCenter, "id">): Promise<ServiceCenter> => {
   try {
-    const newId = (mockServiceCenters.length + 1).toString();
-    const newServiceCenter: ServiceCenter = { id: newId, ...data };
-    mockServiceCenters.push(newServiceCenter);
-    return newServiceCenter;
+    const createData: CreateServiceCenterDTO = {
+      ownerName: data.ownersName || data.OwnerName || "",
+      vatNumber: data.vatNumber || data.VATNumber || "",
+      registerationNumber: data.registrationNumber || data.RegisterationNumber || "",
+      station_name: data.serviceCenterName || data.Station_name || "",
+      email: data.email || data.Email || "",
+      telephone: data.telephoneNumber || data.Telephone || "",
+      address: data.address || data.Address || "",
+      station_status: data.Station_status || "Active",
+    };
+    
+    const response = await axiosInstance.post("/ServiceCenters", createData);
+    const sc = response.data;
+    
+    // Transform backend response to frontend format
+    return {
+      id: sc.station_id?.toString() || "",
+      Station_id: sc.station_id,
+      serviceCenterName: sc.station_name || "",
+      Station_name: sc.station_name,
+      email: sc.email || "",
+      Email: sc.email,
+      address: sc.address || "",
+      Address: sc.address,
+      telephoneNumber: sc.telephone || "",
+      Telephone: sc.telephone,
+      ownersName: sc.ownerName || "",
+      OwnerName: sc.ownerName,
+      vatNumber: sc.vatNumber || "",
+      VATNumber: sc.vatNumber,
+      registrationNumber: sc.registerationNumber || "",
+      RegisterationNumber: sc.registerationNumber,
+      Station_status: sc.station_status,
+      commissionRate: "",
+      availableServices: [],
+      photoUrl: "",
+      registrationCopyUrl: "",
+    };
   } catch (error) {
     console.error("Error in createServiceCenter:", error);
+    throw error;
+  }
+};
+
+// Fetch service centers by status
+export const fetchServiceCentersByStatus = async (status: string): Promise<ServiceCenter[]> => {
+  try {
+    const response = await axiosInstance.get(`/ServiceCenters/status/${status}`);
+    
+    return response.data.map((sc: ServiceCenterDTO) => ({
+      id: sc.station_id?.toString() || "",
+      Station_id: sc.station_id,
+      serviceCenterName: sc.station_name || "",
+      Station_name: sc.station_name,
+      email: sc.email || "",
+      Email: sc.email,
+      address: sc.address || "",
+      Address: sc.address,
+      telephoneNumber: sc.telephone || "",
+      Telephone: sc.telephone,
+      ownersName: sc.ownerName || "",
+      OwnerName: sc.ownerName,
+      vatNumber: sc.vatNumber || "",
+      VATNumber: sc.vatNumber,
+      registrationNumber: sc.registerationNumber || "",
+      RegisterationNumber: sc.registerationNumber,
+      Station_status: sc.station_status,
+      commissionRate: "",
+      availableServices: [],
+      photoUrl: "",
+      registrationCopyUrl: "",
+    }));
+  } catch (error) {
+    console.error("Error in fetchServiceCentersByStatus:", error);
+    throw error;
+  }
+};
+
+// Update service center status
+export const updateServiceCenterStatus = async (id: string, status: string): Promise<void> => {
+  try {
+    await axiosInstance.patch(`/ServiceCenters/${id}/status`, JSON.stringify(status), {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  } catch (error) {
+    console.error("Error in updateServiceCenterStatus:", error);
+    throw error;
+  }
+};
+
+// Fetch services for a specific service center
+export const fetchServiceCenterServices = async (stationId: string): Promise<ServiceCenterServiceDTO[]> => {
+  try {
+    const response = await axiosInstance.get(`/ServiceCenters/${stationId}/Services`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in fetchServiceCenterServices:", error);
+    throw error;
+  }
+};
+
+// Add a service to a service center
+export const addServiceToServiceCenter = async (
+  stationId: string, 
+  serviceData: CreateServiceCenterServiceDTO
+): Promise<ServiceCenterServiceDTO> => {
+  try {
+    const response = await axiosInstance.post(`/ServiceCenters/${stationId}/Services`, serviceData);
+    return response.data;
+  } catch (error) {
+    console.error("Error in addServiceToServiceCenter:", error);
+    throw error;
+  }
+};
+
+// Remove a service from a service center
+export const removeServiceFromServiceCenter = async (stationId: string, serviceId: string): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/ServiceCenters/${stationId}/Services/${serviceId}`);
+  } catch (error) {
+    console.error("Error in removeServiceFromServiceCenter:", error);
     throw error;
   }
 };

@@ -1,4 +1,4 @@
-// src/app/pages/super-admin-dashboard/page.tsx
+// src/app/pages/super-admin-dashboard
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -7,7 +7,11 @@ import UserProfileCard from "@/components/molecules/user-card/user-card";
 import Button from "@/components/atoms/button/button";
 import StatusCard from "@/components/atoms/status-cards/status-card";
 import Table from "@/components/organism/table/table";
-import { fetchDashboardStats, fetchServiceCenters, deleteServiceCenter } from "@/utils/api";
+import {
+  fetchDashboardStats,
+  fetchServiceCenters,
+  deleteServiceCenter,
+} from "@/utils/api";
 import { ServiceCenter, DashboardStats } from "@/types";
 
 const SuperAdminDashboard: React.FC = () => {
@@ -23,7 +27,10 @@ const SuperAdminDashboard: React.FC = () => {
           fetchDashboardStats(),
           fetchServiceCenters(),
         ]);
-        console.log("Fetched service centers in SuperAdminDashboard:", serviceCentersData);
+        console.log(
+          "Fetched service centers in SuperAdminDashboard:",
+          serviceCentersData
+        );
         setStats(statsData);
         setServiceCenters(serviceCentersData);
       } catch (error) {
@@ -36,13 +43,18 @@ const SuperAdminDashboard: React.FC = () => {
     loadData();
   }, []);
 
-  const data = serviceCenters.map((sc) => [
-    sc.id,
-    sc.serviceCenterName,
-    sc.email,
-    sc.telephoneNumber,
-    sc.address,
-  ]);
+  const data = serviceCenters.map((sc) => {
+    console.log("Mapping service center to table data:", sc);
+    const rowData = [
+      sc.id,
+      sc.serviceCenterName,
+      sc.email,
+      sc.telephoneNumber,
+      sc.address,
+    ];
+    console.log("Generated row data:", rowData);
+    return rowData;
+  });
 
   const headers = [
     { title: "ID", sortable: false },
@@ -52,7 +64,11 @@ const SuperAdminDashboard: React.FC = () => {
     { title: "Address", sortable: false },
   ];
 
-  const actions: ("edit" | "delete" | "view" | "loyaltyPoints")[] = ["edit", "delete", "view"];
+  const actions: ("edit" | "delete" | "view" | "loyaltyPoints")[] = [
+    "edit",
+    "delete",
+    "view",
+  ];
 
   const handleEdit = (id: string) => {
     console.log("Navigating to:", `/service-centers/${id}/edit`);
@@ -86,6 +102,14 @@ const SuperAdminDashboard: React.FC = () => {
     console.log("handleAction called with:", { action, row });
     const id = row[0];
     console.log("Extracted ID:", id);
+
+    // Check if ID is valid
+    if (!id || id.trim() === "") {
+      console.error("Invalid ID for action:", id);
+      alert("Unable to perform action: Invalid service center ID");
+      return;
+    }
+
     const actionMap: Record<string, string> = {
       Edit: "edit",
       Delete: "delete",
@@ -120,20 +144,35 @@ const SuperAdminDashboard: React.FC = () => {
           onSettingsClick={() => router.push("/settings")} // Updated for consistency
         />
       </div>
-      
+
       <div className="px-[182px]">
-      
-        <h1 className="text-2xl font-semibold text-neutral-900 mb-[32px]">Dashboard</h1>
+        <h1 className="text-2xl font-semibold text-neutral-900 mb-[32px]">
+          Dashboard
+        </h1>
 
         <div className="flex justify-start gap-[67px] mb-[44px]">
-          <StatusCard title="Customers" value={stats?.customers || 0} icon="customers" />
-          <StatusCard title="Vehicles" value={stats?.vehicles || 0} icon="vehicles" />
-          <StatusCard title="Service Centers" value={stats?.serviceCenters || 0} icon="serviceCenters" />
+          <StatusCard
+            title="Customers"
+            value={stats?.customers || 0}
+            icon="customers"
+          />
+          <StatusCard
+            title="Vehicles"
+            value={stats?.vehicles || 0}
+            icon="vehicles"
+          />
+          <StatusCard
+            title="Service Centers"
+            value={stats?.serviceCenters || 0}
+            icon="serviceCenters"
+          />
         </div>
 
         <div>
           <div className="flex justify-between items-center mb-[32px]">
-            <h2 className="text-xl font-semibold text-neutral-900">Service Centers</h2>
+            <h2 className="text-xl font-semibold text-neutral-900">
+              Service Centers
+            </h2>
             <div className="flex items-center space-x-4">
               <Button
                 variant="primary"
@@ -142,7 +181,6 @@ const SuperAdminDashboard: React.FC = () => {
               >
                 Add Service Center
               </Button>
-              
             </div>
           </div>
 
@@ -156,7 +194,6 @@ const SuperAdminDashboard: React.FC = () => {
           />
         </div>
       </div>
-      
     </div>
   );
 };

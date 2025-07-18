@@ -36,10 +36,12 @@ const AddServiceCenter: React.FC = () => {
           onSettingsClick={() => console.log("Settings clicked")}
         />
       </div>
-      
+
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center">
-          <h1 className="text-xl font-bold text-neutral-600 mb-[40px]">Service Center Registration</h1>
+          <h1 className="text-xl font-bold text-neutral-600 mb-[40px]">
+            Service Center Registration
+          </h1>
           {/* Centered form */}
           <div>
             <ServiceCenterForm onSubmit={handleSubmit} />

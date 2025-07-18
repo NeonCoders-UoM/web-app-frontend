@@ -7,18 +7,64 @@ import UserProfileCard from "@/components/molecules/user-card/user-card";
 import TabNavigation from "@/components/atoms/tab-navigation/tab-navigation";
 import Table from "@/components/organism/table/table";
 import Button from "@/components/atoms/button/button";
-import { fetchServiceCenterById } from "@/utils/api";
-import { ServiceCenter } from "@/types";
+import {
+  fetchServiceCenterById,
+  fetchServiceCenterServices,
+  removeServiceFromServiceCenter,
+} from "@/utils/api";
+import { ServiceCenter, ServiceCenterServiceDTO } from "@/types";
 
 // Mock service data
 const mockServices = [
-  { id: "#SC-0001", name: "Engine Check", price: "60000LKR", effectiveTo: "12-05-2025", addAnother: "DGFHR3 Enterprises" },
-  { id: "#SC-0002", name: "Engine Check", price: "60000LKR", effectiveTo: "12-05-2025", addAnother: "DGFHR3 Enterprises" },
-  { id: "#SC-0003", name: "Engine Check", price: "60000LKR", effectiveTo: "12-05-2025", addAnother: "DGFHR3 Enterprises" },
-  { id: "#SC-0004", name: "Engine Check", price: "60000LKR", effectiveTo: "12-05-2025", addAnother: "DGFHR3 Enterprises" },
-  { id: "#SC-0005", name: "Engine Check", price: "60000LKR", effectiveTo: "12-05-2025", addAnother: "DGFHR3 Enterprises" },
-  { id: "#SC-0006", name: "Engine Check", price: "60000LKR", effectiveTo: "12-05-2025", addAnother: "DGFHR3 Enterprises" },
-  { id: "#SC-0007", name: "Engine Check", price: "60000LKR", effectiveTo: "12-05-2025", addAnother: "DGFHR3 Enterprises" },
+  {
+    id: "#SC-0001",
+    name: "Engine Check",
+    price: "60000LKR",
+    effectiveTo: "12-05-2025",
+    addAnother: "DGFHR3 Enterprises",
+  },
+  {
+    id: "#SC-0002",
+    name: "Engine Check",
+    price: "60000LKR",
+    effectiveTo: "12-05-2025",
+    addAnother: "DGFHR3 Enterprises",
+  },
+  {
+    id: "#SC-0003",
+    name: "Engine Check",
+    price: "60000LKR",
+    effectiveTo: "12-05-2025",
+    addAnother: "DGFHR3 Enterprises",
+  },
+  {
+    id: "#SC-0004",
+    name: "Engine Check",
+    price: "60000LKR",
+    effectiveTo: "12-05-2025",
+    addAnother: "DGFHR3 Enterprises",
+  },
+  {
+    id: "#SC-0005",
+    name: "Engine Check",
+    price: "60000LKR",
+    effectiveTo: "12-05-2025",
+    addAnother: "DGFHR3 Enterprises",
+  },
+  {
+    id: "#SC-0006",
+    name: "Engine Check",
+    price: "60000LKR",
+    effectiveTo: "12-05-2025",
+    addAnother: "DGFHR3 Enterprises",
+  },
+  {
+    id: "#SC-0007",
+    name: "Engine Check",
+    price: "60000LKR",
+    effectiveTo: "12-05-2025",
+    addAnother: "DGFHR3 Enterprises",
+  },
 ];
 
 const ServicesTab: React.FC = () => {
@@ -26,19 +72,51 @@ const ServicesTab: React.FC = () => {
   const params = useParams();
   const { id } = params;
 
-  const [serviceCenter, setServiceCenter] = useState<ServiceCenter | null>(null);
+  const [serviceCenter, setServiceCenter] = useState<ServiceCenter | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
-  const [services, setServices] = useState(mockServices);
+  const [services, setServices] = useState<ServiceCenterServiceDTO[]>([]);
 
   useEffect(() => {
-    const loadServiceCenter = async () => {
+    const loadData = async () => {
       if (typeof id === "string") {
         try {
-          const data = await fetchServiceCenterById(id);
-          console.log("Fetched service center in ServicesTab:", data);
-          setServiceCenter(data);
+          const [serviceCenterData, servicesData] = await Promise.all([
+            fetchServiceCenterById(id),
+            fetchServiceCenterServices(id),
+          ]);
+
+          console.log(
+            "Fetched service center in ServicesTab:",
+            serviceCenterData
+          );
+          console.log("Fetched services:", servicesData);
+
+          setServiceCenter(serviceCenterData);
+          setServices(servicesData);
         } catch (error) {
-          console.error("Error fetching service center:", error);
+          console.error("Error fetching data:", error);
+          // Fallback to mock data if API fails
+          const fallbackServices = mockServices.map((service) => ({
+            ServiceCenterServiceId: parseInt(service.id.replace("#SC-", "")),
+            Station_id: parseInt(id),
+            ServiceId: parseInt(service.id.replace("#SC-", "")),
+            CustomPrice: parseFloat(
+              service.price.replace("LKR", "").replace(",", "")
+            ),
+            IsAvailable: true,
+            Notes: "",
+            ServiceName: service.name,
+            ServiceDescription: service.name,
+            BasePrice: parseFloat(
+              service.price.replace("LKR", "").replace(",", "")
+            ),
+            LoyaltyPoints: 10,
+            Category: "General",
+            StationName: "Unknown",
+          }));
+          setServices(fallbackServices);
         } finally {
           setIsLoading(false);
         }
@@ -47,24 +125,51 @@ const ServicesTab: React.FC = () => {
         setIsLoading(false);
       }
     };
-    loadServiceCenter();
+    loadData();
   }, [id]);
 
   const tabs = [
     {
       label: "Details",
       icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+          />
         </svg>
       ),
     },
     {
       label: "Services",
       icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+          />
         </svg>
       ),
     },
@@ -79,12 +184,12 @@ const ServicesTab: React.FC = () => {
     { title: "ACTIONS", sortable: false }, // Added column for kebab menu
   ];
 
-  const tableData = services.map(service => [
-    service.id,
-    service.name,
-    service.price,
-    service.effectiveTo,
-    service.addAnother,
+  const tableData = services.map((service) => [
+    `#SC-${service.ServiceCenterServiceId.toString().padStart(4, "0")}`,
+    service.ServiceName,
+    `${service.CustomPrice || service.BasePrice}LKR`,
+    "N/A", // No effective date in current API
+    service.StationName,
     "", // Placeholder for the actions column
   ]);
 
@@ -97,15 +202,32 @@ const ServicesTab: React.FC = () => {
     router.push(`/service-centers/${id}/view/${tabRoute}`);
   };
 
-  const handleAction = (action: string, row: string[]) => {
+  const handleAction = async (action: string, row: string[]) => {
     const serviceId = row[0]; // SERVICE ID
+    const serviceCenterServiceId = parseInt(serviceId.replace("#SC-", ""));
+
     if (action === "edit") {
       console.log(`Editing service: ${serviceId}`);
       // Navigate to edit page
       router.push(`/service-centers/${id}/view/services/edit/${serviceId}`);
     } else if (action === "delete") {
       console.log(`Deleting service: ${serviceId}`);
-      setServices(services.filter(service => service.id !== serviceId));
+      if (window.confirm("Are you sure you want to remove this service?")) {
+        try {
+          const actualServiceId = serviceCenterServiceId.toString();
+          await removeServiceFromServiceCenter(id as string, actualServiceId);
+          // Remove from local state
+          setServices(
+            services.filter(
+              (service) =>
+                service.ServiceCenterServiceId !== serviceCenterServiceId
+            )
+          );
+        } catch (error) {
+          console.error("Error removing service:", error);
+          alert("Failed to remove service");
+        }
+      }
     }
   };
 
@@ -130,29 +252,37 @@ const ServicesTab: React.FC = () => {
       {/* Removed fixed-size frame */}
       <div className="w-full max-w-5xl flex flex-col p-6">
         {/* Header */}
-          <div className="flex justify-end items-center mb-[80px]">
-            <UserProfileCard
-              pictureSrc="/images/profipic.jpg"
-              pictureAlt="Moni Roy"
-              name="Moni Roy"
-              role="super-admin"
-              onLogout={() => router.push("/login")}
-              onProfileClick={() => router.push("/profile")}
-              onSettingsClick={() => router.push("/settings")}
-            />
-          </div>
-        
-        <h1 className="text-xl font-semibold text-neutral-800 mb-[40px]">Service Center Details</h1>
+        <div className="flex justify-end items-center mb-[80px]">
+          <UserProfileCard
+            pictureSrc="/images/profipic.jpg"
+            pictureAlt="Moni Roy"
+            name="Moni Roy"
+            role="super-admin"
+            onLogout={() => router.push("/login")}
+            onProfileClick={() => router.push("/profile")}
+            onSettingsClick={() => router.push("/settings")}
+          />
+        </div>
+
+        <h1 className="text-xl font-semibold text-neutral-800 mb-[40px]">
+          Service Center Details
+        </h1>
         {/* Tab Navigation and Content */}
         <div className="flex-1 flex flex-col">
-          <TabNavigation tabs={tabs} activeTab="Services" onTabChange={handleTabChange} />
+          <TabNavigation
+            tabs={tabs}
+            activeTab="Services"
+            onTabChange={handleTabChange}
+          />
 
           <div className="flex-1 p-6 bg-neutral-50 w-[1074px] h-[760]">
             <div className="flex justify-end mb-4">
               <Button
                 variant="primary"
                 size="medium"
-                onClick={() => router.push(`/service-centers/${id}/view/services/add`)}
+                onClick={() =>
+                  router.push(`/service-centers/${id}/view/services/add`)
+                }
               >
                 Add Service
               </Button>
