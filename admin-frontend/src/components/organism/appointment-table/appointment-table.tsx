@@ -48,14 +48,6 @@ const Table: React.FC<TableProps> = ({ data, onView }) => {
     setCurrentPage(1);
   };
 
-  const handleAccept = (appointment: Appointment) => {
-    console.log(`Accept clicked for appointment ${appointment.id}`);
-  };
-
-  const handleReject = (appointment: Appointment) => {
-    console.log(`Reject clicked for appointment ${appointment.id}`);
-  };
-
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
   const paginatedData = sortedData.slice(
     (currentPage - 1) * itemsPerPage,
@@ -86,8 +78,6 @@ const Table: React.FC<TableProps> = ({ data, onView }) => {
               name={appointment.name}
               date={appointment.date}
               onView={() => onView(appointment)}
-              onAccept={() => handleAccept(appointment)}
-              onReject={() => handleReject(appointment)}
             />
           ))}
         </tbody>

@@ -109,8 +109,6 @@ const AppointmentsPage = () => {
                 date={selectedAppointment.date}
                 vehicle={selectedAppointment.vehicle}
                 services={selectedAppointment.services}
-                onAccept={() => console.log(`Accept clicked for appointment ${selectedAppointment.appointmentId}`)}
-                onReject={() => console.log(`Reject clicked for appointment ${selectedAppointment.appointmentId}`)}
               />
             </div>
           </div>
