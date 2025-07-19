@@ -6,15 +6,18 @@ import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import TabNavigation from "@/components/atoms/tab-navigation/tab-navigation";
-import { fetchServiceCenterById } from "@/utils/api";
-import { ServiceCenter } from "@/types";
+import { fetchServiceCenterById, fetchServiceCenterPackage } from "@/utils/api";
+import { ServiceCenter, Package } from "@/types";
 
 const DetailsTab: React.FC = () => {
   const router = useRouter();
   const params = useParams();
   const { id } = params;
 
-  const [serviceCenter, setServiceCenter] = useState<ServiceCenter | null>(null);
+  const [serviceCenter, setServiceCenter] = useState<ServiceCenter | null>(
+    null
+  );
+  const [packageInfo, setPackageInfo] = useState<Package | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -24,6 +27,18 @@ const DetailsTab: React.FC = () => {
           const data = await fetchServiceCenterById(id);
           console.log("Fetched service center in DetailsTab:", data);
           setServiceCenter(data);
+
+          // Try to fetch package info, but don't fail if it doesn't exist
+          try {
+            const packageData = await fetchServiceCenterPackage(id);
+            console.log("Fetched package info:", packageData);
+            setPackageInfo(packageData);
+          } catch {
+            console.log(
+              "Package endpoint not available, skipping package info"
+            );
+            setPackageInfo(null);
+          }
         } catch (error) {
           console.error("Error fetching service center:", error);
         } finally {
@@ -41,17 +56,44 @@ const DetailsTab: React.FC = () => {
     {
       label: "Details",
       icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+          />
         </svg>
       ),
     },
     {
       label: "Services",
       icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+          />
         </svg>
       ),
     },
@@ -87,22 +129,28 @@ const DetailsTab: React.FC = () => {
       {/* Removed fixed-size frame */}
       <div className="w-full max-w-5xl flex flex-col p-6">
         {/* Header */}
-          <div className="flex justify-end items-center mb-[80px]">
-            <UserProfileCard
-              pictureSrc="/images/profipic.jpg"
-              pictureAlt="Moni Roy"
-              name="Moni Roy"
-              role="super-admin"
-              onLogout={() => router.push("/login")}
-              onProfileClick={() => router.push("/profile")}
-              onSettingsClick={() => router.push("/settings")}
-            />
-          </div>
-        
-        <h1 className="text-xl font-semibold text-neutral-800 mb-[40px]">Service Center Details</h1>
+        <div className="flex justify-end items-center mb-[80px]">
+          <UserProfileCard
+            pictureSrc="/images/profipic.jpg"
+            pictureAlt="Moni Roy"
+            name="Moni Roy"
+            role="super-admin"
+            onLogout={() => router.push("/login")}
+            onProfileClick={() => router.push("/profile")}
+            onSettingsClick={() => router.push("/settings")}
+          />
+        </div>
+
+        <h1 className="text-xl font-semibold text-neutral-800 mb-[40px]">
+          Service Center Details
+        </h1>
         {/* Tab Navigation and Content */}
         <div className="flex-1 flex flex-col">
-          <TabNavigation tabs={tabs} activeTab="Details" onTabChange={handleTabChange} />
+          <TabNavigation
+            tabs={tabs}
+            activeTab="Details"
+            onTabChange={handleTabChange}
+          />
 
           <div className="flex-1 p-12 bg-neutral-100 w-[1074px] h-[760]">
             <div className="grid grid-cols-2 gap-x-4 gap-y-6">
@@ -110,10 +158,14 @@ const DetailsTab: React.FC = () => {
               <div>
                 <div className="mb-4">
                   <p className="text-gray-500 text-sm">Service Center Name :</p>
-                  <p className="font-medium">{serviceCenter.serviceCenterName}</p>
+                  <p className="font-medium">
+                    {serviceCenter.serviceCenterName}
+                  </p>
                 </div>
                 <div className="mb-4">
-                  <p className="text-gray-500 text-sm">Service Center Address :</p>
+                  <p className="text-gray-500 text-sm">
+                    Service Center Address :
+                  </p>
                   <p className="font-medium">{serviceCenter.address}</p>
                 </div>
                 <div className="mb-4">
@@ -138,7 +190,9 @@ const DetailsTab: React.FC = () => {
                 </div>
                 <div className="mb-4">
                   <p className="text-gray-500 text-sm">Registration Number :</p>
-                  <p className="font-medium">{serviceCenter.registrationNumber}</p>
+                  <p className="font-medium">
+                    {serviceCenter.registrationNumber}
+                  </p>
                 </div>
                 <div className="mb-4">
                   <p className="text-gray-500 text-sm">Commission Rate :</p>
@@ -146,6 +200,45 @@ const DetailsTab: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* Package Information Section */}
+            {packageInfo && (
+              <div className="mt-8 p-6 bg-white rounded-lg border border-neutral-200">
+                <h3 className="text-lg font-semibold text-neutral-900 mb-4">
+                  Package Information
+                </h3>
+                <div className="grid grid-cols-3 gap-6">
+                  <div>
+                    <p className="text-gray-500 text-sm">Package Name :</p>
+                    <p className="font-medium">{packageInfo.packageName}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-sm">
+                      Loyalty Percentage :
+                    </p>
+                    <p className="font-medium">{packageInfo.percentage}%</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 text-sm">Status :</p>
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        packageInfo.isActive
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {packageInfo.isActive ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <p className="text-gray-500 text-sm">Description :</p>
+                  <p className="font-medium text-sm">
+                    {packageInfo.description}
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="flex justify-end">
               <Image

@@ -46,6 +46,29 @@ export interface CreateServiceCenterDTO {
   station_status: string;
 }
 
+export interface ServiceCenterServiceSelection {
+  serviceId: number;
+  serviceName: string;
+  basePrice: number;
+  isSelected: boolean;
+}
+
+export interface CreateServiceCenterWithServicesDTO {
+  // Service Center basic info
+  ownerName: string;
+  vatNumber: string;
+  registerationNumber: string;
+  station_name: string;
+  email: string;
+  telephone: string;
+  address: string;
+  station_status: string;
+  // Package selection
+  packageId: number;
+  // Services with pricing
+  services: ServiceCenterServiceSelection[];
+}
+
 export interface UpdateServiceCenterDTO {
   ownerName?: string;
   vatNumber?: string;
@@ -58,26 +81,34 @@ export interface UpdateServiceCenterDTO {
 }
 
 export interface ServiceCenterServiceDTO {
-  ServiceCenterServiceId: number;
-  Station_id: number;
-  ServiceId: number;
-  CustomPrice?: number;
-  IsAvailable: boolean;
-  Notes?: string;
-  ServiceName: string;
-  ServiceDescription: string;
-  BasePrice: number;
-  LoyaltyPoints: number;
-  Category: string;
-  StationName: string;
+  serviceCenterServiceId: number;
+  station_id: number;
+  serviceId: number;
+  packageId: number;
+  customPrice: number;
+  serviceCenterBasePrice: number;
+  serviceCenterLoyaltyPoints: number;
+  isAvailable: boolean;
+  notes: string;
+  serviceName: string;
+  serviceDescription: string;
+  serviceBasePrice: number;
+  category: string;
+  stationName: string;
+  packageName: string;
+  packagePercentage: number;
+  packageDescription: string;
 }
 
 export interface CreateServiceCenterServiceDTO {
-  Station_id: number;
-  ServiceId: number;
-  CustomPrice?: number;
-  IsAvailable: boolean;
-  Notes?: string;
+  station_id: number;
+  serviceId: number;
+  packageId: number;
+  customPrice: number;
+  serviceCenterBasePrice: number;
+  serviceCenterLoyaltyPoints: number;
+  isAvailable: boolean;
+  notes: string;
 }
 
 export interface Tier {
@@ -182,6 +213,52 @@ export interface Service {
   checked: boolean;
 }
 
+// New interfaces for system-level service management
+export interface SystemService {
+  serviceId: number;
+  serviceName: string;
+  description: string;
+  category: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Package {
+  packageId: number;
+  packageName: string;
+  percentage: number;
+  description: string;
+  isActive: boolean;
+}
+
+export interface CreatePackageDTO {
+  packageName: string;
+  percentage: number;
+  description: string;
+  isActive: boolean;
+}
+
+export interface UpdatePackageDTO {
+  packageName?: string;
+  percentage?: number;
+  description?: string;
+  isActive?: boolean;
+}
+
+export interface CreateSystemServiceDTO {
+  serviceName: string;
+  description: string;
+  category: string;
+}
+
+export interface UpdateSystemServiceDTO {
+  serviceName?: string;
+  description?: string;
+  category?: string;
+  isActive?: boolean;
+}
+
 export type UserRole = "admin" | "super-admin" | "service-center-admin" | "cashier" | "data-operator";
 
 export interface DashboardStats {
@@ -206,4 +283,9 @@ export {
   updateServiceCenter,
   createServiceCenter,
   fetchVehicles,
+  fetchSystemServices,
+  createSystemService,
+  updateSystemService,
+  deleteSystemService,
+  toggleSystemServiceStatus,
 } from "@/utils/api";
