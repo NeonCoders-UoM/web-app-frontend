@@ -181,6 +181,20 @@ const SuperAdminDashboard: React.FC = () => {
               >
                 Add Service Center
               </Button>
+              <Button
+                variant="secondary"
+                size="medium"
+                onClick={() => router.push("/services")}
+              >
+                Manage Services
+              </Button>
+              <Button
+                variant="secondary"
+                size="medium"
+                onClick={() => router.push("/packages")}
+              >
+                Manage Packages
+              </Button>
             </div>
           </div>
 

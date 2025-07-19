@@ -8,7 +8,14 @@ import {
   CreateServiceCenterDTO,
   UpdateServiceCenterDTO,
   ServiceCenterServiceDTO,
-  CreateServiceCenterServiceDTO
+  CreateServiceCenterServiceDTO,
+  SystemService,
+  CreateSystemServiceDTO,
+  UpdateSystemServiceDTO,
+  Package,
+  CreatePackageDTO,
+  UpdatePackageDTO,
+  CreateServiceCenterWithServicesDTO
 } from "@/types";
 import axiosInstance from "./axios";
 
@@ -739,6 +746,71 @@ export const createServiceCenter = async (data: Omit<ServiceCenter, "id">): Prom
   }
 };
 
+// Create a service center with package and services
+export const createServiceCenterWithServices = async (data: CreateServiceCenterWithServicesDTO): Promise<ServiceCenter> => {
+  try {
+    // First create the service center
+    const createData: CreateServiceCenterDTO = {
+      ownerName: data.ownerName,
+      vatNumber: data.vatNumber,
+      registerationNumber: data.registerationNumber,
+      station_name: data.station_name,
+      email: data.email,
+      telephone: data.telephone,
+      address: data.address,
+      station_status: data.station_status
+    };
+    
+    const response = await axiosInstance.post("/ServiceCenters", createData);
+    const serviceCenter = response.data;
+    const stationId = serviceCenter.station_id;
+    
+    // Then add the selected services with pricing
+    const selectedServices = data.services.filter(service => service.isSelected);
+    
+    for (const service of selectedServices) {
+      await axiosInstance.post(`/ServiceCenters/${stationId}/Services`, {
+        station_id: stationId,
+        serviceId: service.serviceId,
+        packageId: data.packageId,
+        customPrice: service.basePrice,
+        serviceCenterBasePrice: service.basePrice,
+        serviceCenterLoyaltyPoints: 10,
+        isAvailable: true,
+        notes: `Base price: ${service.basePrice}`
+      });
+    }
+    
+    // Transform backend response to frontend format
+    return {
+      id: serviceCenter.station_id?.toString() || "",
+      Station_id: serviceCenter.station_id,
+      serviceCenterName: serviceCenter.station_name || "",
+      Station_name: serviceCenter.station_name,
+      email: serviceCenter.email || "",
+      Email: serviceCenter.email,
+      address: serviceCenter.address || "",
+      Address: serviceCenter.address,
+      telephoneNumber: serviceCenter.telephone || "",
+      Telephone: serviceCenter.telephone,
+      ownersName: serviceCenter.ownerName || "",
+      OwnerName: serviceCenter.ownerName,
+      vatNumber: serviceCenter.vatNumber || "",
+      VATNumber: serviceCenter.vatNumber,
+      registrationNumber: serviceCenter.registerationNumber || "",
+      RegisterationNumber: serviceCenter.registerationNumber,
+      Station_status: serviceCenter.station_status,
+      commissionRate: "",
+      availableServices: [],
+      photoUrl: "",
+      registrationCopyUrl: "",
+    };
+  } catch (error) {
+    console.error("Error in createServiceCenterWithServices:", error);
+    throw error;
+  }
+};
+
 // Fetch service centers by status
 export const fetchServiceCentersByStatus = async (status: string): Promise<ServiceCenter[]> => {
   try {
@@ -798,6 +870,21 @@ export const fetchServiceCenterServices = async (stationId: string): Promise<Ser
   }
 };
 
+// Fetch package information for a service center
+export const fetchServiceCenterPackage = async (stationId: string): Promise<Package | null> => {
+  try {
+    const response = await axiosInstance.get(`/ServiceCenters/${stationId}/Package`);
+    return response.data;
+  } catch (error) {
+    // Only log error if it's not a 404 (endpoint doesn't exist)
+    const axiosError = error as { response?: { status?: number } };
+    if (axiosError.response?.status !== 404) {
+      console.error("Error fetching service center package:", error);
+    }
+    return null;
+  }
+};
+
 // Add a service to a service center
 export const addServiceToServiceCenter = async (
   stationId: string, 
@@ -818,6 +905,24 @@ export const removeServiceFromServiceCenter = async (stationId: string, serviceI
     await axiosInstance.delete(`/ServiceCenters/${stationId}/Services/${serviceId}`);
   } catch (error) {
     console.error("Error in removeServiceFromServiceCenter:", error);
+    throw error;
+  }
+};
+
+// Update a service center service
+export const updateServiceCenterService = async (
+  stationId: string, 
+  serviceId: string, 
+  updateData: { customPrice: number; loyaltyPoints: number }
+): Promise<ServiceCenterServiceDTO> => {
+  try {
+    const response = await axiosInstance.put(`/ServiceCenters/${stationId}/Services/${serviceId}`, {
+      customPrice: updateData.customPrice,
+      serviceCenterLoyaltyPoints: updateData.loyaltyPoints,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error in updateServiceCenterService:", error);
     throw error;
   }
 };
@@ -1015,6 +1120,222 @@ export const deleteServiceHistory = async (vehicleId: number, serviceHistoryId: 
     return true;
   } catch (error) {
     console.error("Error deleting service history:", error);
+    throw error;
+  }
+};
+
+// ========== System Services Management API Functions ==========
+
+// Fetch all system services
+export const fetchSystemServices = async (): Promise<SystemService[]> => {
+  try {
+    console.log("Attempting to fetch system services from:", `${axiosInstance.defaults.baseURL}/Services`);
+    const response = await axiosInstance.get('/Services');
+    console.log("Successfully fetched system services from backend:", response.data);
+    return response.data;
+  } catch (error) {
+    const axiosError = error as { 
+      response?: { 
+        status?: number; 
+        statusText?: string;
+        data?: unknown;
+        config?: { url?: string };
+      } 
+    };
+    
+    // If it's a 404, the endpoint doesn't exist - this is expected
+    if (axiosError.response?.status === 404) {
+      console.log("Services endpoint not found (expected - backend endpoint not implemented yet), using fallback data");
+    } else {
+      console.error("Error fetching system services:", {
+        status: axiosError.response?.status,
+        statusText: axiosError.response?.statusText,
+        data: axiosError.response?.data,
+        url: axiosError.response?.config?.url
+      });
+    }
+    
+    // Fallback data for development/testing
+    const fallbackServices: SystemService[] = [
+      {
+        serviceId: 1,
+        serviceName: "Oil Change",
+        description: "Complete oil change with filter replacement",
+        category: "Maintenance",
+        isActive: true,
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z"
+      },
+      {
+        serviceId: 2,
+        serviceName: "Tire Replacement",
+        description: "Replace worn tires with new ones",
+        category: "Tires",
+        isActive: true,
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z"
+      },
+      {
+        serviceId: 3,
+        serviceName: "Brake Service",
+        description: "Brake pad replacement and brake fluid change",
+        category: "Brakes",
+        isActive: true,
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z"
+      },
+      {
+        serviceId: 4,
+        serviceName: "Engine Repair",
+        description: "Diagnostic and repair of engine issues",
+        category: "Engine",
+        isActive: true,
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z"
+      },
+      {
+        serviceId: 5,
+        serviceName: "Full Inspection",
+        description: "Comprehensive vehicle inspection",
+        category: "Inspection",
+        isActive: true,
+        createdAt: "2024-01-01T00:00:00Z",
+        updatedAt: "2024-01-01T00:00:00Z"
+      }
+    ];
+    console.log("Using fallback services data for development:", fallbackServices);
+    return fallbackServices;
+  }
+};
+
+// Create a new system service
+export const createSystemService = async (serviceData: CreateSystemServiceDTO): Promise<SystemService> => {
+  try {
+    const response = await axiosInstance.post('/Services', serviceData);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating system service:", error);
+    throw error;
+  }
+};
+
+// Update a system service
+export const updateSystemService = async (serviceId: number, serviceData: UpdateSystemServiceDTO): Promise<SystemService> => {
+  try {
+    const response = await axiosInstance.put(`/Services/${serviceId}`, serviceData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating system service:", error);
+    throw error;
+  }
+};
+
+// Delete a system service
+export const deleteSystemService = async (serviceId: number): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/Services/${serviceId}`);
+  } catch (error) {
+    console.error("Error deleting system service:", error);
+    throw error;
+  }
+};
+
+// Toggle service active status
+export const toggleSystemServiceStatus = async (serviceId: number, isActive: boolean): Promise<void> => {
+  try {
+    await axiosInstance.patch(`/Services/${serviceId}/status`, { isActive });
+  } catch (error) {
+    console.error("Error toggling system service status:", error);
+    throw error;
+  }
+};
+
+// ========== Packages Management API Functions ==========
+
+// Fetch all packages
+export const fetchPackages = async (): Promise<Package[]> => {
+  try {
+    const response = await axiosInstance.get('/Packages');
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching packages:", error);
+    // Fallback data for development/testing
+    const fallbackPackages: Package[] = [
+      {
+        packageId: 1,
+        packageName: "Basic Package",
+        percentage: 10,
+        description: "Basic service package with 10% loyalty percentage",
+        isActive: true
+      },
+      {
+        packageId: 2,
+        packageName: "Premium Package",
+        percentage: 20,
+        description: "Premium service package with 20% loyalty percentage",
+        isActive: true
+      },
+      {
+        packageId: 3,
+        packageName: "Gold Package",
+        percentage: 30,
+        description: "Gold service package with 30% loyalty percentage",
+        isActive: true
+      }
+    ];
+    return fallbackPackages;
+  }
+};
+
+// Fetch a specific package
+export const fetchPackage = async (id: number): Promise<Package> => {
+  try {
+    const response = await axiosInstance.get(`/Packages/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching package:", error);
+    throw error;
+  }
+};
+
+// Fetch active packages only
+export const fetchActivePackages = async (): Promise<Package[]> => {
+  try {
+    const response = await axiosInstance.get('/Packages/Active');
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching active packages:", error);
+    throw error;
+  }
+};
+
+// Create a new package
+export const createPackage = async (packageData: CreatePackageDTO): Promise<Package> => {
+  try {
+    const response = await axiosInstance.post('/Packages', packageData);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating package:", error);
+    throw error;
+  }
+};
+
+// Update a package
+export const updatePackage = async (id: number, packageData: UpdatePackageDTO): Promise<void> => {
+  try {
+    await axiosInstance.put(`/Packages/${id}`, packageData);
+  } catch (error) {
+    console.error("Error updating package:", error);
+    throw error;
+  }
+};
+
+// Delete a package
+export const deletePackage = async (id: number): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/Packages/${id}`);
+  } catch (error) {
+    console.error("Error deleting package:", error);
     throw error;
   }
 };

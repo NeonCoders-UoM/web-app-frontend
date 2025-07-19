@@ -6,7 +6,6 @@ import { useRouter, useParams } from "next/navigation";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import TabNavigation from "@/components/atoms/tab-navigation/tab-navigation";
 import Table from "@/components/organism/table/table";
-import Button from "@/components/atoms/button/button";
 import {
   fetchServiceCenterById,
   fetchServiceCenterServices,
@@ -98,24 +97,31 @@ const ServicesTab: React.FC = () => {
         } catch (error) {
           console.error("Error fetching data:", error);
           // Fallback to mock data if API fails
-          const fallbackServices = mockServices.map((service) => ({
-            ServiceCenterServiceId: parseInt(service.id.replace("#SC-", "")),
-            Station_id: parseInt(id),
-            ServiceId: parseInt(service.id.replace("#SC-", "")),
-            CustomPrice: parseFloat(
+          const fallbackServices = mockServices.map((service) => {
+            const price = parseFloat(
               service.price.replace("LKR", "").replace(",", "")
-            ),
-            IsAvailable: true,
-            Notes: "",
-            ServiceName: service.name,
-            ServiceDescription: service.name,
-            BasePrice: parseFloat(
-              service.price.replace("LKR", "").replace(",", "")
-            ),
-            LoyaltyPoints: 10,
-            Category: "General",
-            StationName: "Unknown",
-          }));
+            );
+            return {
+              serviceCenterServiceId: parseInt(service.id.replace("#SC-", "")),
+              station_id: parseInt(id),
+              serviceId: parseInt(service.id.replace("#SC-", "")),
+              packageId: 1,
+              customPrice: price,
+              serviceCenterBasePrice: price,
+              serviceCenterLoyaltyPoints: Math.round((price * 10) / 100), // 10% for basic package
+              isAvailable: true,
+              notes: "",
+              serviceName: service.name,
+              serviceDescription: service.name,
+              serviceBasePrice: price,
+              category: "General",
+              stationName: "Unknown",
+              packageName: "Basic Package",
+              packagePercentage: 10, // 10% for basic package
+              packageDescription:
+                "Basic service package with 10% loyalty percentage",
+            };
+          });
           setServices(fallbackServices);
         } finally {
           setIsLoading(false);
@@ -177,21 +183,31 @@ const ServicesTab: React.FC = () => {
 
   const headers = [
     { title: "SERVICE ID", sortable: false },
-    { title: "NAME", sortable: false },
-    { title: "PRICE", sortable: false },
-    { title: "EFFECTIVE TO", sortable: false },
-    { title: "ADD ANOTHER", sortable: false },
-    { title: "ACTIONS", sortable: false }, // Added column for kebab menu
+    { title: "SERVICE NAME", sortable: false },
+    { title: "DESCRIPTION", sortable: false },
+    { title: "CUSTOM PRICE", sortable: false },
+    { title: "LOYALTY POINTS", sortable: false },
+    { title: "STATUS", sortable: false },
   ];
 
-  const tableData = services.map((service) => [
-    `#SC-${service.ServiceCenterServiceId.toString().padStart(4, "0")}`,
-    service.ServiceName,
-    `${service.CustomPrice || service.BasePrice}LKR`,
-    "N/A", // No effective date in current API
-    service.StationName,
-    "", // Placeholder for the actions column
-  ]);
+  const tableData = services.map((service) => {
+    // Calculate loyalty points based on custom price and package percentage
+    const customPrice = service.customPrice || service.serviceBasePrice || 0;
+    const packagePercentage = service.packagePercentage || 0;
+    const loyaltyPoints = Math.round((customPrice * packagePercentage) / 100);
+
+    return [
+      `#SC-${(service.serviceCenterServiceId || 0)
+        .toString()
+        .padStart(4, "0")}`,
+      service.serviceName || "Unknown Service",
+      service.serviceDescription || "No description available",
+      `${customPrice} LKR`,
+      `${loyaltyPoints} points`,
+      service.isAvailable ? "Available" : "Not Available",
+      "", // Placeholder for the actions column
+    ];
+  });
 
   const handleTabChange = (tab: string) => {
     if (!id || typeof id !== "string") {
@@ -220,7 +236,7 @@ const ServicesTab: React.FC = () => {
           setServices(
             services.filter(
               (service) =>
-                service.ServiceCenterServiceId !== serviceCenterServiceId
+                (service.serviceCenterServiceId || 0) !== serviceCenterServiceId
             )
           );
         } catch (error) {
@@ -276,18 +292,6 @@ const ServicesTab: React.FC = () => {
           />
 
           <div className="flex-1 p-6 bg-neutral-50 w-[1074px] h-[760]">
-            <div className="flex justify-end mb-4">
-              <Button
-                variant="primary"
-                size="medium"
-                onClick={() =>
-                  router.push(`/service-centers/${id}/view/services/add`)
-                }
-              >
-                Add Service
-              </Button>
-            </div>
-
             <Table
               headers={headers}
               data={tableData}

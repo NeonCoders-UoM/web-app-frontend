@@ -3,18 +3,18 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import ServiceCenterForm from "@/components/organism/service-center-form/service-center-form";
+import EnhancedServiceCenterForm from "@/components/organism/enhanced-service-center-form/enhanced-service-center-form";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
-import { createServiceCenter } from "@/utils/api";
-import { ServiceCenter } from "@/types";
+import { createServiceCenterWithServices } from "@/utils/api";
+import { CreateServiceCenterWithServicesDTO } from "@/types";
 
 const AddServiceCenter: React.FC = () => {
   const router = useRouter();
 
-  const handleSubmit = async (data: Omit<ServiceCenter, "id">) => {
+  const handleSubmit = async (data: CreateServiceCenterWithServicesDTO) => {
     try {
-      await createServiceCenter(data);
-      alert("Service Center created successfully!");
+      await createServiceCenterWithServices(data);
+      alert("Service Center created successfully with services!");
       router.push("/super-admin"); // Redirect to super admin dashboard
     } catch (error) {
       console.error("Error creating service center:", error);
@@ -44,7 +44,7 @@ const AddServiceCenter: React.FC = () => {
           </h1>
           {/* Centered form */}
           <div>
-            <ServiceCenterForm onSubmit={handleSubmit} />
+            <EnhancedServiceCenterForm onSubmit={handleSubmit} />
           </div>
         </div>
       </div>
