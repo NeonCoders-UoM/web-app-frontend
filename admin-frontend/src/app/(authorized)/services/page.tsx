@@ -9,8 +9,11 @@ import {
   fetchSystemServices,
   deleteSystemService,
   fetchServiceCenterById,
+  fetchServiceCenterServices,
+  addServiceToServiceCenter,
+  removeServiceFromServiceCenter,
 } from "@/utils/api";
-import { SystemService, ServiceCenter } from "@/types";
+import { SystemService, ServiceCenter, ServiceCenterServiceDTO } from "@/types";
 
 const ServicesPage: React.FC = () => {
   const router = useRouter();
@@ -19,58 +22,83 @@ const ServicesPage: React.FC = () => {
   const [serviceCenter, setServiceCenter] = useState<ServiceCenter | null>(
     null
   );
-  const [services, setServices] = useState<SystemService[]>([]);
+  const [services, setServices] = useState<SystemService[] | ServiceCenterServiceDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isServiceCenterView, setIsServiceCenterView] = useState(false);
 
   useEffect(() => {
-    const loadServices = async () => {
-      try {
-        console.log("Loading services...");
-
-        // If serviceCenterId is provided, load service center details
-        if (serviceCenterId) {
-          try {
-            const serviceCenterData = await fetchServiceCenterById(
-              serviceCenterId
-            );
-            setServiceCenter(serviceCenterData);
-          } catch (error) {
-            console.error("Error fetching service center:", error);
-          }
-        }
-
-        const data = await fetchSystemServices();
-        console.log("Services loaded successfully:", data);
-        setServices(data);
-      } catch (error) {
-        console.error("Error fetching services:", error);
-        // Don't show alert since fetchSystemServices has fallback data
-        console.log("Using fallback services data");
-      } finally {
-        setIsLoading(false);
-      }
-    };
     loadServices();
   }, [serviceCenterId]);
 
+  // Refresh data when the page becomes visible (e.g., when returning from add service page)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && (serviceCenterId || !isServiceCenterView)) {
+        loadServices();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [serviceCenterId, isServiceCenterView]);
+
+  const loadServices = async () => {
+    try {
+      console.log("Loading services...");
+
+      if (serviceCenterId) {
+        // Load service center details and its services
+        try {
+          const serviceCenterData = await fetchServiceCenterById(serviceCenterId);
+          setServiceCenter(serviceCenterData);
+          
+          const centerServices = await fetchServiceCenterServices(serviceCenterId);
+          console.log("Service center services loaded:", centerServices);
+          setServices(centerServices);
+          setIsServiceCenterView(true);
+        } catch (error) {
+          console.error("Error fetching service center services:", error);
+          setServices([]);
+        }
+      } else {
+        // Load all system services
+        const data = await fetchSystemServices();
+        console.log("System services loaded successfully:", data);
+        setServices(data);
+        setIsServiceCenterView(false);
+      }
+    } catch (error) {
+      console.error("Error fetching services:", error);
+      console.log("Using fallback services data");
+      setServices([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const data = services.map((service, index) => {
     try {
-      // Ensure all properties exist with fallback values
-      const safeService = {
-        serviceId: service?.serviceId || 0,
-        serviceName: service?.serviceName || "",
-        description: service?.description || "",
-        category: service?.category || "",
-        isActive: service?.isActive ?? true,
-      };
-
-      return [
-        safeService.serviceId.toString(),
-        safeService.serviceName,
-        safeService.description,
-        safeService.category,
-        safeService.isActive ? "Active" : "Inactive",
-      ];
+      if (isServiceCenterView) {
+        // Handle ServiceCenterServiceDTO
+        const centerService = service as ServiceCenterServiceDTO;
+        return [
+          centerService.serviceCenterServiceId?.toString() || "0",
+          centerService.serviceName || "",
+          centerService.serviceDescription || "",
+          centerService.category || "",
+          centerService.isAvailable ? "Available" : "Not Available",
+        ];
+      } else {
+        // Handle SystemService
+        const systemService = service as SystemService;
+        return [
+          systemService.serviceId?.toString() || "0",
+          systemService.serviceName || "",
+          systemService.description || "",
+          systemService.category || "",
+          systemService.isActive ? "Active" : "Inactive",
+        ];
+      }
     } catch (error) {
       console.error(
         `Error processing service at index ${index}:`,
@@ -93,32 +121,46 @@ const ServicesPage: React.FC = () => {
     { title: "Service Name", sortable: false },
     { title: "Description", sortable: false },
     { title: "Category", sortable: false },
-    { title: "Status", sortable: false },
+    { title: isServiceCenterView ? "Availability" : "Status", sortable: false },
   ];
 
   const actions: ("edit" | "delete" | "view")[] = ["edit", "delete", "view"];
 
   const handleEdit = (id: string) => {
-    router.push(`/services/${id}/edit`);
+    if (serviceCenterId) {
+      router.push(`/service-centers/${serviceCenterId}/view/services/edit/${id}`);
+    } else {
+      router.push(`/services/${id}/edit`);
+    }
   };
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this service?")) {
       try {
-        await deleteSystemService(parseInt(id));
-        setServices((prev) =>
-          prev.filter((service) => (service.serviceId || 0).toString() !== id)
-        );
-        alert("Service deleted successfully!");
+        if (isServiceCenterView && serviceCenterId) {
+          // Remove service from service center
+          await removeServiceFromServiceCenter(serviceCenterId, id);
+          alert("Service removed from service center successfully!");
+        } else {
+          // Delete system service
+          await deleteSystemService(parseInt(id));
+          alert("Service deleted successfully!");
+        }
+        // Refresh the data after successful operation
+        await loadServices();
       } catch (error) {
         console.error("Error deleting service:", error);
-        alert("Failed to delete service.");
+        alert("Failed to delete service. Please try again.");
       }
     }
   };
 
   const handleView = (id: string) => {
-    router.push(`/services/${id}/view`);
+    if (serviceCenterId) {
+      router.push(`/service-centers/${serviceCenterId}/view/services/view/${id}`);
+    } else {
+      router.push(`/services/${id}/view`);
+    }
   };
 
   const handleAction = (action: string, row: string[]) => {
@@ -166,24 +208,30 @@ const ServicesPage: React.FC = () => {
       <div className="px-[182px]">
         <h1 className="text-2xl font-semibold text-neutral-900 mb-[32px]">
           {serviceCenterId
-            ? `Services - Service Center ${
+            ? `Service Center Services - ${
                 serviceCenter?.serviceCenterName || serviceCenterId
               }`
-            : "Services Management"}
+            : "System Services Management"}
         </h1>
 
         <div>
           <div className="flex justify-between items-center mb-[32px]">
             <h2 className="text-xl font-semibold text-neutral-900">
-              System Services
+              {serviceCenterId ? "Service Center Services" : "System Services"}
             </h2>
             <div className="flex items-center space-x-4">
               <Button
                 variant="primary"
                 size="medium"
-                onClick={() => router.push("/services/add")}
+                onClick={() => {
+                  if (serviceCenterId) {
+                    router.push(`/service-centers/${serviceCenterId}/view/services/add`);
+                  } else {
+                    router.push("/services/add");
+                  }
+                }}
               >
-                Add Service
+                {serviceCenterId ? "Add Service to Center" : "Add System Service"}
               </Button>
             </div>
           </div>

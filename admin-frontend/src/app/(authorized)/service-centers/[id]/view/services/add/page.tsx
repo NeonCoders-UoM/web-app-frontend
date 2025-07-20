@@ -4,7 +4,8 @@ import React from "react";
 import { useRouter, useParams } from "next/navigation";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import TabNavigation from "@/components/atoms/tab-navigation/tab-navigation";
-import ServiceUpdateForm from "@/components/organism/service-update-form/service-update-form";
+import ServiceCenterServiceAddForm from "@/components/organism/service-center-service-add-form/service-center-service-add-form";
+import { addServiceToServiceCenter } from "@/utils/api";
 import colors from "@/styles/colors";
 
 const AddServicePage: React.FC = () => {
@@ -41,19 +42,43 @@ const AddServicePage: React.FC = () => {
     router.push(`/service-centers/${id}/view/${tabRoute}`);
   };
 
-  const handleFormSubmit = (data: { serviceName: string; amount: string; effectiveUntil: string }) => {
+  const handleFormSubmit = async (data: { 
+    serviceId: number; 
+    serviceName: string; 
+    customPrice: number; 
+    loyaltyPoints: number;
+    isAvailable: boolean;
+  }) => {
     if (!id || typeof id !== "string") {
       console.error("Invalid ID for navigation:", id);
       return;
     }
-    console.log("New service added:", {
-      id: `#SC-${Math.floor(Math.random() * 10000).toString().padStart(4, "0")}`,
-      name: data.serviceName,
-      price: data.amount,
-      effectiveTo: data.effectiveUntil,
-      addAnother: "DGFHR3 Enterprises",
-    });
-    router.push(`/service-centers/${id}/view/services`);
+
+    try {
+      console.log("Adding service to service center:", {
+        serviceCenterId: id,
+        serviceData: data
+      });
+
+      // Add service to service center
+      await addServiceToServiceCenter(id, {
+        station_id: parseInt(id),
+        serviceId: data.serviceId,
+        packageId: 1, // Default package ID
+        customPrice: data.customPrice,
+        serviceCenterBasePrice: data.customPrice,
+        serviceCenterLoyaltyPoints: data.loyaltyPoints,
+        isAvailable: data.isAvailable,
+        notes: `Added via form on ${new Date().toLocaleDateString()}`,
+      });
+
+      console.log("Service added successfully to service center");
+      alert("Service added successfully to service center!");
+      router.push(`/service-centers/${id}/view/services`);
+    } catch (error) {
+      console.error("Error adding service to service center:", error);
+      alert("Failed to add service to service center. Please try again.");
+    }
   };
 
   return (
@@ -93,7 +118,7 @@ const AddServicePage: React.FC = () => {
             >
               New Service
             </h2>
-            <ServiceUpdateForm onSubmit={handleFormSubmit} buttonLabel="Add" />
+            <ServiceCenterServiceAddForm onSubmit={handleFormSubmit} buttonLabel="Add Service" />
           </div>
         </div>
       </div>
