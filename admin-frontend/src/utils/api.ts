@@ -15,7 +15,10 @@ import {
   Package,
   CreatePackageDTO,
   UpdatePackageDTO,
-  CreateServiceCenterWithServicesDTO
+  CreateServiceCenterWithServicesDTO,
+  ClosureSchedule,
+  CreateClosureScheduleDTO,
+  UpdateClosureScheduleDTO
 } from "@/types";
 import axiosInstance from "./axios";
 
@@ -1338,4 +1341,117 @@ export const deletePackage = async (id: number): Promise<void> => {
     console.error("Error deleting package:", error);
     throw error;
   }
+};
+
+// ========== Closure Schedule Management API Functions ==========
+
+// Add a new closure schedule
+export const addClosureSchedule = async (closureData: CreateClosureScheduleDTO): Promise<ClosureSchedule> => {
+  try {
+    const response = await axiosInstance.post('/ClosureSchedule', closureData);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding closure schedule:", error);
+    throw error;
+  }
+};
+
+// Get closures for a specific service center and week
+export const getClosures = async (serviceCenterId: number, weekNumber: number): Promise<ClosureSchedule[]> => {
+  try {
+    const response = await axiosInstance.get(`/ClosureSchedule/${serviceCenterId}?weekNumber=${weekNumber}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching closures:", error);
+    // Return empty array if no closures found or error occurs
+    return [];
+  }
+};
+
+// Update a closure schedule
+export const updateClosureSchedule = async (id: number, updateData: UpdateClosureScheduleDTO): Promise<ClosureSchedule> => {
+  try {
+    const response = await axiosInstance.put(`/ClosureSchedule/${id}`, updateData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating closure schedule:", error);
+    throw error;
+  }
+};
+
+// Delete a closure schedule
+export const deleteClosureSchedule = async (id: number): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/ClosureSchedule/${id}`);
+  } catch (error) {
+    console.error("Error deleting closure schedule:", error);
+    throw error;
+  }
+};
+
+// ========== Public Customer-Facing API Functions ==========
+
+// Check if a service center is available on a specific date (for customers)
+export const checkServiceCenterAvailability = async (
+  serviceCenterId: number, 
+  date: string
+): Promise<{ isAvailable: boolean; reason?: string }> => {
+  try {
+    // Convert date to week number and day
+    const targetDate = new Date(date);
+    const weekNumber = getWeekNumber(targetDate);
+    const dayOfWeek = getDayOfWeek(targetDate);
+    
+    // Get closures for that week
+    const closures = await getClosures(serviceCenterId, weekNumber);
+    
+    // Check if the specific day is closed
+    const isClosed = closures.some(closure => closure.day === dayOfWeek);
+    
+    return {
+      isAvailable: !isClosed,
+      reason: isClosed ? 'Service center is closed on this day' : undefined
+    };
+  } catch (error) {
+    console.error("Error checking service center availability:", error);
+    // Default to available if we can't check
+    return { isAvailable: true };
+  }
+};
+
+// Get all closures for a service center (for customer display)
+export const getServiceCenterClosures = async (serviceCenterId: number): Promise<ClosureSchedule[]> => {
+  try {
+    // Get closures for current week and next few weeks
+    const currentWeek = getWeekNumber(new Date());
+    const closures: ClosureSchedule[] = [];
+    
+    // Get closures for current week and next 4 weeks
+    for (let week = currentWeek; week <= currentWeek + 4; week++) {
+      try {
+        const weekClosures = await getClosures(serviceCenterId, week);
+        closures.push(...weekClosures);
+      } catch (error) {
+        console.warn(`Failed to fetch closures for week ${week}:`, error);
+        // Continue with other weeks
+      }
+    }
+    
+    return closures;
+  } catch (error) {
+    console.error("Error getting service center closures:", error);
+    return [];
+  }
+};
+
+// Helper functions for date calculations
+const getWeekNumber = (date: Date): number => {
+  const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+  const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
+  return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+};
+
+const getDayOfWeek = (date: Date): string => {
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  return days[date.getDay()];
 };

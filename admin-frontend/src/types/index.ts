@@ -267,6 +267,26 @@ export interface DashboardStats {
   serviceCenters: number;
 }
 
+// Closure Schedule Types
+export interface ClosureSchedule {
+  id: number;
+  serviceCenterId: number;
+  weekNumber: number;
+  day: string;
+}
+
+export interface CreateClosureScheduleDTO {
+  serviceCenterId: number;
+  weekNumber: number;
+  day: string;
+}
+
+export interface UpdateClosureScheduleDTO {
+  serviceCenterId: number;
+  weekNumber: number;
+  day: string;
+}
+
 export {
   fetchServiceCenters,
   fetchServiceCentersByStatus,
@@ -288,4 +308,10 @@ export {
   updateSystemService,
   deleteSystemService,
   toggleSystemServiceStatus,
+  addClosureSchedule,
+  getClosures,
+  updateClosureSchedule,
+  deleteClosureSchedule,
+  checkServiceCenterAvailability,
+  getServiceCenterClosures,
 } from "@/utils/api";

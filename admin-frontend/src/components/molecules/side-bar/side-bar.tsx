@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
 import React from "react";
 import Image from "next/image";
 import SidebarButton from "@/components/atoms/sidebar-button/sidebar-button";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 interface SidebarProps {
   role: "super-admin" | "service-center-admin" | "cashier" | "data-operator";
@@ -11,16 +11,70 @@ interface SidebarProps {
   logo?: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({
-  role,
-  serviceCenters = [],
-}) => {
+const Sidebar: React.FC<SidebarProps> = ({ role, serviceCenters = [] }) => {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const sidebarOptions: Record<string, { label: string; route: string }[]> = {
-    "super-admin": [
-      { label: "Dashboard", route: "/service-center-dashboard/${id}" },
+  // Extract service center ID from pathname if we're in a service center dashboard
+  const serviceCenterIdMatch = pathname.match(
+    /\/service-center-dashboard\/([^\/]+)/
+  );
+
+  // Also check for serviceCenterId in query parameters
+  const queryServiceCenterId = searchParams.get("serviceCenterId");
+
+  const currentServiceCenterId = serviceCenterIdMatch
+    ? serviceCenterIdMatch[1]
+    : queryServiceCenterId;
+
+  const getSidebarOptions = () => {
+    // If we're in a service center dashboard, show service center specific options
+    if (currentServiceCenterId) {
+      return [
+        {
+          label: "Dashboard",
+          route: `/service-center-dashboard/${currentServiceCenterId}`,
+        },
+        {
+          label: "Services",
+          route: `/services?serviceCenterId=${currentServiceCenterId}`,
+        },
+        {
+          label: "Appointments",
+          route: `/appointment?serviceCenterId=${currentServiceCenterId}`,
+        },
+        {
+          label: "Clients",
+          route: `/client?serviceCenterId=${currentServiceCenterId}`,
+        },
+        {
+          label: "Vehicles",
+          route: `/vehicle?serviceCenterId=${currentServiceCenterId}`,
+        },
+        {
+          label: "Feedback",
+          route: `/feedback?serviceCenterId=${currentServiceCenterId}`,
+        },
+        {
+          label: "Service Status",
+          route: `/service-status?serviceCenterId=${currentServiceCenterId}`,
+        },
+        {
+          label: "Closure Schedule",
+          route: `/closure-schedule?serviceCenterId=${currentServiceCenterId}`,
+        },
+        {
+          label: "Loyalty Points",
+          route: `/loyalty-points?serviceCenterId=${currentServiceCenterId}`,
+        },
+        { label: "Back to Admin", route: "/admin-dashboard" },
+      ];
+    }
+
+    // Default admin options
+    return [
+      { label: "Dashboard", route: "/admin-dashboard" },
       { label: "Clients", route: "/client" },
       { label: "Vehicles", route: "/vehicle" },
       { label: "Appointments", route: "/appointment" },
@@ -30,7 +84,11 @@ const Sidebar: React.FC<SidebarProps> = ({
       { label: "Closure Schedule", route: "/closure-schedule" },
       { label: "Loyalty Points", route: "/loyalty-points" },
       { label: "Logout", route: "/login" },
-    ],
+    ];
+  };
+
+  const sidebarOptions: Record<string, { label: string; route: string }[]> = {
+    "super-admin": getSidebarOptions(),
     "service-center-admin": [
       { label: "Dashboard", route: "/dashboard" },
       { label: "Clients", route: "/client" },

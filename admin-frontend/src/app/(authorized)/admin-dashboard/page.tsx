@@ -7,10 +7,16 @@ import Table from "@/components/organism/table/table";
 import Button from "@/components/atoms/button/button";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { fetchDashboardStats, fetchServiceCenters } from "@/utils/api";
 
 const AdminDashboard = () => {
-  const [dashboardData, setDashboardData] = useState({ customers: 0, vehicles: 0, serviceCenters: 0 });
+  const router = useRouter();
+  const [dashboardData, setDashboardData] = useState({
+    customers: 0,
+    vehicles: 0,
+    serviceCenters: 0,
+  });
   const [serviceCenters, setServiceCenters] = useState<string[][]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,18 +55,22 @@ const AdminDashboard = () => {
     { title: "Address", sortable: true },
   ];
 
+  const handleServiceCenterClick = (serviceCenterId: string) => {
+    router.push(`/service-center-dashboard/${serviceCenterId}`);
+  };
+
   return (
     <div className="min-h-screen bg-white p-6">
       {/* Header with logo and user profile */}
       <div className="flex justify-between items-center mb-[32px]">
         <div className="flex items-center">
           <Image
-                    src="/images/logo1.png"
-                    alt="Logo"
-                    width={100}
-                    height={20}
-                    className="object-contain"
-                  />
+            src="/images/logo1.png"
+            alt="Logo"
+            width={100}
+            height={20}
+            className="object-contain"
+          />
         </div>
         <div className="w-auto">
           <UserProfileCard />
@@ -72,14 +82,28 @@ const AdminDashboard = () => {
 
         {/* Status Cards */}
         <div className="flex justify-start gap-[67px] mb-[44px]">
-          <StatusCard title="Customers" value={dashboardData.customers} icon="customers" />
-          <StatusCard title="Vehicles" value={dashboardData.vehicles} icon="vehicles" />
-          <StatusCard title="Appointments" value={dashboardData.serviceCenters} icon="serviceCenters" />
+          <StatusCard
+            title="Customers"
+            value={dashboardData.customers}
+            icon="customers"
+          />
+          <StatusCard
+            title="Vehicles"
+            value={dashboardData.vehicles}
+            icon="vehicles"
+          />
+          <StatusCard
+            title="Appointments"
+            value={dashboardData.serviceCenters}
+            icon="serviceCenters"
+          />
         </div>
 
         {/* Service Centers Section */}
         <div className="mb-6">
-          <h2 className="text-xl font-semibold text-neutral-800 mb-[32px]">Service Centers</h2>
+          <h2 className="text-xl font-semibold text-neutral-800 mb-[32px]">
+            Service Centers
+          </h2>
 
           <div className="flex justify-between items-center mb-[40px]">
             <div className="relative">
@@ -93,14 +117,23 @@ const AdminDashboard = () => {
                 <option value="inactive">Inactive Centers</option>
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-400">
-                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <svg
+                  className="fill-current h-4 w-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                >
                   <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                 </svg>
               </div>
             </div>
 
             <div className="flex items-center space-x-4">
-              <Button variant="primary" size="medium" icon="PlusIcon" iconPosition="left">
+              <Button
+                variant="primary"
+                size="medium"
+                icon="PlusIcon"
+                iconPosition="left"
+              >
                 <span className="flex items-center">
                   <Plus size={16} className="mr-1" />
                   Add Service Center
@@ -143,6 +176,7 @@ const AdminDashboard = () => {
               data={serviceCenters}
               actions={["view", "edit", "delete"]}
               showSearchBar={false}
+              onServiceCenterClick={handleServiceCenterClick}
             />
           )}
         </div>

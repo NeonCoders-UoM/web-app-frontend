@@ -1,15 +1,24 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import Button from "@/components/atoms/button/button";
 import Table from "@/components/organism/table/table";
-import { fetchSystemServices, deleteSystemService } from "@/utils/api";
-import { SystemService } from "@/types";
+import {
+  fetchSystemServices,
+  deleteSystemService,
+  fetchServiceCenterById,
+} from "@/utils/api";
+import { SystemService, ServiceCenter } from "@/types";
 
 const ServicesPage: React.FC = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const serviceCenterId = searchParams.get("serviceCenterId");
+  const [serviceCenter, setServiceCenter] = useState<ServiceCenter | null>(
+    null
+  );
   const [services, setServices] = useState<SystemService[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -17,6 +26,19 @@ const ServicesPage: React.FC = () => {
     const loadServices = async () => {
       try {
         console.log("Loading services...");
+
+        // If serviceCenterId is provided, load service center details
+        if (serviceCenterId) {
+          try {
+            const serviceCenterData = await fetchServiceCenterById(
+              serviceCenterId
+            );
+            setServiceCenter(serviceCenterData);
+          } catch (error) {
+            console.error("Error fetching service center:", error);
+          }
+        }
+
         const data = await fetchSystemServices();
         console.log("Services loaded successfully:", data);
         setServices(data);
@@ -29,7 +51,7 @@ const ServicesPage: React.FC = () => {
       }
     };
     loadServices();
-  }, []);
+  }, [serviceCenterId]);
 
   const data = services.map((service, index) => {
     try {
@@ -143,7 +165,11 @@ const ServicesPage: React.FC = () => {
 
       <div className="px-[182px]">
         <h1 className="text-2xl font-semibold text-neutral-900 mb-[32px]">
-          Services Management
+          {serviceCenterId
+            ? `Services - Service Center ${
+                serviceCenter?.serviceCenterName || serviceCenterId
+              }`
+            : "Services Management"}
         </h1>
 
         <div>

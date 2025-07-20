@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import ClientTable from "@/components/organism/client-table/client-table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import { fetchClients } from "@/utils/api";
@@ -26,6 +26,9 @@ interface TransformedClient {
 
 const ClientsPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const serviceCenterId = searchParams.get("serviceCenterId");
+
   const [clientFilter, setClientFilter] = useState("All Clients");
   const [clientsData, setClientsData] = useState<TransformedClient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -113,7 +116,11 @@ const ClientsPage = () => {
       <div className="flex-1 p-6">
         {/* Header with user profile */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-xl font-bold text-neutral-600"></h1>
+          <h1 className="text-xl font-bold text-neutral-600">
+            {serviceCenterId
+              ? `Clients - Service Center ${serviceCenterId}`
+              : "All Clients"}
+          </h1>
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
             pictureAlt="Moni Roy"

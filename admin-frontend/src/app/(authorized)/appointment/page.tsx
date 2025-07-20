@@ -1,9 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import AppointmentTable from "@/components/organism/appointment-table/appointment-table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
-import AppointmentCard from "@/components/molecules/appoinment-cards/appoinment-cards"; 
+import AppointmentCard from "@/components/molecules/appoinment-cards/appoinment-cards";
+import { fetchServiceCenterById } from "@/utils/api";
+import { ServiceCenter } from "@/types";
 import "@/styles/fonts.css";
 
 // Proper type for Appointment
@@ -23,7 +26,13 @@ type AppointmentDetail = {
 };
 
 const AppointmentsPage = () => {
-  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentDetail | null>(null);
+  const searchParams = useSearchParams();
+  const serviceCenterId = searchParams.get("serviceCenterId");
+  const [serviceCenter, setServiceCenter] = useState<ServiceCenter | null>(
+    null
+  );
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<AppointmentDetail | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const modalRef = useRef<HTMLDivElement | null>(null);
@@ -55,22 +64,42 @@ const AppointmentsPage = () => {
     setSelectedAppointment(null);
   };
 
-  // Close modal when clicking outside
-    useEffect(() => {
-      const handleClickOutside = (event: MouseEvent) => {
-        if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-          closeModal();
+  // Load service center details if serviceCenterId is provided
+  useEffect(() => {
+    const loadServiceCenter = async () => {
+      if (serviceCenterId) {
+        try {
+          const serviceCenterData = await fetchServiceCenterById(
+            serviceCenterId
+          );
+          setServiceCenter(serviceCenterData);
+        } catch (error) {
+          console.error("Error fetching service center:", error);
         }
-      };
-  
-      if (isModalOpen) {
-        document.addEventListener("mousedown", handleClickOutside);
       }
-  
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, [isModalOpen]);
+    };
+    loadServiceCenter();
+  }, [serviceCenterId]);
+
+  // Close modal when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
+        closeModal();
+      }
+    };
+
+    if (isModalOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isModalOpen]);
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -88,16 +117,22 @@ const AppointmentsPage = () => {
             onSettingsClick={() => console.log("Settings clicked")}
           />
         </div>
-        
+
         <div className="pr-[50px]">
-          <h1 className="h2 text-neutral-800 mb-[40px]">Appointments Requests</h1>
+          <h1 className="h2 text-neutral-800 mb-[40px]">
+            {serviceCenterId
+              ? `Appointments - Service Center ${
+                  serviceCenter?.serviceCenterName || serviceCenterId
+                }`
+              : "Appointments Requests"}
+          </h1>
 
           <AppointmentTable
             data={appointments}
             onView={handleViewAppointment}
           />
         </div>
-        
+
         {/* Appointment Modal Popup */}
         {isModalOpen && selectedAppointment && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -109,8 +144,16 @@ const AppointmentsPage = () => {
                 date={selectedAppointment.date}
                 vehicle={selectedAppointment.vehicle}
                 services={selectedAppointment.services}
-                onAccept={() => console.log(`Accept clicked for appointment ${selectedAppointment.appointmentId}`)}
-                onReject={() => console.log(`Reject clicked for appointment ${selectedAppointment.appointmentId}`)}
+                onAccept={() =>
+                  console.log(
+                    `Accept clicked for appointment ${selectedAppointment.appointmentId}`
+                  )
+                }
+                onReject={() =>
+                  console.log(
+                    `Reject clicked for appointment ${selectedAppointment.appointmentId}`
+                  )
+                }
               />
             </div>
           </div>

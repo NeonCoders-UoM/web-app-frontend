@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import ClientTable from "@/components/organism/client-table/client-table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import "@/styles/fonts.css";
@@ -26,6 +27,9 @@ interface Vehicle {
 }
 
 const VehiclesPage = () => {
+  const searchParams = useSearchParams();
+  const serviceCenterId = searchParams.get("serviceCenterId");
+
   const [clientFilter, setClientFilter] = useState("All Clients");
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -99,7 +103,12 @@ const VehiclesPage = () => {
   return (
     <div className="flex min-h-screen bg-white">
       <div className="flex-1 p-[58px]">
-        <div className="flex justify-end items-center mb-[80px]">
+        <div className="flex justify-between items-center mb-[80px]">
+          <h1 className="text-xl font-bold text-neutral-600">
+            {serviceCenterId
+              ? `Vehicles - Service Center ${serviceCenterId}`
+              : "All Vehicles"}
+          </h1>
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
             pictureAlt="Moni Roy"
