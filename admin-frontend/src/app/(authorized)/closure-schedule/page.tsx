@@ -5,11 +5,13 @@ import { useSearchParams } from "next/navigation";
 import { Table } from "@/components/organism/closure-schedule-table/closure-schedule-table";
 import ScheduleShopClosures from "@/components/molecules/schedule-shop-closures/schedule-shop-closures";
 import ShiftCard from "@/components/atoms/shiftcard/shiftcard";
+import ServiceAvailabilityTable from "@/components/organism/service-availability-table/service-availability-table";
 import {
   addClosureSchedule,
   getClosures,
   fetchServiceCenters,
   fetchServiceCenterServices,
+  toggleServiceCenterServiceAvailability,
 } from "@/utils/api";
 import { ServiceCenter, ServiceCenterServiceDTO } from "@/types";
 
@@ -24,7 +26,13 @@ const ManageServices = () => {
   const [currentServiceCenterId, setCurrentServiceCenterId] = useState<
     number | null
   >(null);
-  const [currentWeek] = useState<number>(12);
+  const [currentWeek, setCurrentWeek] = useState<number>(() => {
+    // Get current week number
+    const now = new Date();
+    const firstDayOfYear = new Date(now.getFullYear(), 0, 1);
+    const pastDaysOfYear = (now.getTime() - firstDayOfYear.getTime()) / 86400000;
+    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [selectedServiceCenter, setSelectedServiceCenter] =
     useState<ServiceCenter | null>(null);
@@ -152,10 +160,14 @@ const ManageServices = () => {
 
       try {
         setIsLoading(true);
+        console.log(`Loading closures for service center ${currentServiceCenterId}, week ${currentWeek}`);
+        
         const closuresData = await getClosures(
           currentServiceCenterId,
           currentWeek
         );
+
+        console.log("Closures loaded from database:", closuresData);
 
         // Transform closures to shift cards
         const transformedShiftCards = closuresData.map((closure) => ({
@@ -163,6 +175,8 @@ const ManageServices = () => {
           status: "Closed",
         }));
         setShiftCards(transformedShiftCards);
+        
+        console.log("Shift cards updated:", transformedShiftCards);
       } catch (error) {
         console.error("Error loading closures:", error);
         // Keep existing shift cards if loading fails
@@ -183,6 +197,13 @@ const ManageServices = () => {
     setSelectedServiceCenter(center || null);
 
     // Clear existing closures when switching service centers
+    setShiftCards([]);
+  };
+
+  const handleWeekChange = (newWeek: number) => {
+    console.log("Changing week to:", newWeek);
+    setCurrentWeek(newWeek);
+    // Clear existing closures when switching weeks - they will be reloaded by useEffect
     setShiftCards([]);
   };
 
@@ -221,12 +242,24 @@ const ManageServices = () => {
         }
       }
 
-      // Update shift cards
-      const newShiftCards = days.map((day) => ({
-        day: `${day} (Week ${weekNumber})`,
-        status: "Closed",
-      }));
-      setShiftCards((prev) => [...prev, ...newShiftCards]);
+      // Reload closures from database to ensure UI reflects actual data
+      try {
+        const updatedClosures = await getClosures(currentServiceCenterId, weekNumber);
+        const transformedShiftCards = updatedClosures.map((closure) => ({
+          day: closure.day,
+          status: "Closed",
+        }));
+        setShiftCards(transformedShiftCards);
+        console.log("Closures reloaded from database:", updatedClosures);
+      } catch (error) {
+        console.error("Error reloading closures:", error);
+        // Fallback to manual update if reload fails
+        const newShiftCards = days.map((day) => ({
+          day: `${day} (Week ${weekNumber})`,
+          status: "Closed",
+        }));
+        setShiftCards((prev) => [...prev, ...newShiftCards]);
+      }
 
       console.log("Closures added successfully");
       alert(
@@ -238,14 +271,47 @@ const ManageServices = () => {
     }
   };
 
+  const handleServiceAvailabilityToggle = async (serviceId: string, currentAvailability: boolean) => {
+    if (currentServiceCenterId === null) {
+      alert("Please select a service center first.");
+      return;
+    }
+
+    try {
+      const newAvailability = !currentAvailability;
+      
+      console.log(
+        `Toggling service ${serviceId} availability for service center ${currentServiceCenterId}`
+      );
+      console.log(`Making PATCH request to toggle availability`);
+
+      // Update the backend and get the updated list
+      const updatedServices = await toggleServiceCenterServiceAvailability(
+        currentServiceCenterId.toString(),
+        serviceId, // This is actually the serviceCenterServiceId from the table
+        newAvailability
+      );
+      setServiceCenterServices(updatedServices);
+
+      console.log("Service availability updated successfully");
+      alert(
+        `Service availability ${newAvailability ? "enabled" : "disabled"} successfully`
+      );
+    } catch (error: any) {
+      console.error("Error updating service availability:", error);
+      console.error("Full error details:", error.response?.data || error.message);
+      alert("Failed to update service availability. Please try again.");
+    }
+  };
+
   // Transform service center services to table data
   const tableData = serviceCenterServices.map((service) => ({
     id: service.serviceCenterServiceId.toString(),
-    label: service.serviceName,
+    label: service.serviceName || "Unknown Service",
     checked: service.isAvailable,
-    price: service.customPrice,
-    category: service.category,
-    description: service.serviceDescription,
+    price: service.customPrice || service.serviceBasePrice || 0,
+    category: service.category || "General",
+    description: service.serviceDescription || "No description available",
   }));
 
   if (isLoading) {
@@ -356,30 +422,51 @@ const ManageServices = () => {
         </p>
       </div>
 
-      {/* Service Center Selection (for super admin) */}
-      {getUserRole() === "super-admin" && serviceCenters.length > 0 && (
-        <div className="mb-4">
+      {/* Service Center and Week Selection */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        {/* Service Center Selection (for super admin) */}
+        {getUserRole() === "super-admin" && serviceCenters.length > 0 && (
+          <div>
+            <label className="block text-sm font-medium text-neutral-600 mb-2">
+              Select Service Center
+            </label>
+            <select
+              value={currentServiceCenterId || ""}
+              onChange={(e) =>
+                handleServiceCenterChange(parseInt(e.target.value))
+              }
+              className="w-full p-2 border border-neutral-150 rounded-md text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-200"
+            >
+              {serviceCenters.map((center) => (
+                <option
+                  key={center.id}
+                  value={center.Station_id || parseInt(center.id)}
+                >
+                  {center.serviceCenterName}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Week Selection */}
+        <div>
           <label className="block text-sm font-medium text-neutral-600 mb-2">
-            Select Service Center
+            Select Week to View Closures
           </label>
           <select
-            value={currentServiceCenterId || ""}
-            onChange={(e) =>
-              handleServiceCenterChange(parseInt(e.target.value))
-            }
+            value={currentWeek}
+            onChange={(e) => handleWeekChange(parseInt(e.target.value))}
             className="w-full p-2 border border-neutral-150 rounded-md text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-200"
           >
-            {serviceCenters.map((center) => (
-              <option
-                key={center.id}
-                value={center.Station_id || parseInt(center.id)}
-              >
-                {center.serviceCenterName}
+            {allWeeks.map((week, index) => (
+              <option key={index + 1} value={index + 1}>
+                {week}
               </option>
             ))}
           </select>
         </div>
-      )}
+      </div>
 
       {/* Current Service Center Info */}
       {selectedServiceCenter && (
@@ -418,7 +505,11 @@ const ManageServices = () => {
             </div>
             <div>
               <span className="font-medium">Available Services:</span>{" "}
-              {serviceCenterServices.length}
+              {serviceCenterServices.filter(service => service.isAvailable).length} / {serviceCenterServices.length}
+            </div>
+            <div>
+              <span className="font-medium">Viewing Week:</span>{" "}
+              {allWeeks[currentWeek - 1] || `Week ${currentWeek}`}
             </div>
           </div>
         </div>
@@ -428,13 +519,13 @@ const ManageServices = () => {
       <div className="flex space-x-4">
         {/* Schedule Shop Closures Section (Left) */}
         <div className="flex-1">
-          <ScheduleShopClosures onSave={handleSave} allWeeks={allWeeks} />
+          <ScheduleShopClosures onSave={handleSave} allWeeks={allWeeks} currentWeek={currentWeek} />
         </div>
 
         {/* Closure Schedule Section (Right) */}
         <div className="space-y-2">
           <div className="text-lg font-semibold text-neutral-600">
-            Scheduled Closures
+            Scheduled Closures for {allWeeks[currentWeek - 1] || `Week ${currentWeek}`}
           </div>
           <div className="text-sm text-neutral-500 mb-3">
             These closures will be visible to customers
@@ -491,13 +582,57 @@ const ManageServices = () => {
         </p>
       </div>
 
+      {/* Week Selection Notice */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h4 className="text-md font-semibold text-blue-800 mb-2">
+          Week Selection
+        </h4>
+        <p className="text-blue-700 text-sm">
+          Use the week selector above to view closures for different weeks. 
+          Closures are saved per week, so make sure to select the correct week 
+          to see your scheduled closures. The current week is selected by default.
+        </p>
+      </div>
+
+      {/* Service Availability Impact Notice */}
+      <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
+        <h4 className="text-md font-semibold text-green-800 mb-2">
+          Service Availability Impact
+        </h4>
+        <p className="text-green-700 text-sm">
+          When you disable a service, it will no longer appear in the service list 
+          for customers booking appointments. This helps manage which services are 
+          currently offered by the service center. Re-enable services when they 
+          become available again.
+        </p>
+      </div>
+
       {/* Services Table */}
       <div className="mt-8">
         <h2 className="text-lg font-semibold text-neutral-600 mb-4">
-          Available Services for {selectedServiceCenter?.serviceCenterName}
+          Service Availability Management for {selectedServiceCenter?.serviceCenterName}
         </h2>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <h3 className="text-lg font-semibold text-blue-800 mb-2">
+            About Service Availability
+          </h3>
+          <p className="text-blue-700 text-sm">
+            Toggle the availability of services for this service center. When a service is disabled, 
+            it will not appear in the service list for customers booking appointments. This helps 
+            manage which services are currently offered by the service center.
+          </p>
+          <div className="mt-3 p-3 bg-yellow-100 border border-yellow-300 rounded">
+            <p className="text-yellow-800 text-xs">
+              <strong>Note:</strong> Backend support for service availability updates may not be fully implemented yet. 
+              UI changes will be reflected immediately, but backend persistence depends on API support.
+            </p>
+          </div>
+        </div>
         {serviceCenterServices.length > 0 ? (
-          <Table data={tableData} />
+          <ServiceAvailabilityTable 
+            data={tableData} 
+            onToggle={handleServiceAvailabilityToggle}
+          />
         ) : (
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
             <div className="text-gray-400 mb-2">

@@ -31,13 +31,18 @@ const Select: React.FC<{
 interface ScheduleShopClosuresProps {
   onSave: (week: string, days: string[]) => void;
   allWeeks?: string[];
+  currentWeek?: number;
 }
 
 const ScheduleShopClosures: React.FC<ScheduleShopClosuresProps> = ({
   onSave,
   allWeeks = [],
+  currentWeek = 12,
 }) => {
-  const [selectedWeek, setSelectedWeek] = useState("Week 12 (Jan 1-7)");
+  // Use currentWeek to determine the selected week
+  const selectedWeek = allWeeks.length > 0 && currentWeek > 0 && currentWeek <= allWeeks.length 
+    ? allWeeks[currentWeek - 1] 
+    : "Week 12 (Jan 1-7)";
   const [selectedDays, setSelectedDays] = useState<string[]>(["Mon"]);
 
   // Use provided allWeeks or fallback to default weeks
@@ -70,11 +75,16 @@ const ScheduleShopClosures: React.FC<ScheduleShopClosuresProps> = ({
         Schedule Shop Closures
       </div>
       <div className="space-y-4">
-        <Select
-          options={weeks}
-          value={selectedWeek}
-          onChange={setSelectedWeek}
-        />
+        <div className="space-y-2">
+          <Select
+            options={weeks}
+            value={selectedWeek}
+            onChange={() => {}} // Read-only since it's controlled by parent
+          />
+          <p className="text-xs text-neutral-500">
+            Week selection is controlled by the main page. Use the week selector above to change weeks.
+          </p>
+        </div>
         <DayPicker selectedDays={selectedDays} onDayChange={setSelectedDays} />
       </div>
       <div className="flex justify-end">

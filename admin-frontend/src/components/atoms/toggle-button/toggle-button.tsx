@@ -11,6 +11,11 @@ interface ToggleButtonProps {
 const ToggleButton: React.FC<ToggleButtonProps> = ({ checked = false, onChange }) => {
   const [isOn, setIsOn] = useState<boolean>(checked);
 
+  // Update internal state when checked prop changes
+  React.useEffect(() => {
+    setIsOn(checked);
+  }, [checked]);
+
   const handleToggle = () => {
     const newChecked = !isOn;
     setIsOn(newChecked);

@@ -77,60 +77,61 @@ const ServicesTab: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [services, setServices] = useState<ServiceCenterServiceDTO[]>([]);
 
-  useEffect(() => {
-    const loadData = async () => {
-      if (typeof id === "string") {
-        try {
-          const [serviceCenterData, servicesData] = await Promise.all([
-            fetchServiceCenterById(id),
-            fetchServiceCenterServices(id),
-          ]);
+  const loadData = async () => {
+    if (typeof id === "string") {
+      try {
+        const [serviceCenterData, servicesData] = await Promise.all([
+          fetchServiceCenterById(id),
+          fetchServiceCenterServices(id),
+        ]);
 
-          console.log(
-            "Fetched service center in ServicesTab:",
-            serviceCenterData
+        console.log(
+          "Fetched service center in ServicesTab:",
+          serviceCenterData
+        );
+        console.log("Fetched services:", servicesData);
+
+        setServiceCenter(serviceCenterData);
+        setServices(servicesData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        // Fallback to mock data if API fails
+        const fallbackServices = mockServices.map((service) => {
+          const price = parseFloat(
+            service.price.replace("LKR", "").replace(",", "")
           );
-          console.log("Fetched services:", servicesData);
-
-          setServiceCenter(serviceCenterData);
-          setServices(servicesData);
-        } catch (error) {
-          console.error("Error fetching data:", error);
-          // Fallback to mock data if API fails
-          const fallbackServices = mockServices.map((service) => {
-            const price = parseFloat(
-              service.price.replace("LKR", "").replace(",", "")
-            );
-            return {
-              serviceCenterServiceId: parseInt(service.id.replace("#SC-", "")),
-              station_id: parseInt(id),
-              serviceId: parseInt(service.id.replace("#SC-", "")),
-              packageId: 1,
-              customPrice: price,
-              serviceCenterBasePrice: price,
-              serviceCenterLoyaltyPoints: Math.round((price * 10) / 100), // 10% for basic package
-              isAvailable: true,
-              notes: "",
-              serviceName: service.name,
-              serviceDescription: service.name,
-              serviceBasePrice: price,
-              category: "General",
-              stationName: "Unknown",
-              packageName: "Basic Package",
-              packagePercentage: 10, // 10% for basic package
-              packageDescription:
-                "Basic service package with 10% loyalty percentage",
-            };
-          });
-          setServices(fallbackServices);
-        } finally {
-          setIsLoading(false);
-        }
-      } else {
-        console.error("ID is not a string:", id);
+          return {
+            serviceCenterServiceId: parseInt(service.id.replace("#SC-", "")),
+            station_id: parseInt(id),
+            serviceId: parseInt(service.id.replace("#SC-", "")),
+            packageId: 1,
+            customPrice: price,
+            serviceCenterBasePrice: price,
+            serviceCenterLoyaltyPoints: Math.round((price * 10) / 100), // 10% for basic package
+            isAvailable: true,
+            notes: "",
+            serviceName: service.name,
+            serviceDescription: service.name,
+            serviceBasePrice: price,
+            category: "General",
+            stationName: "Unknown",
+            packageName: "Basic Package",
+            packagePercentage: 10, // 10% for basic package
+            packageDescription:
+              "Basic service package with 10% loyalty percentage",
+          };
+        });
+        setServices(fallbackServices);
+      } finally {
         setIsLoading(false);
       }
-    };
+    } else {
+      console.error("ID is not a string:", id);
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadData();
   }, [id]);
 
@@ -190,7 +191,10 @@ const ServicesTab: React.FC = () => {
     { title: "STATUS", sortable: false },
   ];
 
-  const tableData = services.map((service) => {
+  // Filter services to only show available ones
+  const availableServices = services.filter(service => service.isAvailable);
+  
+  const tableData = availableServices.map((service) => {
     // Calculate loyalty points based on custom price and package percentage
     const customPrice = service.customPrice || service.serviceBasePrice || 0;
     const packagePercentage = service.packagePercentage || 0;
@@ -204,7 +208,7 @@ const ServicesTab: React.FC = () => {
       service.serviceDescription || "No description available",
       `${customPrice} LKR`,
       `${loyaltyPoints} points`,
-      service.isAvailable ? "Available" : "Not Available",
+      "Available", // Since we're only showing available services
       "", // Placeholder for the actions column
     ];
   });
@@ -232,20 +236,28 @@ const ServicesTab: React.FC = () => {
         try {
           const actualServiceId = serviceCenterServiceId.toString();
           await removeServiceFromServiceCenter(id as string, actualServiceId);
-          // Remove from local state
-          setServices(
-            services.filter(
-              (service) =>
-                (service.serviceCenterServiceId || 0) !== serviceCenterServiceId
-            )
-          );
+          alert("Service removed successfully!");
+          // Refresh the data after successful operation
+          await loadData();
         } catch (error) {
           console.error("Error removing service:", error);
-          alert("Failed to remove service");
+          alert("Failed to remove service. Please try again.");
         }
       }
     }
   };
+
+  // Refresh services when the page becomes visible (e.g., when returning from closure schedule)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && typeof id === "string") {
+        loadData();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [id]);
 
   if (isLoading) {
     return (
@@ -279,6 +291,21 @@ const ServicesTab: React.FC = () => {
             onSettingsClick={() => router.push("/settings")}
           />
         </div>
+
+        {/* Service Availability Notice */}
+        {services.length > availableServices.length && (
+          <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-yellow-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <span className="text-yellow-800 text-sm">
+                {services.length - availableServices.length} service(s) are currently unavailable and hidden from this list. 
+                Use the closure schedule page to manage service availability.
+              </span>
+            </div>
+          </div>
+        )}
 
         <h1 className="text-xl font-semibold text-neutral-800 mb-[40px]">
           Service Center Details

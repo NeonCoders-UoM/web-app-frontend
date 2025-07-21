@@ -916,12 +916,13 @@ export const removeServiceFromServiceCenter = async (stationId: string, serviceI
 export const updateServiceCenterService = async (
   stationId: string, 
   serviceId: string, 
-  updateData: { customPrice: number; loyaltyPoints: number }
+  updateData: { customPrice: number; loyaltyPoints: number; isAvailable?: boolean }
 ): Promise<ServiceCenterServiceDTO> => {
   try {
     const response = await axiosInstance.put(`/ServiceCenters/${stationId}/Services/${serviceId}`, {
       customPrice: updateData.customPrice,
       serviceCenterLoyaltyPoints: updateData.loyaltyPoints,
+      ...(updateData.isAvailable !== undefined && { isAvailable: updateData.isAvailable }),
     });
     return response.data;
   } catch (error) {
@@ -929,6 +930,35 @@ export const updateServiceCenterService = async (
     throw error;
   }
 };
+
+// Toggle service availability for a service center
+export const toggleServiceCenterServiceAvailability = async (
+  stationId: string, 
+  serviceCenterServiceId: string, 
+  isAvailable: boolean
+): Promise<ServiceCenterServiceDTO[]> => {
+  try {
+    console.log(`Toggling service center service ID: ${serviceCenterServiceId}`);
+    console.log(`Making PATCH request to: /ServiceCenterServices/${serviceCenterServiceId}/toggle-availability`);
+
+    // Use the toggle endpoint which is simpler and more reliable
+    await axiosInstance.patch(`/ServiceCenterServices/${serviceCenterServiceId}/toggle-availability`);
+    
+    console.log("Toggle request successful, fetching updated services");
+    
+    // Fetch the updated list after toggling
+    const updatedServices = await fetchServiceCenterServices(stationId);
+    return updatedServices;
+  } catch (error) {
+    console.error("Error in toggleServiceCenterServiceAvailability:", error);
+    throw error;
+  }
+};
+
+// Interface for UpdateServiceAvailabilityRequest (backend DTO)
+export interface UpdateServiceAvailabilityRequest {
+  IsAvailable?: boolean;
+}
 
 // Update customer data
 export const updateCustomer = async (customerId: number, customerData: {
@@ -1416,6 +1446,35 @@ export const checkServiceCenterAvailability = async (
     console.error("Error checking service center availability:", error);
     // Default to available if we can't check
     return { isAvailable: true };
+  }
+};
+
+// Check current availability for all service centers
+export const checkAllServiceCentersAvailability = async (): Promise<Map<string, { isAvailable: boolean; reason?: string }>> => {
+  try {
+    const serviceCenters = await fetchServiceCenters();
+    const availabilityMap = new Map<string, { isAvailable: boolean; reason?: string }>();
+    const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    // Check availability for each service center
+    for (const serviceCenter of serviceCenters) {
+      const serviceCenterId = serviceCenter.Station_id || parseInt(serviceCenter.id);
+      if (serviceCenterId) {
+        try {
+          const availability = await checkServiceCenterAvailability(serviceCenterId, currentDate);
+          availabilityMap.set(serviceCenter.id, availability);
+        } catch (error) {
+          console.error(`Error checking availability for service center ${serviceCenter.id}:`, error);
+          // Default to available if we can't check
+          availabilityMap.set(serviceCenter.id, { isAvailable: true });
+        }
+      }
+    }
+    
+    return availabilityMap;
+  } catch (error) {
+    console.error("Error checking all service centers availability:", error);
+    return new Map();
   }
 };
 

@@ -29,72 +29,89 @@ const ServiceCenterDashboard = () => {
   });
 
   const [leadingServices, setLeadingServices] = useState<string[][]>([]);
+  const [availableServicesCount, setAvailableServicesCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
+  const fetchData = async () => {
+    if (!serviceCenterId) return;
+
+    setIsLoading(true);
+    try {
+      // Fetch service center details
+      const serviceCenterData = await fetchServiceCenterById(serviceCenterId);
+      setServiceCenter(serviceCenterData);
+
+      // Fetch services for this service center
+      const servicesData = await fetchServiceCenterServices(serviceCenterId);
+
+      // Fetch all clients and vehicles to calculate counts
+      const [clientsData, vehiclesData] = await Promise.all([
+        fetchClients(),
+        fetchVehicles(),
+      ]);
+
+      // Calculate counts for this service center
+      // For now, we'll use the total counts since there's no direct relationship
+      // In a real implementation, you'd filter by service center
+      const customerCount = clientsData.length;
+      const vehicleCount = vehiclesData.length;
+      const serviceCenterCount = 1; // This service center
+
+      setDashboardData({
+        customers: customerCount,
+        vehicles: vehicleCount,
+        serviceCenters: serviceCenterCount,
+      });
+
+      // Filter services to only show available ones
+      const availableServices = servicesData.filter(service => service.isAvailable);
+      
+      // Transform services data to table format (only available services)
+      const servicesTableData = availableServices.map((service, index) => [
+        service.serviceName || "Unknown Service",
+        `${service.customPrice || 0} LKR`,
+        "Available", // Since we're only showing available services
+        serviceCenterData?.serviceCenterName || "Unknown Center",
+        (index + 1).toString(),
+      ]);
+
+      setLeadingServices(servicesTableData);
+      setAvailableServicesCount(availableServices.length);
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+      // Fallback to mock data if API fails
+      const fallbackServices = [
+        ["Engine Check", "60,000 LKR", "12-05-2025", "Service Center", "1"],
+        ["Oil Change", "25,000 LKR", "12-05-2025", "Service Center", "2"],
+        ["Brake Service", "45,000 LKR", "12-05-2025", "Service Center", "3"],
+      ];
+      setLeadingServices(fallbackServices);
+
+      // Set fallback counts
+      setDashboardData({
+        customers: 150,
+        vehicles: 75,
+        serviceCenters: 1,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      if (!serviceCenterId) return;
+    fetchData();
+  }, [serviceCenterId]);
 
-      setIsLoading(true);
-      try {
-        // Fetch service center details
-        const serviceCenterData = await fetchServiceCenterById(serviceCenterId);
-        setServiceCenter(serviceCenterData);
-
-        // Fetch services for this service center
-        const servicesData = await fetchServiceCenterServices(serviceCenterId);
-
-        // Fetch all clients and vehicles to calculate counts
-        const [clientsData, vehiclesData] = await Promise.all([
-          fetchClients(),
-          fetchVehicles(),
-        ]);
-
-        // Calculate counts for this service center
-        // For now, we'll use the total counts since there's no direct relationship
-        // In a real implementation, you'd filter by service center
-        const customerCount = clientsData.length;
-        const vehicleCount = vehiclesData.length;
-        const serviceCenterCount = 1; // This service center
-
-        setDashboardData({
-          customers: customerCount,
-          vehicles: vehicleCount,
-          serviceCenters: serviceCenterCount,
-        });
-
-        // Transform services data to table format
-        const servicesTableData = servicesData.map((service, index) => [
-          service.serviceName || "Unknown Service",
-          `${service.customPrice || 0} LKR`,
-          service.isAvailable ? "Available" : "Not Available",
-          serviceCenterData?.serviceCenterName || "Unknown Center",
-          (index + 1).toString(),
-        ]);
-
-        setLeadingServices(servicesTableData);
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-        // Fallback to mock data if API fails
-        const fallbackServices = [
-          ["Engine Check", "60,000 LKR", "12-05-2025", "Service Center", "1"],
-          ["Oil Change", "25,000 LKR", "12-05-2025", "Service Center", "2"],
-          ["Brake Service", "45,000 LKR", "12-05-2025", "Service Center", "3"],
-        ];
-        setLeadingServices(fallbackServices);
-
-        // Set fallback counts
-        setDashboardData({
-          customers: 150,
-          vehicles: 75,
-          serviceCenters: 1,
-        });
-      } finally {
-        setIsLoading(false);
+  // Refresh data when the page becomes visible (e.g., when returning from closure schedule)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && serviceCenterId) {
+        fetchData();
       }
     };
 
-    fetchData();
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [serviceCenterId]);
 
   const tableHeaders = [
@@ -139,7 +156,7 @@ const ServiceCenterDashboard = () => {
           />
           <StatusCard
             title="Available Services"
-            value={leadingServices.length}
+            value={availableServicesCount}
             icon="serviceCenters"
           />
         </div>
