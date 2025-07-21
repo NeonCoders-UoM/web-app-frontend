@@ -7,7 +7,14 @@ export interface ServiceAvailabilityDTO {
   isAvailable: boolean;
 }
 
-export interface UpdateServiceAvailabilityDTO extends ServiceAvailabilityDTO {}
+export interface UpdateServiceAvailabilityDTO {
+  id?: number;
+  serviceCenterId: number;
+  serviceId: number;
+  weekNumber: number;
+  day: string;
+  isAvailable: boolean;
+}
 
 export interface ServiceCenter {
   id: string; // For frontend compatibility
@@ -326,3 +333,47 @@ export {
   checkServiceCenterAvailability,
   getServiceCenterClosures,
 } from "@/utils/api";
+
+// Feedback related types
+export interface FeedbackDTO {
+  feedbackId: number;
+  customerId: number;
+  serviceCenterId: number;
+  vehicleId: number;
+  rating: number;
+  comments: string;
+  serviceDate: Date | null;
+  feedbackDate: Date;
+  customerName: string;
+  serviceCenterName: string;
+  vehicleRegistrationNumber: string;
+}
+
+export interface CreateFeedbackDTO {
+  customerId: number;
+  serviceCenterId: number;
+  vehicleId: number;
+  rating: number;
+  comments: string;
+  serviceDate: Date;
+}
+
+export interface UpdateFeedbackDTO {
+  rating?: number;
+  comments?: string;
+  serviceDate?: Date | null;
+}
+
+export interface FeedbackStatsDTO {
+  averageRating: number;
+  totalFeedbacks: number;
+  ratingCounts: { [key: number]: number };
+}
+
+export interface FeedbackFilters {
+  page?: number;
+  pageSize?: number;
+  serviceCenterId?: number;
+  minRating?: number;
+  maxRating?: number;
+}

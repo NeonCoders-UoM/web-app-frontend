@@ -1,82 +1,95 @@
 'use client';
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import FeedbackTable from "@/components/organism/feedback-table/feedback-table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import ReviewSummaryCard from "@/components/organism/review-summary-card/review-summary-card";
+import { FeedbackDTO, FeedbackStatsDTO } from "@/types";
+import { getAllFeedbacks, getFeedbackStats } from "@/utils/api";
+import { formatDate } from "@/lib/utils";
 import "@/styles/fonts.css";
 
 const FeedbackPage = () => {
-  const feedbackData = [
-    {
-      clientName: "John Doe",
-      profileSrc: "/images/profile1.jpg",
-      profileAlt: "John's profile",
-      clientId: "1",
-      stars: 5,
-      serviceCenter: "Speed Motors",
-      date: "2025-04-01",
-      feedback: "Excellent service! Highly recommended."
-    },
-    {
-      clientName: "Jane Smith",
-      profileSrc: "/images/profile2.jpg",
-      profileAlt: "Jane's profile",
-      clientId: "2",
-      stars: 5,
-      serviceCenter: "Rapid Repairs",
-      date: "2025-04-02",
-      feedback: "Amazing staff and thorough work!"
-    },
-    {
-      clientName: "Mike Johnson",
-      profileSrc: "/images/profile3.jpg",
-      profileAlt: "Mike's profile",
-      clientId: "3",
-      stars: 3,
-      serviceCenter: "AutoSure Solutions",
-      date: "2025-04-03",
-      feedback: "Average experience. Staff could be friendlier."
-    },
-    {
-      clientName: "Emily Davis",
-      profileSrc: "/images/profile4.jpg",
-      profileAlt: "Emily's profile",
-      clientId: "4",
-      stars: 4,
-      serviceCenter: "Speed Motors",
-      date: "2025-04-04",
-      feedback: ""
-    },
-    {
-      clientName: "Daniel Wilson",
-      profileSrc: "/images/profile5.jpg",
-      profileAlt: "Daniel's profile",
-      clientId: "5",
-      stars: 4,
-      serviceCenter: "Speed Motors",
-      date: "2025-04-05",
-      feedback: "Great service, but prices are slightly high."
-    },
-    {
-      clientName: "Sophia Brown",
-      profileSrc: "/images/profile6.jpg",
-      profileAlt: "Sophia's profile",
-      clientId: "6",
-      stars: 5,
-      serviceCenter: "MotorMedic Garage",
-      date: "2025-04-06",
-      feedback: "Excellent for hybrid cars! Fully satisfied."
-    }
-  ];
+  const [feedbackData, setFeedbackData] = useState<FeedbackDTO[]>([]);
+  const [feedbackStats, setFeedbackStats] = useState<FeedbackStatsDTO | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const ratingStats = [
-    { star: 5, count: 20000 },
-    { star: 4, count: 8000 },
-    { star: 3, count: 3000 },
-    { star: 2, count: 1000 },
-    { star: 1, count: 256 },
-  ];
+  const fetchFeedbackData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Fetch feedbacks and stats in parallel
+      const [feedbacks, stats] = await Promise.all([
+        getAllFeedbacks({ page: 1, pageSize: 50 }), // Adjust pageSize as needed
+        getFeedbackStats()
+      ]);
+
+      setFeedbackData(feedbacks);
+      setFeedbackStats(stats);
+    } catch (err) {
+      console.error("Error fetching feedback data:", err);
+      setError("Failed to load feedback data. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFeedbackData();
+  }, []);
+
+  // Transform backend data to match the frontend component format
+  const transformedFeedbackData = feedbackData.map((feedback) => ({
+    clientName: feedback.customerName,
+    profileSrc: "/images/profilepic.jpg", // Default profile image
+    profileAlt: `${feedback.customerName}'s profile`,
+    clientId: feedback.customerId.toString(),
+    stars: feedback.rating,
+    serviceCenter: feedback.serviceCenterName,
+    date: formatDate(feedback.feedbackDate), // Use the utility function
+    feedback: feedback.comments || ""
+  }));
+
+  // Transform stats data for the ReviewSummaryCard
+  const ratingStats = feedbackStats ? [
+    { star: 5, count: feedbackStats.ratingCounts[5] || 0 },
+    { star: 4, count: feedbackStats.ratingCounts[4] || 0 },
+    { star: 3, count: feedbackStats.ratingCounts[3] || 0 },
+    { star: 2, count: feedbackStats.ratingCounts[2] || 0 },
+    { star: 1, count: feedbackStats.ratingCounts[1] || 0 },
+  ] : [];
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen bg-white">
+        <div className="flex-1 p-[58px]">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-lg text-neutral-600">Loading feedback data...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen bg-white">
+        <div className="flex-1 p-[58px]">
+          <div className="flex justify-center items-center h-64 flex-col gap-4">
+            <div className="text-lg text-red-600">{error}</div>
+            <button
+              onClick={fetchFeedbackData}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -95,18 +108,27 @@ const FeedbackPage = () => {
           />
         </div>
         
-        <h1 className="h2 text-neutral-600 mb-[28px]">Customer Feedbacks</h1>
+        <div className="flex justify-between items-center mb-[28px]">
+          <h1 className="h2 text-neutral-600">Customer Feedbacks</h1>
+          <button
+            onClick={fetchFeedbackData}
+            disabled={loading}
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? "Refreshing..." : "Refresh"}
+          </button>
+        </div>
 
         <div className="flex justify-center md:justify-start mb-[46px]">
           <ReviewSummaryCard
-            average={4.8}
-            totalReviews={32256}
+            average={feedbackStats?.averageRating || 0}
+            totalReviews={feedbackStats?.totalFeedbacks || 0}
             ratings={ratingStats}
           />
         </div>
 
         {/* Feedback Table Component */}
-        <FeedbackTable data={feedbackData} />
+        <FeedbackTable data={transformedFeedbackData} />
       </div>
     </div>
   );
