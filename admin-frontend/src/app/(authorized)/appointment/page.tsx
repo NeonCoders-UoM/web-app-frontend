@@ -9,20 +9,31 @@ import { fetchServiceCenterById } from "@/utils/api";
 import { ServiceCenter } from "@/types";
 import "@/styles/fonts.css";
 
-// Proper type for Appointment
+// Types matching backend DTOs
+// Appointment summary for admin
+// { appointmentId, ownerName, appointmentDate }
 type AppointmentSummary = {
+  appointmentId: number;
+  ownerName: string;
+  appointmentDate: string;
+};
+
+// Appointment detail for admin
+// { appointmentId, licensePlate, vehicleType, ownerName, appointmentDate, services }
+type AppointmentDetail = {
+  appointmentId: number;
+  licensePlate: string;
+  vehicleType: string;
+  ownerName: string;
+  appointmentDate: string;
+  services: string[];
+};
+
+// Table expects this type:
+type TableAppointment = {
   id: string;
   name: string;
   date: string;
-};
-
-type AppointmentDetail = {
-  appointmentId: string;
-  owner: string;
-  licensePlate: string;
-  date: string;
-  vehicle: string;
-  services: string[];
 };
 
 const AppointmentsPage = () => {
@@ -31,40 +42,22 @@ const AppointmentsPage = () => {
   const [serviceCenter, setServiceCenter] = useState<ServiceCenter | null>(
     null
   );
+  const [appointments, setAppointments] = useState<AppointmentSummary[]>([]);
+  const [appointmentsLoading, setAppointmentsLoading] = useState(false);
+  const [appointmentsError, setAppointmentsError] = useState<string | null>(
+    null
+  );
   const [selectedAppointment, setSelectedAppointment] =
     useState<AppointmentDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const modalRef = useRef<HTMLDivElement | null>(null);
+  const [tableAppointments, setTableAppointments] = useState<
+    TableAppointment[]
+  >([]);
 
-  const appointments: AppointmentSummary[] = [
-    { id: "#APT-0001", name: "Devon Lane", date: "12-05-2025" },
-    { id: "#APT-0002", name: "Devon Lane", date: "12-05-2025" },
-    { id: "#APT-0003", name: "Devon Lane", date: "12-05-2025" },
-    { id: "#APT-0004", name: "Devon Lane", date: "12-05-2025" },
-    { id: "#APT-0005", name: "Devon Lane", date: "12-05-2025" },
-    { id: "#APT-0006", name: "Devon Lane", date: "12-05-2025" },
-    { id: "#APT-0007", name: "Devon Lane", date: "12-05-2025" },
-  ];
-
-  const handleViewAppointment = (appointment: AppointmentSummary) => {
-    setSelectedAppointment({
-      appointmentId: appointment.id,
-      owner: appointment.name,
-      licensePlate: "ABC-1234",
-      date: appointment.date,
-      vehicle: "Toyota Prius 2021",
-      services: ["Oil Change", "Tire Rotation"],
-    });
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedAppointment(null);
-  };
-
-  // Load service center details if serviceCenterId is provided
+  // Fetch service center details
   useEffect(() => {
     const loadServiceCenter = async () => {
       if (serviceCenterId) {
@@ -74,12 +67,86 @@ const AppointmentsPage = () => {
           );
           setServiceCenter(serviceCenterData);
         } catch (error) {
+          // Not critical for appointments, so just log
           console.error("Error fetching service center:", error);
         }
       }
     };
     loadServiceCenter();
   }, [serviceCenterId]);
+
+  // Fetch appointments for the service center
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      if (serviceCenterId) {
+        setAppointmentsLoading(true);
+        setAppointmentsError(null);
+        try {
+          const res = await fetch(
+            `/api/Appointment/station/${serviceCenterId}`
+          );
+          if (!res.ok) throw new Error("Failed to fetch appointments");
+          const data = await res.json();
+          setAppointments(data);
+        } catch (error: unknown) {
+          setAppointmentsError(
+            error instanceof Error ? error.message : "Unknown error"
+          );
+        } finally {
+          setAppointmentsLoading(false);
+        }
+      }
+    };
+    fetchAppointments();
+  }, [serviceCenterId]);
+
+  // Map fetched appointments to table format
+  useEffect(() => {
+    if (appointments && Array.isArray(appointments)) {
+      setTableAppointments(
+        appointments.map((a) => ({
+          id: a.appointmentId.toString(),
+          name: a.ownerName,
+          date: a.appointmentDate,
+        }))
+      );
+    }
+  }, [appointments]);
+
+  // Accepts TableAppointment, finds AppointmentSummary, then fetches detail
+  const handleViewAppointment = async (appointment: TableAppointment) => {
+    if (!serviceCenterId) return;
+    setDetailLoading(true);
+    setDetailError(null);
+    // Find the original summary by id
+    const summary = appointments.find(
+      (a) => a.appointmentId.toString() === appointment.id
+    );
+    if (!summary) {
+      setDetailError("Appointment not found");
+      setDetailLoading(false);
+      return;
+    }
+    try {
+      const res = await fetch(
+        `/api/Appointment/station/${serviceCenterId}/details/${summary.appointmentId}`
+      );
+      if (!res.ok) throw new Error("Failed to fetch appointment details");
+      const data = await res.json();
+      setSelectedAppointment(data);
+      setIsModalOpen(true);
+    } catch (error: unknown) {
+      setDetailError(error instanceof Error ? error.message : "Unknown error");
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedAppointment(null);
+    setDetailError(null);
+  };
 
   // Close modal when clicking outside
   useEffect(() => {
@@ -91,11 +158,9 @@ const AppointmentsPage = () => {
         closeModal();
       }
     };
-
     if (isModalOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
@@ -127,34 +192,50 @@ const AppointmentsPage = () => {
               : "Appointments Requests"}
           </h1>
 
-          <AppointmentTable
-            data={appointments}
-            onView={handleViewAppointment}
-          />
+          {appointmentsLoading ? (
+            <div className="text-gray-500">Loading appointments...</div>
+          ) : appointmentsError ? (
+            <div className="text-red-500">{appointmentsError}</div>
+          ) : (
+            <AppointmentTable
+              data={tableAppointments}
+              onView={handleViewAppointment}
+            />
+          )}
         </div>
 
         {/* Appointment Modal Popup */}
-        {isModalOpen && selectedAppointment && (
+        {isModalOpen && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div ref={modalRef} className="relative">
-              <AppointmentCard
-                appointmentId={selectedAppointment.appointmentId}
-                owner={selectedAppointment.owner}
-                licensePlate={selectedAppointment.licensePlate}
-                date={selectedAppointment.date}
-                vehicle={selectedAppointment.vehicle}
-                services={selectedAppointment.services}
-                onAccept={() =>
-                  console.log(
-                    `Accept clicked for appointment ${selectedAppointment.appointmentId}`
-                  )
-                }
-                onReject={() =>
-                  console.log(
-                    `Reject clicked for appointment ${selectedAppointment.appointmentId}`
-                  )
-                }
-              />
+              {detailLoading ? (
+                <div className="bg-white p-8 rounded shadow text-gray-700">
+                  Loading details...
+                </div>
+              ) : detailError ? (
+                <div className="bg-white p-8 rounded shadow text-red-500">
+                  {detailError}
+                </div>
+              ) : selectedAppointment ? (
+                <AppointmentCard
+                  appointmentId={selectedAppointment.appointmentId.toString()}
+                  owner={selectedAppointment.ownerName}
+                  licensePlate={selectedAppointment.licensePlate}
+                  date={selectedAppointment.appointmentDate}
+                  vehicle={selectedAppointment.vehicleType}
+                  services={selectedAppointment.services}
+                  onAccept={() =>
+                    console.log(
+                      `Accept clicked for appointment ${selectedAppointment.appointmentId}`
+                    )
+                  }
+                  onReject={() =>
+                    console.log(
+                      `Reject clicked for appointment ${selectedAppointment.appointmentId}`
+                    )
+                  }
+                />
+              ) : null}
             </div>
           </div>
         )}

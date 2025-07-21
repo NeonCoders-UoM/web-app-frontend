@@ -33,7 +33,8 @@ const ManageServices = () => {
     // Get current week number
     const now = new Date();
     const firstDayOfYear = new Date(now.getFullYear(), 0, 1);
-    const pastDaysOfYear = (now.getTime() - firstDayOfYear.getTime()) / 86400000;
+    const pastDaysOfYear =
+      (now.getTime() - firstDayOfYear.getTime()) / 86400000;
     return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -163,8 +164,10 @@ const ManageServices = () => {
 
       try {
         setIsLoading(true);
-        console.log(`Loading closures for service center ${currentServiceCenterId}, week ${currentWeek}`);
-        
+        console.log(
+          `Loading closures for service center ${currentServiceCenterId}, week ${currentWeek}`
+        );
+
         const closuresData = await getClosures(
           currentServiceCenterId,
           currentWeek
@@ -178,7 +181,7 @@ const ManageServices = () => {
           status: "Closed",
         }));
         setShiftCards(transformedShiftCards);
-        
+
         console.log("Shift cards updated:", transformedShiftCards);
       } catch (error) {
         console.error("Error loading closures:", error);
@@ -247,7 +250,10 @@ const ManageServices = () => {
 
       // Reload closures from database to ensure UI reflects actual data
       try {
-        const updatedClosures = await getClosures(currentServiceCenterId, weekNumber);
+        const updatedClosures = await getClosures(
+          currentServiceCenterId,
+          weekNumber
+        );
         const transformedShiftCards = updatedClosures.map((closure) => ({
           day: closure.day,
           status: "Closed",
@@ -274,7 +280,10 @@ const ManageServices = () => {
     }
   };
 
-  const handleServiceAvailabilityToggle = async (serviceId: string, currentAvailability: boolean) => {
+  const handleServiceAvailabilityToggle = async (
+    serviceId: string,
+    currentAvailability: boolean
+  ) => {
     if (currentServiceCenterId === null) {
       alert("Please select a service center first.");
       return;
@@ -282,15 +291,15 @@ const ManageServices = () => {
 
     try {
       const newAvailability = !currentAvailability;
-      const day = new Date().toLocaleDateString('en-US', { weekday: 'long' }); // Get current day name
-      
+      const day = new Date().toLocaleDateString("en-US", { weekday: "long" }); // Get current day name
+
       // Add or update service availability for the selected day
       const availabilityData: ServiceAvailabilityDTO = {
         serviceCenterId: currentServiceCenterId,
         serviceId: parseInt(serviceId),
         weekNumber: currentWeek,
         day: day,
-        isAvailable: newAvailability
+        isAvailable: newAvailability,
       };
 
       // Check if an existing availability entry exists
@@ -304,7 +313,7 @@ const ManageServices = () => {
       if (existingAvailabilities.length > 0) {
         // Update existing availability
         await updateServiceAvailability(existingAvailabilities[0].id!, {
-          ...availabilityData
+          ...availabilityData,
         });
       } else {
         // Create new availability
@@ -312,11 +321,11 @@ const ManageServices = () => {
       }
 
       // Update the service center services state to reflect the change
-      const updatedServices = serviceCenterServices.map(service => {
+      const updatedServices = serviceCenterServices.map((service) => {
         if (service.serviceCenterServiceId.toString() === serviceId) {
           return {
             ...service,
-            isAvailable: newAvailability
+            isAvailable: newAvailability,
           };
         }
         return service;
@@ -325,7 +334,9 @@ const ManageServices = () => {
 
       console.log("Service availability updated successfully");
       alert(
-        `Service availability ${newAvailability ? "enabled" : "disabled"} for ${day}`
+        `Service availability ${
+          newAvailability ? "enabled" : "disabled"
+        } for ${day}`
       );
     } catch (error) {
       console.error("Error updating service availability:", error);
@@ -537,7 +548,11 @@ const ManageServices = () => {
             </div>
             <div>
               <span className="font-medium">Available Services:</span>{" "}
-              {serviceCenterServices.filter(service => service.isAvailable).length} / {serviceCenterServices.length}
+              {
+                serviceCenterServices.filter((service) => service.isAvailable)
+                  .length
+              }{" "}
+              / {serviceCenterServices.length}
             </div>
             <div>
               <span className="font-medium">Viewing Week:</span>{" "}
@@ -551,13 +566,18 @@ const ManageServices = () => {
       <div className="flex space-x-4">
         {/* Schedule Shop Closures Section (Left) */}
         <div className="flex-1">
-          <ScheduleShopClosures onSave={handleSave} allWeeks={allWeeks} currentWeek={currentWeek} />
+          <ScheduleShopClosures
+            onSave={handleSave}
+            allWeeks={allWeeks}
+            currentWeek={currentWeek}
+          />
         </div>
 
         {/* Closure Schedule Section (Right) */}
         <div className="space-y-2">
           <div className="text-lg font-semibold text-neutral-600">
-            Scheduled Closures for {allWeeks[currentWeek - 1] || `Week ${currentWeek}`}
+            Scheduled Closures for{" "}
+            {allWeeks[currentWeek - 1] || `Week ${currentWeek}`}
           </div>
           <div className="text-sm text-neutral-500 mb-3">
             These closures will be visible to customers
@@ -620,9 +640,10 @@ const ManageServices = () => {
           Week Selection
         </h4>
         <p className="text-blue-700 text-sm">
-          Use the week selector above to view closures for different weeks. 
-          Closures are saved per week, so make sure to select the correct week 
-          to see your scheduled closures. The current week is selected by default.
+          Use the week selector above to view closures for different weeks.
+          Closures are saved per week, so make sure to select the correct week
+          to see your scheduled closures. The current week is selected by
+          default.
         </p>
       </div>
 
@@ -632,37 +653,41 @@ const ManageServices = () => {
           Service Availability Impact
         </h4>
         <p className="text-green-700 text-sm">
-          When you disable a service, it will no longer appear in the service list 
-          for customers booking appointments. This helps manage which services are 
-          currently offered by the service center. Re-enable services when they 
-          become available again.
+          When you disable a service, it will no longer appear in the service
+          list for customers booking appointments. This helps manage which
+          services are currently offered by the service center. Re-enable
+          services when they become available again.
         </p>
       </div>
 
       {/* Services Table */}
       <div className="mt-8">
         <h2 className="text-lg font-semibold text-neutral-600 mb-4">
-          Service Availability Management for {selectedServiceCenter?.serviceCenterName}
+          Service Availability Management for{" "}
+          {selectedServiceCenter?.serviceCenterName}
         </h2>
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <h3 className="text-lg font-semibold text-blue-800 mb-2">
             About Service Availability
           </h3>
           <p className="text-blue-700 text-sm">
-            Toggle the availability of services for this service center. When a service is disabled, 
-            it will not appear in the service list for customers booking appointments. This helps 
-            manage which services are currently offered by the service center.
+            Toggle the availability of services for this service center. When a
+            service is disabled, it will not appear in the service list for
+            customers booking appointments. This helps manage which services are
+            currently offered by the service center.
           </p>
           <div className="mt-3 p-3 bg-yellow-100 border border-yellow-300 rounded">
             <p className="text-yellow-800 text-xs">
-              <strong>Note:</strong> Backend support for service availability updates may not be fully implemented yet. 
-              UI changes will be reflected immediately, but backend persistence depends on API support.
+              <strong>Note:</strong> Backend support for service availability
+              updates may not be fully implemented yet. UI changes will be
+              reflected immediately, but backend persistence depends on API
+              support.
             </p>
           </div>
         </div>
         {serviceCenterServices.length > 0 ? (
-          <ServiceAvailabilityTable 
-            data={tableData} 
+          <ServiceAvailabilityTable
+            data={tableData}
             onToggle={handleServiceAvailabilityToggle}
           />
         ) : (
