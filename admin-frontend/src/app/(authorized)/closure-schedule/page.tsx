@@ -11,8 +11,11 @@ import {
   getClosures,
   fetchServiceCenters,
   fetchServiceCenterServices,
-  toggleServiceCenterServiceAvailability,
+  addServiceAvailability,
+  getServiceAvailability,
+  updateServiceAvailability,
 } from "@/utils/api";
+import { ServiceAvailabilityDTO } from "@/types";
 import { ServiceCenter, ServiceCenterServiceDTO } from "@/types";
 
 const ManageServices = () => {
@@ -279,27 +282,56 @@ const ManageServices = () => {
 
     try {
       const newAvailability = !currentAvailability;
+      const day = new Date().toLocaleDateString('en-US', { weekday: 'long' }); // Get current day name
       
-      console.log(
-        `Toggling service ${serviceId} availability for service center ${currentServiceCenterId}`
-      );
-      console.log(`Making PATCH request to toggle availability`);
+      // Add or update service availability for the selected day
+      const availabilityData: ServiceAvailabilityDTO = {
+        serviceCenterId: currentServiceCenterId,
+        serviceId: parseInt(serviceId),
+        weekNumber: currentWeek,
+        day: day,
+        isAvailable: newAvailability
+      };
 
-      // Update the backend and get the updated list
-      const updatedServices = await toggleServiceCenterServiceAvailability(
-        currentServiceCenterId.toString(),
-        serviceId, // This is actually the serviceCenterServiceId from the table
-        newAvailability
+      // Check if an existing availability entry exists
+      const existingAvailabilities = await getServiceAvailability(
+        currentServiceCenterId,
+        parseInt(serviceId),
+        currentWeek,
+        day
       );
+
+      if (existingAvailabilities.length > 0) {
+        // Update existing availability
+        await updateServiceAvailability(existingAvailabilities[0].id!, {
+          ...availabilityData
+        });
+      } else {
+        // Create new availability
+        await addServiceAvailability(availabilityData);
+      }
+
+      // Update the service center services state to reflect the change
+      const updatedServices = serviceCenterServices.map(service => {
+        if (service.serviceCenterServiceId.toString() === serviceId) {
+          return {
+            ...service,
+            isAvailable: newAvailability
+          };
+        }
+        return service;
+      });
       setServiceCenterServices(updatedServices);
 
       console.log("Service availability updated successfully");
       alert(
-        `Service availability ${newAvailability ? "enabled" : "disabled"} successfully`
+        `Service availability ${newAvailability ? "enabled" : "disabled"} for ${day}`
       );
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error updating service availability:", error);
-      console.error("Full error details:", error.response?.data || error.message);
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+      }
       alert("Failed to update service availability. Please try again.");
     }
   };

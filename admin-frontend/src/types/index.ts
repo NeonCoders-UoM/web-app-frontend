@@ -1,3 +1,14 @@
+export interface ServiceAvailabilityDTO {
+  id?: number;
+  serviceCenterId: number;
+  serviceId: number;
+  weekNumber: number;
+  day: string;
+  isAvailable: boolean;
+}
+
+export interface UpdateServiceAvailabilityDTO extends ServiceAvailabilityDTO {}
+
 export interface ServiceCenter {
   id: string; // For frontend compatibility
   Station_id?: number; // Backend ID

@@ -18,7 +18,8 @@ import {
   CreateServiceCenterWithServicesDTO,
   ClosureSchedule,
   CreateClosureScheduleDTO,
-  UpdateClosureScheduleDTO
+  UpdateClosureScheduleDTO,
+  ServiceAvailabilityDTO
 } from "@/types";
 import axiosInstance from "./axios";
 
@@ -955,10 +956,80 @@ export const toggleServiceCenterServiceAvailability = async (
   }
 };
 
-// Interface for UpdateServiceAvailabilityRequest (backend DTO)
-export interface UpdateServiceAvailabilityRequest {
-  IsAvailable?: boolean;
-}
+// Service Availability APIs
+export const addServiceAvailability = async (serviceAvailability: ServiceAvailabilityDTO): Promise<ServiceAvailabilityDTO> => {
+  try {
+    const response = await axiosInstance.post('/ServiceAvailability', serviceAvailability);
+    return response.data;
+  } catch (error) {
+    console.error("Error in addServiceAvailability:", error);
+    throw error;
+  }
+};
+
+export const getServiceAvailabilities = async (
+  serviceCenterId: number,
+  weekNumber: number
+): Promise<ServiceAvailabilityDTO[]> => {
+  try {
+    const response = await axiosInstance.get(`/ServiceAvailability/${serviceCenterId}`, {
+      params: { weekNumber }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error in getServiceAvailabilities:", error);
+    throw error;
+  }
+};
+
+export const getServiceAvailability = async (
+  serviceCenterId: number,
+  serviceId: number,
+  weekNumber: number,
+  day?: string
+): Promise<ServiceAvailabilityDTO[]> => {
+  try {
+    const response = await axiosInstance.get(
+      `/ServiceAvailability/${serviceCenterId}/${serviceId}`,
+      { params: { weekNumber, day } }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error in getServiceAvailability:", error);
+    throw error;
+  }
+};
+
+export const updateServiceAvailability = async (
+  id: number,
+  updateData: UpdateServiceAvailabilityDTO
+): Promise<ServiceAvailabilityDTO> => {
+  try {
+    const response = await axiosInstance.put(`/ServiceAvailability/${id}`, updateData);
+    return response.data;
+  } catch (error) {
+    console.error("Error in updateServiceAvailability:", error);
+    throw error;
+  }
+};
+
+export const deleteServiceAvailability = async (id: number): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/ServiceAvailability/${id}`);
+  } catch (error) {
+    console.error("Error in deleteServiceAvailability:", error);
+    throw error;
+  }
+};
+
+export const deleteServiceAvailabilities = async (ids: number[]): Promise<void> => {
+  try {
+    await axiosInstance.delete('/ServiceAvailability/bulk', { data: ids });
+  } catch (error) {
+    console.error("Error in deleteServiceAvailabilities:", error);
+    throw error;
+  }
+};
 
 // Update customer data
 export const updateCustomer = async (customerId: number, customerData: {
