@@ -19,7 +19,13 @@ import {
   ClosureSchedule,
   CreateClosureScheduleDTO,
   UpdateClosureScheduleDTO,
-  ServiceAvailabilityDTO
+  ServiceAvailabilityDTO,
+  UpdateServiceAvailabilityDTO,
+  FeedbackDTO,
+  CreateFeedbackDTO,
+  UpdateFeedbackDTO,
+  FeedbackStatsDTO,
+  FeedbackFilters
 } from "@/types";
 import axiosInstance from "./axios";
 
@@ -935,8 +941,7 @@ export const updateServiceCenterService = async (
 // Toggle service availability for a service center
 export const toggleServiceCenterServiceAvailability = async (
   stationId: string, 
-  serviceCenterServiceId: string, 
-  isAvailable: boolean
+  serviceCenterServiceId: string
 ): Promise<ServiceCenterServiceDTO[]> => {
   try {
     console.log(`Toggling service center service ID: ${serviceCenterServiceId}`);
@@ -1584,4 +1589,108 @@ const getWeekNumber = (date: Date): number => {
 const getDayOfWeek = (date: Date): string => {
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   return days[date.getDay()];
+};
+
+// ===============================
+// FEEDBACK API FUNCTIONS
+// ===============================
+
+// Get all feedbacks with optional filters
+export const getAllFeedbacks = async (filters?: FeedbackFilters): Promise<FeedbackDTO[]> => {
+  try {
+    const params = new URLSearchParams();
+    
+    if (filters?.page) params.append('page', filters.page.toString());
+    if (filters?.pageSize) params.append('pageSize', filters.pageSize.toString());
+    if (filters?.serviceCenterId) params.append('serviceCenterId', filters.serviceCenterId.toString());
+    if (filters?.minRating) params.append('minRating', filters.minRating.toString());
+    if (filters?.maxRating) params.append('maxRating', filters.maxRating.toString());
+
+    const queryString = params.toString();
+    const url = queryString ? `/Feedback?${queryString}` : '/Feedback';
+    
+    const response = await axiosInstance.get(url);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching feedbacks:", error);
+    throw error;
+  }
+};
+
+// Get feedback by ID
+export const getFeedbackById = async (id: number): Promise<FeedbackDTO> => {
+  try {
+    const response = await axiosInstance.get(`/Feedback/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching feedback:", error);
+    throw error;
+  }
+};
+
+// Get customer feedbacks
+export const getCustomerFeedbacks = async (customerId: number): Promise<FeedbackDTO[]> => {
+  try {
+    const response = await axiosInstance.get(`/Feedback/Customer/${customerId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching customer feedbacks:", error);
+    throw error;
+  }
+};
+
+// Get service center feedbacks
+export const getServiceCenterFeedbacks = async (serviceCenterId: number): Promise<FeedbackDTO[]> => {
+  try {
+    const response = await axiosInstance.get(`/Feedback/ServiceCenter/${serviceCenterId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching service center feedbacks:", error);
+    throw error;
+  }
+};
+
+// Get feedback statistics
+export const getFeedbackStats = async (serviceCenterId?: number): Promise<FeedbackStatsDTO> => {
+  try {
+    const url = serviceCenterId 
+      ? `/Feedback/Stats?serviceCenterId=${serviceCenterId}` 
+      : '/Feedback/Stats';
+    const response = await axiosInstance.get(url);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching feedback stats:", error);
+    throw error;
+  }
+};
+
+// Create new feedback (for mobile app)
+export const createFeedback = async (feedback: CreateFeedbackDTO): Promise<FeedbackDTO> => {
+  try {
+    const response = await axiosInstance.post('/Feedback', feedback);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating feedback:", error);
+    throw error;
+  }
+};
+
+// Update feedback
+export const updateFeedback = async (id: number, feedback: UpdateFeedbackDTO): Promise<void> => {
+  try {
+    await axiosInstance.put(`/Feedback/${id}`, feedback);
+  } catch (error) {
+    console.error("Error updating feedback:", error);
+    throw error;
+  }
+};
+
+// Delete feedback
+export const deleteFeedback = async (id: number): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/Feedback/${id}`);
+  } catch (error) {
+    console.error("Error deleting feedback:", error);
+    throw error;
+  }
 };
