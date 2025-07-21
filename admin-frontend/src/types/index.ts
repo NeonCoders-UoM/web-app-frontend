@@ -62,6 +62,8 @@ export interface CreateServiceCenterDTO {
   telephone: string;
   address: string;
   station_status: string;
+  Latitude: number; // Changed to match backend
+  Longitude: number; // Changed to match backend
 }
 
 export interface ServiceCenterServiceSelection {
@@ -85,6 +87,8 @@ export interface CreateServiceCenterWithServicesDTO {
   packageId: number;
   // Services with pricing
   services: ServiceCenterServiceSelection[];
+  lat : number;
+  lng : number ;
 }
 
 export interface UpdateServiceCenterDTO {

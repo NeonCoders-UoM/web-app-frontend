@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Button from "@/components/atoms/button/button";
 import InputField from "@/components/atoms/input-fields/input-fields";
+import MapPicker from "@/components/organism/map-picker/mappicker";
 import colors from "@/styles/colors";
 import {
   CreateServiceCenterWithServicesDTO,
@@ -30,6 +31,8 @@ export default function EnhancedServiceCenterForm({
     station_status: "Active",
     packageId: 0,
     services: [],
+    lat: 0,
+    lng: 0,
   });
 
   const [packages, setPackages] = useState<Package[]>([]);
@@ -50,7 +53,6 @@ export default function EnhancedServiceCenterForm({
         setPackages(packagesData);
         setSystemServices(servicesData);
 
-        // Initialize services with default values
         const initialServices: ServiceCenterServiceSelection[] =
           servicesData.map((service) => ({
             serviceId: service.serviceId,
@@ -116,6 +118,8 @@ export default function EnhancedServiceCenterForm({
       address,
       packageId,
       services,
+      lat,
+      lng,
     } = formData;
 
     if (!ownerName.trim()) newErrors.ownerName = "Owner Name is required";
@@ -132,12 +136,19 @@ export default function EnhancedServiceCenterForm({
       newErrors.telephone = "Telephone must be 10 digits";
     if (!address.trim()) newErrors.address = "Address is required";
     if (packageId === 0) newErrors.packageId = "Please select a package";
+    if (lat === 0 && lng === 0) {
+      newErrors.lat = "Please select a location on the map";
+    } else {
+      if (lat < -90 || lat > 90)
+        newErrors.lat = "Latitude must be between -90 and 90";
+      if (lng < -180 || lng > 180)
+        newErrors.lng = "Longitude must be between -180 and 180";
+    }
 
     const selectedServices = services.filter((service) => service.isSelected);
     if (selectedServices.length === 0) {
       newErrors.services = "Please select at least one service";
     } else {
-      // Check if all selected services have valid prices
       const invalidServices = selectedServices.filter(
         (service) => service.basePrice <= 0
       );
@@ -153,6 +164,7 @@ export default function EnhancedServiceCenterForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Submitting formData:", formData); // Debug log
     if (validateForm()) {
       onSubmit(formData);
     }
@@ -211,6 +223,37 @@ export default function EnhancedServiceCenterForm({
                 )}
               </div>
             ))}
+          </div>
+          {/* MapPicker for Location Selection */}
+          <div className="mt-6">
+            <h3 className="text-md font-semibold text-neutral-900 mb-2">
+              Select Location
+            </h3>
+            <MapPicker
+              onLocationSelect={(location) => {
+                console.log("Location selected:", location); // Debug log
+                setFormData((prev) => {
+                  const newState = {
+                    ...prev,
+                    lat: location.lat,
+                    lng: location.lng,
+                  };
+                  console.log("Updated formData:", newState); // Debug log
+                  return newState;
+                });
+              }}
+            />
+            {(errors.lat || errors.lng) && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.lat || errors.lng}
+              </p>
+            )}
+            {/* Display selected coordinates */}
+            {formData.lat !== 0 || formData.lng !== 0 ? (
+              <p className="text-sm text-neutral-600 mt-2">
+                Selected: {formData.lat.toFixed(6)}, {formData.lng.toFixed(6)}
+              </p>
+            ) : null}
           </div>
         </div>
 

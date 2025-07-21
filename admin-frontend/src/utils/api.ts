@@ -768,7 +768,9 @@ export const createServiceCenterWithServices = async (data: CreateServiceCenterW
       email: data.email,
       telephone: data.telephone,
       address: data.address,
-      station_status: data.station_status
+      station_status: data.station_status,
+      Latitude: data.lat, // Changed to match backend
+      Longitude: data.lng // Changed to match backend
     };
     
     const response = await axiosInstance.post("/ServiceCenters", createData);
