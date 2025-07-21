@@ -31,10 +31,10 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const searchParams = useSearchParams();
-  const serviceCenterId = searchParams.get("serviceCenterId");
+  const stationId = searchParams.get("stationId");
 
-  // If no serviceCenterId, show error and do not render the rest of the page
-  if (!serviceCenterId) {
+  // If no stationId, show error and do not render the rest of the page
+  if (!stationId) {
     return (
       <div className="flex flex-col min-h-screen p-[58px] bg-white">
         <div className="text-red-600 text-lg font-semibold">
@@ -60,14 +60,14 @@ export default function Page() {
     setLoading(true);
     try {
       const trimmedId = appointmentId.replace("#APT-", "").replace(/^0+/, "");
-      const stationId = serviceCenterId ? parseInt(serviceCenterId) : undefined;
-      if (!stationId) {
+      const stationIdNum = stationId ? parseInt(stationId) : undefined;
+      if (!stationIdNum) {
         setFeedback("No service center selected.");
         setLoading(false);
         return;
       }
       const res = await fetch(
-        `/api/Appointment/station/${stationId}/details/${trimmedId}`
+        `/api/Appointment/station/${stationIdNum}/details/${trimmedId}`
       );
       if (!res.ok) throw new Error("Appointment not found");
       const data = (await res.json()) as AppointmentDetail;

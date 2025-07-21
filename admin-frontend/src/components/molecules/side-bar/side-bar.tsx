@@ -9,9 +9,14 @@ interface SidebarProps {
   role: "super-admin" | "service-center-admin" | "cashier" | "data-operator";
   serviceCenters?: { id: string; name: string }[];
   logo?: string;
+  stationId?: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ role, serviceCenters = [] }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  role,
+  serviceCenters = [],
+  stationId,
+}) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -20,53 +25,54 @@ const Sidebar: React.FC<SidebarProps> = ({ role, serviceCenters = [] }) => {
   const serviceCenterIdMatch = pathname.match(
     /\/service-center-dashboard\/([^\/]+)/
   );
-
-  // Also check for serviceCenterId in query parameters
-  const queryServiceCenterId = searchParams.get("serviceCenterId");
-
-  const currentServiceCenterId = serviceCenterIdMatch
-    ? serviceCenterIdMatch[1]
-    : queryServiceCenterId;
+  // Also check for stationId in query parameters
+  const queryStationId = searchParams.get("stationId");
+  // Use prop if provided, else fallback to query or path
+  const currentStationId =
+    typeof stationId === "string" && stationId
+      ? stationId
+      : queryStationId ||
+        (serviceCenterIdMatch ? serviceCenterIdMatch[1] : undefined);
 
   const getSidebarOptions = () => {
     // If we're in a service center dashboard, show service center specific options
-    if (currentServiceCenterId) {
+    if (currentStationId) {
       return [
         {
           label: "Dashboard",
-          route: `/service-center-dashboard/${currentServiceCenterId}`,
+          route: `/service-center-dashboard/${currentStationId}?stationId=${currentStationId}`,
         },
         {
           label: "Services",
-          route: `/services?serviceCenterId=${currentServiceCenterId}`,
+          route: `/services?stationId=${currentStationId}`,
         },
         {
           label: "Appointments",
-          route: `/appointment?serviceCenterId=${currentServiceCenterId}`,
+          route: `/appointment?stationId=${currentStationId}`,
         },
         {
           label: "Clients",
-          route: `/client?serviceCenterId=${currentServiceCenterId}`,
+          route: `/client?stationId=${currentStationId}`,
         },
         {
           label: "Vehicles",
-          route: `/vehicle?serviceCenterId=${currentServiceCenterId}`,
+          route: `/vehicle?stationId=${currentStationId}`,
         },
         {
           label: "Feedback",
-          route: `/feedback?serviceCenterId=${currentServiceCenterId}`,
+          route: `/feedback?stationId=${currentStationId}`,
         },
         {
           label: "Service Status",
-          route: `/service-status?serviceCenterId=${currentServiceCenterId}`,
+          route: `/service-status?stationId=${currentStationId}`,
         },
         {
           label: "Closure Schedule",
-          route: `/closure-schedule?serviceCenterId=${currentServiceCenterId}`,
+          route: `/closure-schedule?stationId=${currentStationId}`,
         },
         {
           label: "Loyalty Points",
-          route: `/loyalty-points?serviceCenterId=${currentServiceCenterId}`,
+          route: `/loyalty-points?stationId=${currentStationId}`,
         },
         { label: "Back to Admin", route: "/admin-dashboard" },
       ];
@@ -117,13 +123,8 @@ const Sidebar: React.FC<SidebarProps> = ({ role, serviceCenters = [] }) => {
 
   const sections = sidebarOptions[role] || [];
 
-  const activeSection =
-    sections.find((section) => pathname.startsWith(section.route))?.label ||
-    sections[0]?.label ||
-    "";
-
   const handleServiceCenterClick = (centerId: string) => {
-    router.push(`/service-center/${centerId}/dashboard`);
+    router.push(`/service-center-dashboard/${centerId}?stationId=${centerId}`);
   };
 
   return (
@@ -149,7 +150,11 @@ const Sidebar: React.FC<SidebarProps> = ({ role, serviceCenters = [] }) => {
             <SidebarButton
               key={center.id}
               label={center.name}
-              isActive={pathname === `/service-center/${center.id}/dashboard`}
+              isActive={
+                pathname.startsWith(`/service-center-dashboard/${center.id}`) &&
+                (queryStationId === center.id ||
+                  serviceCenterIdMatch?.[1] === center.id)
+              }
               onClick={() => handleServiceCenterClick(center.id)}
             />
           ))}
@@ -158,14 +163,23 @@ const Sidebar: React.FC<SidebarProps> = ({ role, serviceCenters = [] }) => {
 
       {/* Sidebar Sections */}
       <div className="flex-1 px-2 space-y-2">
-        {sections.map((section) => (
-          <SidebarButton
-            key={section.label}
-            label={section.label}
-            isActive={activeSection === section.label}
-            onClick={() => router.push(section.route)}
-          />
-        ))}
+        {sections.map((section) => {
+          // For active state, check if pathname and query match
+          const url = new URL(section.route, "http://dummy");
+          const sectionPath = url.pathname;
+          const sectionStationId = url.searchParams.get("stationId");
+          const isActive =
+            pathname.startsWith(sectionPath) &&
+            (!sectionStationId || sectionStationId === currentStationId);
+          return (
+            <SidebarButton
+              key={section.label}
+              label={section.label}
+              isActive={isActive}
+              onClick={() => router.push(section.route)}
+            />
+          );
+        })}
       </div>
     </div>
   );

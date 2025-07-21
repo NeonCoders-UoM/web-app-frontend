@@ -5,8 +5,13 @@ import { useSearchParams } from "next/navigation";
 import AppointmentTable from "@/components/organism/appointment-table/appointment-table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import AppointmentCard from "@/components/molecules/appoinment-cards/appoinment-cards";
-import { fetchServiceCenterById } from "@/utils/api";
+import {
+  fetchServiceCenterById,
+  updateAppointmentStatus,
+  fetchAppointmentsForStation,
+} from "@/utils/api";
 import { ServiceCenter } from "@/types";
+import type { AppointmentDetail } from "@/utils/api";
 import "@/styles/fonts.css";
 
 // Types matching backend DTOs
@@ -18,17 +23,6 @@ type AppointmentSummary = {
   appointmentDate: string;
 };
 
-// Appointment detail for admin
-// { appointmentId, licensePlate, vehicleType, ownerName, appointmentDate, services }
-type AppointmentDetail = {
-  appointmentId: number;
-  licensePlate: string;
-  vehicleType: string;
-  ownerName: string;
-  appointmentDate: string;
-  services: string[];
-};
-
 // Table expects this type:
 type TableAppointment = {
   id: string;
@@ -38,7 +32,7 @@ type TableAppointment = {
 
 const AppointmentsPage = () => {
   const searchParams = useSearchParams();
-  const serviceCenterId = searchParams.get("serviceCenterId");
+  const stationId = searchParams.get("stationId");
   const [serviceCenter, setServiceCenter] = useState<ServiceCenter | null>(
     null
   );
@@ -60,11 +54,9 @@ const AppointmentsPage = () => {
   // Fetch service center details
   useEffect(() => {
     const loadServiceCenter = async () => {
-      if (serviceCenterId) {
+      if (stationId) {
         try {
-          const serviceCenterData = await fetchServiceCenterById(
-            serviceCenterId
-          );
+          const serviceCenterData = await fetchServiceCenterById(stationId);
           setServiceCenter(serviceCenterData);
         } catch (error) {
           // Not critical for appointments, so just log
@@ -73,20 +65,16 @@ const AppointmentsPage = () => {
       }
     };
     loadServiceCenter();
-  }, [serviceCenterId]);
+  }, [stationId]);
 
   // Fetch appointments for the service center
   useEffect(() => {
     const fetchAppointments = async () => {
-      if (serviceCenterId) {
+      if (stationId) {
         setAppointmentsLoading(true);
         setAppointmentsError(null);
         try {
-          const res = await fetch(
-            `/api/Appointment/station/${serviceCenterId}`
-          );
-          if (!res.ok) throw new Error("Failed to fetch appointments");
-          const data = await res.json();
+          const data = await fetchAppointmentsForStation(stationId);
           setAppointments(data);
         } catch (error: unknown) {
           setAppointmentsError(
@@ -98,7 +86,7 @@ const AppointmentsPage = () => {
       }
     };
     fetchAppointments();
-  }, [serviceCenterId]);
+  }, [stationId]);
 
   // Map fetched appointments to table format
   useEffect(() => {
@@ -115,7 +103,7 @@ const AppointmentsPage = () => {
 
   // Accepts TableAppointment, finds AppointmentSummary, then fetches detail
   const handleViewAppointment = async (appointment: TableAppointment) => {
-    if (!serviceCenterId) return;
+    if (!stationId) return;
     setDetailLoading(true);
     setDetailError(null);
     // Find the original summary by id
@@ -129,7 +117,7 @@ const AppointmentsPage = () => {
     }
     try {
       const res = await fetch(
-        `/api/Appointment/station/${serviceCenterId}/details/${summary.appointmentId}`
+        `/api/Appointment/station/${stationId}/details/${summary.appointmentId}`
       );
       if (!res.ok) throw new Error("Failed to fetch appointment details");
       const data = await res.json();
@@ -185,9 +173,9 @@ const AppointmentsPage = () => {
 
         <div className="pr-[50px]">
           <h1 className="h2 text-neutral-800 mb-[40px]">
-            {serviceCenterId
+            {stationId
               ? `Appointments - Service Center ${
-                  serviceCenter?.serviceCenterName || serviceCenterId
+                  serviceCenter?.serviceCenterName || stationId
                 }`
               : "Appointments Requests"}
           </h1>
@@ -224,16 +212,46 @@ const AppointmentsPage = () => {
                   date={selectedAppointment.appointmentDate}
                   vehicle={selectedAppointment.vehicleType}
                   services={selectedAppointment.services}
-                  onAccept={() =>
-                    console.log(
-                      `Accept clicked for appointment ${selectedAppointment.appointmentId}`
-                    )
-                  }
-                  onReject={() =>
-                    console.log(
-                      `Reject clicked for appointment ${selectedAppointment.appointmentId}`
-                    )
-                  }
+                  onAccept={async () => {
+                    try {
+                      await updateAppointmentStatus(
+                        selectedAppointment.appointmentId,
+                        "Accepted"
+                      );
+                      closeModal();
+                      // Refresh appointments
+                      if (stationId) {
+                        setAppointmentsLoading(true);
+                        const data = await fetchAppointmentsForStation(
+                          stationId
+                        );
+                        setAppointments(data);
+                        setAppointmentsLoading(false);
+                      }
+                    } catch {
+                      alert("Failed to accept appointment");
+                    }
+                  }}
+                  onReject={async () => {
+                    try {
+                      await updateAppointmentStatus(
+                        selectedAppointment.appointmentId,
+                        "Rejected"
+                      );
+                      closeModal();
+                      // Refresh appointments
+                      if (stationId) {
+                        setAppointmentsLoading(true);
+                        const data = await fetchAppointmentsForStation(
+                          stationId
+                        );
+                        setAppointments(data);
+                        setAppointmentsLoading(false);
+                      }
+                    } catch {
+                      alert("Failed to reject appointment");
+                    }
+                  }}
                 />
               ) : null}
             </div>

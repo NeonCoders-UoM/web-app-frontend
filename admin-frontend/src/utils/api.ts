@@ -28,6 +28,7 @@ import {
   FeedbackFilters
 } from "@/types";
 import axiosInstance from "./axios";
+import type { AppointmentDetail } from "@/app/(authorized)/appointment/page";
 
 
 // Mock data (as provided)
@@ -1691,6 +1692,60 @@ export const deleteFeedback = async (id: number): Promise<void> => {
     await axiosInstance.delete(`/Feedback/${id}`);
   } catch (error) {
     console.error("Error deleting feedback:", error);
+    throw error;
+  }
+};
+
+export const updateAppointmentStatus = async (
+  appointmentId: number,
+  status: string
+): Promise<void> => {
+  try {
+    await axiosInstance.put(`/Appointment/${appointmentId}/status`, { status });
+  } catch (error) {
+    console.error("Error updating appointment status:", error);
+    throw error;
+  }
+};
+
+export interface AppointmentSummary {
+  appointmentId: number;
+  ownerName: string;
+  appointmentDate: string;
+}
+
+export const fetchAppointmentsForStation = async (stationId: string | number): Promise<AppointmentSummary[]> => {
+  try {
+    const response = await axiosInstance.get(`/Appointment/station/${stationId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching appointments for station:', error);
+    throw error;
+  }
+};
+
+export type AppointmentDetail = {
+  appointmentId: number;
+  licensePlate: string;
+  vehicleType: string;
+  ownerName: string;
+  appointmentDate: string;
+  services: string[];
+};
+
+export const fetchAdminAppointmentVehicleDetail = async (
+  stationId: number | string,
+  customerId: number | string,
+  vehicleId: number | string,
+  appointmentId: number | string
+): Promise<AppointmentDetail> => {
+  try {
+    const response = await axiosInstance.get(
+      `/Appointment/station/${stationId}/customer/${customerId}/vehicle/${vehicleId}/details/${appointmentId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching admin appointment vehicle detail:', error);
     throw error;
   }
 };

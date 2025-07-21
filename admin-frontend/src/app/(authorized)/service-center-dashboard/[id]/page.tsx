@@ -64,8 +64,10 @@ const ServiceCenterDashboard = () => {
       });
 
       // Filter services to only show available ones
-      const availableServices = servicesData.filter(service => service.isAvailable);
-      
+      const availableServices = servicesData.filter(
+        (service) => service.isAvailable
+      );
+
       // Transform services data to table format (only available services)
       const servicesTableData = availableServices.map((service, index) => [
         service.serviceName || "Unknown Service",
@@ -111,7 +113,8 @@ const ServiceCenterDashboard = () => {
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [serviceCenterId]);
 
   const tableHeaders = [
@@ -125,7 +128,14 @@ const ServiceCenterDashboard = () => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
-      {/* <Sidebar role="super-admin" /> */}
+      {/* <Sidebar
+        role="super-admin"
+        serviceCenters={
+          serviceCenter
+            ? [{ id: serviceCenterId, name: serviceCenter.serviceCenterName }]
+            : []
+        }
+      /> */}
 
       {/* Main Content */}
       <div className="flex-1 p-[58px]">

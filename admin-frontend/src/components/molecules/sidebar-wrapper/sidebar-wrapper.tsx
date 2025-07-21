@@ -1,11 +1,18 @@
 "use client";
 
 import React from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import Sidebar from "@/components/molecules/side-bar/side-bar";
 
 const SidebarWrapper = () => {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Extract stationId from query or dashboard path
+  const stationIdMatch = pathname.match(/\/service-center-dashboard\/([^\/]+)/);
+  const queryStationId = searchParams.get("stationId");
+  const currentStationId =
+    queryStationId || (stationIdMatch ? stationIdMatch[1] : undefined);
 
   // Define routes where the sidebar should NOT be shown
   const hideSidebarRoutes = [
@@ -31,7 +38,10 @@ const SidebarWrapper = () => {
 
   const showSidebar = !shouldHideSidebar;
 
-  return showSidebar ? <Sidebar role="super-admin" /> : null;
+  // Pass stationId as a prop if needed (optional, for future Sidebar API)
+  return showSidebar ? (
+    <Sidebar role="super-admin" stationId={currentStationId} />
+  ) : null;
 };
 
 export default SidebarWrapper;
