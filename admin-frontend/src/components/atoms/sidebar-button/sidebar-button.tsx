@@ -1,7 +1,6 @@
 "use client"; 
 
 import React, { useState } from "react";
-import colors from "@/styles/colors"; 
 
 interface SidebarButtonProps {
   label: string;
@@ -17,43 +16,85 @@ const SidebarButton: React.FC<SidebarButtonProps> = ({ label, isActive, onClick 
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
+      className={`
+        relative w-full h-12 flex items-center px-4 mx-2 rounded-xl cursor-pointer
+        transition-all duration-300 ease-in-out transform
+        ${isActive 
+          ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white sidebar-active-glow translate-x-1 scale-[1.02]' 
+          : isHovered 
+            ? 'bg-gradient-to-r from-gray-700 to-gray-800 text-gray-100 sidebar-hover-effect shadow-lg shadow-gray-700/30' 
+            : 'bg-transparent text-gray-300 hover:text-white'
+        }
+        group
+      `}
       style={{
-        width: "200px",
-        height: "50px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center", 
-        fontSize: "14px",
-        fontWeight: 500,
         fontFamily: "Montserrat, sans-serif",
-        borderRadius: "8px",
-        cursor: "pointer",
-        transition: "background-color 0.3s ease",
-        backgroundColor: isActive ? "rgba(39, 95, 235, 0.8)" : isHovered ? colors.neutral[150] : colors.neutral[100],
-        color: isActive ? "#FFFFFF" : colors.primary[300],
-        position: "relative",
-        paddingLeft: "16px",
-        paddingRight: "16px", 
+        fontSize: "14px",
+        fontWeight: isActive ? 600 : 500,
+        backdropFilter: isHovered || isActive ? 'blur(10px)' : 'none',
+        border: isActive ? '1px solid rgba(59, 130, 246, 0.4)' : '1px solid transparent',
       }}
     >
-      
-      <span>{label}</span>
-
-      
+      {/* Active indicator line with glow effect */}
       <div
-        style={{
-          position: "absolute",
-          left: "-8px",
-          width: "4px",
-          height: "70%",
-          backgroundColor: isActive
-            ? "rgba(39, 95, 235, 0.8)" 
-            : isHovered
-            ? "rgba(191, 191, 191, 0.8)" 
-            : "rgba(255, 255, 255, 0.8)", 
-          borderRadius: "2px",
-        }}
-      ></div>
+        className={`
+          absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-8 rounded-r-full
+          transition-all duration-300 ease-in-out
+          ${isActive 
+            ? 'bg-blue-400 shadow-lg shadow-blue-400/60 w-1.5' 
+            : isHovered 
+              ? 'bg-gray-400 shadow-md shadow-gray-400/40 w-1' 
+              : 'bg-transparent w-0'
+          }
+        `}
+      />
+      
+      {/* Icon placeholder */}
+      <div 
+        className={`
+          w-2 h-2 rounded-full mr-3 transition-all duration-300
+          ${isActive 
+            ? 'bg-blue-300 shadow-lg shadow-blue-300/50' 
+            : isHovered 
+              ? 'bg-gray-400' 
+              : 'bg-gray-600 group-hover:bg-gray-400'
+          }
+        `}
+      />
+      
+      {/* Text with subtle animation */}
+      <span className={`
+        relative z-10 transition-all duration-300
+        ${isHovered || isActive ? 'tracking-wide' : 'tracking-normal'}
+      `}>
+        {label}
+      </span>
+
+      {/* Ripple effect on click */}
+      <div 
+        className={`
+          absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300
+          ${isActive ? 'opacity-20' : 'opacity-0'}
+          bg-gradient-to-r from-blue-400/20 to-blue-600/20
+        `}
+      />
+
+      {/* 3D shadow effect */}
+      {(isHovered || isActive) && (
+        <div 
+          className={`
+            absolute inset-0 rounded-xl -z-10 transition-all duration-300
+            ${isActive 
+              ? 'bg-gradient-to-br from-blue-600/30 to-blue-800/30' 
+              : 'bg-gradient-to-br from-gray-600/20 to-gray-800/20'
+            }
+          `}
+          style={{
+            transform: 'translateY(3px) translateX(3px)',
+            filter: 'blur(6px)',
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -38,6 +38,20 @@ const SidebarWrapper = () => {
 
   const showSidebar = !shouldHideSidebar;
 
+  // Add a useEffect to adjust body margin based on sidebar visibility
+  React.useEffect(() => {
+    const mainElement = document.querySelector('main');
+    if (mainElement) {
+      if (showSidebar) {
+        mainElement.style.marginLeft = '288px'; // 18rem = 288px for w-72
+        mainElement.style.paddingLeft = '1rem';
+      } else {
+        mainElement.style.marginLeft = '0';
+        mainElement.style.paddingLeft = '1rem';
+      }
+    }
+  }, [showSidebar]);
+
   // Pass stationId as a prop if needed (optional, for future Sidebar API)
   return showSidebar ? (
     <Sidebar role="super-admin" stationId={currentStationId} />
