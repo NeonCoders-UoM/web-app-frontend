@@ -42,10 +42,10 @@ const Sidebar: React.FC<SidebarProps> = ({
           label: "Dashboard",
           route: `/service-center-dashboard/${currentStationId}?stationId=${currentStationId}`,
         },
-        {
-          label: "Services",
-          route: `/services?stationId=${currentStationId}`,
-        },
+        // {
+        //   label: "Services",
+        //   route: `/services?stationId=${currentStationId}`,
+        // },
         {
           label: "Appointments",
           route: `/appointment?stationId=${currentStationId}`,

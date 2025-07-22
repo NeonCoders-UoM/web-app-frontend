@@ -28,7 +28,6 @@ import {
   FeedbackFilters
 } from "@/types";
 import axiosInstance from "./axios";
-import type { AppointmentDetail } from "@/app/(authorized)/appointment/page";
 
 
 // Mock data (as provided)
@@ -1731,6 +1730,9 @@ export type AppointmentDetail = {
   ownerName: string;
   appointmentDate: string;
   services: string[];
+  vehicleId: number;
+  serviceCenterId: number;
+  serviceCenterName?: string;
 };
 
 export const fetchAdminAppointmentVehicleDetail = async (
@@ -1746,6 +1748,22 @@ export const fetchAdminAppointmentVehicleDetail = async (
     return response.data;
   } catch (error) {
     console.error('Error fetching admin appointment vehicle detail:', error);
+    throw error;
+  }
+};
+
+// Fetch appointment detail by station and appointment ID
+export const fetchAppointmentDetail = async (
+  stationId: number | string,
+  appointmentId: number | string
+): Promise<AppointmentDetail> => {
+  try {
+    const response = await axiosInstance.get(
+      `/Appointment/station/${stationId}/details/${appointmentId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching appointment detail:', error);
     throw error;
   }
 };

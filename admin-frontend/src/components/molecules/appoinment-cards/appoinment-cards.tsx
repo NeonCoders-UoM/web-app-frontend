@@ -1,13 +1,15 @@
 import colors from "@/styles/colors";
 import "@/styles/fonts.css";
 
+type ServiceWithPrice = { name: string; price: number };
 interface AppointmentProps {
   appointmentId: string;
   owner: string;
   licensePlate: string;
   date: string;
   vehicle: string;
-  services: string[];
+  services?: string[];
+  servicesWithPrices?: ServiceWithPrice[];
   onAccept: () => void;
   onReject: () => void;
 }
@@ -19,11 +21,12 @@ const AppointmentCard: React.FC<AppointmentProps> = ({
   date,
   vehicle,
   services,
+  servicesWithPrices,
   onAccept,
   onReject,
 }) => {
   return (
-    <div className="bg-white p-[86px] rounded-[20px] shadow-md w-[715px] h-[638px]">
+    <div className="bg-white p-[86px] rounded-[20px] shadow-md w-[600px] h-[500px]">
       <h2 className="text-lg font-semibold mb-[56px]" style={{ color: colors.primary[200] }}>
         Appointment Details
       </h2>
@@ -50,21 +53,33 @@ const AppointmentCard: React.FC<AppointmentProps> = ({
         </div>
         <div className="col-span-2">
           <span className="font-semibold mb-[8px]">Services:</span>
-          <ul className="list-inside mt-1 text-neutral-600">
-            {services.map((service, index) => (
-              <li key={index}>{service}</li>
-            ))}
-          </ul>
+          {servicesWithPrices && servicesWithPrices.length > 0 ? (
+            <table className="w-full mt-1 text-neutral-600">
+              <thead>
+                <tr>
+                  <th className="text-left">Service</th>
+                  <th className="text-left">Price (LKR)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {servicesWithPrices.map((svc, idx) => (
+                  <tr key={idx}>
+                    <td>{svc.name}</td>
+                    <td>{svc.price}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <ul className="list-inside mt-1 text-neutral-600">
+              {services && services.map((service, index) => (
+                <li key={index}>{service}</li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
-      <div className="flex justify-end gap-3 mt-[30px]">
-        <button className="w-[123px] h-[40px] px-[16px] rounded-xl text-white text-sm bg-green-500 hover:bg-green-600 active:bg-green-400" onClick={onAccept}>
-          Accept
-        </button>
-        <button className="w-[123px] h-[40px] px-[16px] rounded-xl text-white text-sm bg-red-500 hover:bg-red-600 active:bg-red-400" onClick={onReject}>
-          Reject
-        </button>
-      </div>
+      {/* Removed Accept and Reject buttons as requested */}
     </div>
   );
 };
