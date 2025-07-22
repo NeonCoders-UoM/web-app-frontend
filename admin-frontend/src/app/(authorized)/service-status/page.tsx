@@ -1,37 +1,61 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { ServiceStatusDataTable } from "@/components/organism/service-status-data-table/servise-status-data-table";
 import AppointmentSearch from "@/components/organism/search-filter-form/search-filter-form";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import Button from "@/components/atoms/button/button";
-import { addServiceHistory } from "@/utils/api";
+import { addServiceHistory, fetchAppointmentDetail, fetchServiceCenterServices } from "@/utils/api";
 
-// Define a type for appointment details (customize as needed)
-type AppointmentDetail = {
-  vehicleId: number;
-  serviceCenterId: number;
-  serviceCenterName?: string;
-  services: string[];
-};
+// Use the AppointmentDetail type from api.ts
+import type { AppointmentDetail } from "@/utils/api";
 
 type RowData = {
   service: string;
   checked: boolean;
   serviceCenter: string;
+  price?: number;
 };
+
+// Add type for available service
+interface AvailableService {
+  serviceCenterServiceId: number;
+  serviceName: string;
+  customPrice?: number;
+  serviceBasePrice?: number;
+}
 
 export default function Page() {
   const [appointmentId, setAppointmentId] = useState("");
   const [services, setServices] = useState<RowData[] | null>(null);
-  const [newServiceName, setNewServiceName] = useState("");
+  const [newServiceId, setNewServiceId] = useState<string>("");
+  const [availableServices, setAvailableServices] = useState<AvailableService[]>([]);
   const [appointmentDetails, setAppointmentDetails] =
     useState<AppointmentDetail | null>(null); // Holds vehicleId, serviceCenterId, etc.
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const stationId = searchParams.get("stationId");
+
+  // Fetch available services for the service center
+  useEffect(() => {
+    const fetchServices = async () => {
+      if (!stationId) return;
+      try {
+        const data = await fetchServiceCenterServices(stationId);
+        setAvailableServices(data.map((svc: any) => ({
+          serviceCenterServiceId: svc.serviceCenterServiceId,
+          serviceName: svc.serviceName,
+          customPrice: svc.customPrice,
+          serviceBasePrice: svc.serviceBasePrice,
+        })));
+      } catch (e) {
+        setAvailableServices([]);
+      }
+    };
+    fetchServices();
+  }, [stationId]);
 
   // If no stationId, show error and do not render the rest of the page
   if (!stationId) {
@@ -66,18 +90,19 @@ export default function Page() {
         setLoading(false);
         return;
       }
-      const res = await fetch(
-        `/api/Appointment/station/${stationIdNum}/details/${trimmedId}`
-      );
-      if (!res.ok) throw new Error("Appointment not found");
-      const data = (await res.json()) as AppointmentDetail;
+      const data = await fetchAppointmentDetail(stationIdNum, trimmedId);
+      console.log("Fetched appointment details:", data);
       setAppointmentDetails(data);
       setServices(
-        (data.services || []).map((service: string) => ({
-          service,
-          checked: true,
-          serviceCenter: data.serviceCenterName || "",
-        }))
+        (data.services || []).map((service: string) => {
+          const svc = availableServices.find(s => s.serviceName === service);
+          return {
+            service,
+            checked: true,
+            serviceCenter: data.serviceCenterName || "",
+            price: svc ? (svc.customPrice ?? svc.serviceBasePrice ?? 0) : 0
+          };
+        })
       );
     } catch {
       setServices([]);
@@ -88,15 +113,20 @@ export default function Page() {
     }
   };
 
+  // Add service from dropdown
   const handleAddService = () => {
-    if (!newServiceName.trim() || services === null) return;
+    if (!newServiceId || services === null) return;
+    const svc = availableServices.find(s => s.serviceCenterServiceId.toString() === newServiceId);
+    if (!svc) return;
+    const price = svc.customPrice ?? svc.serviceBasePrice ?? 0;
     const newService: RowData = {
-      service: newServiceName.trim(),
+      service: svc.serviceName,
       checked: false,
-      serviceCenter: appointmentDetails?.serviceCenterName || "", // Use real service center if available
+      serviceCenter: appointmentDetails?.serviceCenterName || "",
+      price,
     };
     setServices((prev) => [...(prev || []), newService]);
-    setNewServiceName("");
+    setNewServiceId("");
   };
 
   const handleToggleService = (index: number) => {
@@ -127,7 +157,7 @@ export default function Page() {
             serviceCenterId,
             servicedByUserId,
             serviceDate,
-            cost: 0, // TODO: Add real cost if available
+            cost: service.price || 0, // TODO: Add real cost if available
             mileage: undefined, // TODO: Add real mileage if available
           });
         }
@@ -139,6 +169,9 @@ export default function Page() {
       setLoading(false);
     }
   };
+
+  // Calculate total cost
+  const totalCost = (services || []).filter(s => s.checked).reduce((sum, s) => sum + (s.price || 0), 0);
 
   return (
     <div className="flex flex-col min-h-screen p-[58px] bg-white">
@@ -175,20 +208,24 @@ export default function Page() {
         </div>
       )}
 
-      {/* Services Section */}
+      {/* Service Type Dropdown */}
       {services !== null && (
-        <div className="flex flex-col gap-[72px] pr-[38px]">
-          <div>
-            <h2 className="text-lg text-neutral-800 mb-[24px]">Services</h2>
-            <p className="text-md text-neutral-500 mb-[8px] ">Service Type</p>
+        <>
+          <div className="mb-4">
+            <label className="block text-md text-neutral-500 mb-2">Service Type</label>
             <div className="flex items-center w-[496px] h-[62px] mb-[16px]">
-              <input
-                type="text"
-                placeholder="Service Type"
-                value={newServiceName}
-                onChange={(e) => setNewServiceName(e.target.value)}
+              <select
+                value={newServiceId}
+                onChange={e => setNewServiceId(e.target.value)}
                 className="w-full p-3 rounded-md border bg-blue-50 text-neutral-500 mb-6"
-              />
+              >
+                <option value="">Select a service</option>
+                {availableServices.map(svc => (
+                  <option key={svc.serviceCenterServiceId} value={svc.serviceCenterServiceId}>
+                    {svc.serviceName} ({svc.customPrice ?? svc.serviceBasePrice ?? 0} LKR)
+                  </option>
+                ))}
+              </select>
             </div>
             <div
               onClick={handleAddService}
@@ -196,23 +233,35 @@ export default function Page() {
             >
               + Add Service
             </div>
-            <ServiceStatusDataTable
-              data={services}
-              onToggle={handleToggleService}
-            />
           </div>
-          <div>
-            <Button
-              variant="primary"
-              size="large"
-              className="w-full"
-              onClick={handleSubmit}
-              disabled={loading}
-            >
-              {loading ? "Saving..." : "Submit"}
-            </Button>
+
+          {/* Services Table */}
+          <div className="flex flex-col gap-[72px] pr-[38px]">
+            <div>
+              <h2 className="text-lg text-neutral-800 mb-[24px]">Services</h2>
+              <ServiceStatusDataTable
+                data={services}
+                onToggle={handleToggleService}
+                showPrice={true}
+              />
+            </div>
+            {/* Total and Submit */}
+            <div className="flex flex-col items-end gap-4">
+              <div className="text-lg font-semibold text-neutral-700">
+                Total: {totalCost} LKR
+              </div>
+              <Button
+                variant="primary"
+                size="large"
+                className="w-full"
+                onClick={handleSubmit}
+                disabled={loading}
+              >
+                {loading ? "Saving..." : "Submit"}
+              </Button>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

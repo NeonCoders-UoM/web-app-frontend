@@ -86,8 +86,7 @@ const Table: React.FC<TableProps> = ({ data, onView }) => {
               name={appointment.name}
               date={appointment.date}
               onView={() => onView(appointment)}
-              onAccept={() => handleAccept(appointment)}
-              onReject={() => handleReject(appointment)}
+          
             />
           ))}
         </tbody>

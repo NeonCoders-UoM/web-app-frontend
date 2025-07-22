@@ -9,11 +9,10 @@ interface TableRowProps {
   name: string;
   date: string;
   onView: () => void;
-  onAccept: () => void;
-  onReject: () => void;
+  
 }
 
-const TableRow: React.FC<TableRowProps> = ({ appointmentId, name, date, onView, onAccept, onReject }) => {
+const TableRow: React.FC<TableRowProps> = ({ appointmentId, name, date, onView}) => {
   return (
     <tr>
       <TableCell>#{appointmentId}</TableCell>
@@ -24,12 +23,6 @@ const TableRow: React.FC<TableRowProps> = ({ appointmentId, name, date, onView, 
           <Button variant="primary" size="small" onClick={onView}>
             View
           </Button>
-          <button className="w-[123px] h-[40px] px-[16px] rounded-xl text-white text-sm bg-green-500 hover:bg-green-600 active:bg-green-400" onClick={onAccept}>
-            Accept
-          </button>
-          <button className="w-[123px] h-[40px] px-[16px] rounded-xl text-white text-sm bg-red-500 hover:bg-red-600 active:bg-red-400" onClick={onReject}>
-            Reject
-          </button>
         </div>
       </TableCell>
     </tr>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Table } from "@/components/organism/closure-schedule-table/closure-schedule-table";
 import ScheduleShopClosures from "@/components/molecules/schedule-shop-closures/schedule-shop-closures";
 import ShiftCard from "@/components/atoms/shiftcard/shiftcard";
@@ -17,7 +17,8 @@ import { ServiceCenter, ServiceCenterServiceDTO } from "@/types";
 
 const ManageServices = () => {
   const searchParams = useSearchParams();
-  const queryServiceCenterId = searchParams.get("serviceCenterId");
+  const router = useRouter();
+  const queryServiceCenterId = searchParams.get("serviceCenterId") || searchParams.get("stationId");
 
   const [shiftCards, setShiftCards] = useState<
     { day: string; status: string }[]
@@ -133,7 +134,7 @@ const ManageServices = () => {
     };
 
     loadServiceCenters();
-  }, []);
+  }, [queryServiceCenterId]);
 
   // Load service center services when service center changes
   useEffect(() => {
@@ -198,7 +199,10 @@ const ManageServices = () => {
       (sc) => (sc.Station_id || parseInt(sc.id)) === serviceCenterId
     );
     setSelectedServiceCenter(center || null);
-
+    // Update the URL query parameter
+    const params = new URLSearchParams(window.location.search);
+    params.set("serviceCenterId", serviceCenterId.toString());
+    router.push(`?${params.toString()}`);
     // Clear existing closures when switching service centers
     setShiftCards([]);
   };

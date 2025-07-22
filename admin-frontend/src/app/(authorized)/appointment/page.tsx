@@ -12,6 +12,7 @@ import {
 } from "@/utils/api";
 import { ServiceCenter } from "@/types";
 import type { AppointmentDetail } from "@/utils/api";
+import { fetchServiceCenterServices, fetchAppointmentDetail } from "@/utils/api";
 import "@/styles/fonts.css";
 
 // Types matching backend DTOs
@@ -29,6 +30,8 @@ type TableAppointment = {
   name: string;
   date: string;
 };
+
+type ServiceWithPrice = { name: string; price: number };
 
 const AppointmentsPage = () => {
   const searchParams = useSearchParams();
@@ -50,6 +53,8 @@ const AppointmentsPage = () => {
   const [tableAppointments, setTableAppointments] = useState<
     TableAppointment[]
   >([]);
+  const [availableServices, setAvailableServices] = useState<any[]>([]);
+  const [servicesWithPrices, setServicesWithPrices] = useState<ServiceWithPrice[]>([]);
 
   // Fetch service center details
   useEffect(() => {
@@ -88,6 +93,13 @@ const AppointmentsPage = () => {
     fetchAppointments();
   }, [stationId]);
 
+  // Fetch available services for the service center
+  useEffect(() => {
+    if (stationId) {
+      fetchServiceCenterServices(stationId).then(setAvailableServices);
+    }
+  }, [stationId]);
+
   // Map fetched appointments to table format
   useEffect(() => {
     if (appointments && Array.isArray(appointments)) {
@@ -116,11 +128,24 @@ const AppointmentsPage = () => {
       return;
     }
     try {
-      const res = await fetch(
-        `/api/Appointment/station/${stationId}/details/${summary.appointmentId}`
-      );
-      if (!res.ok) throw new Error("Failed to fetch appointment details");
-      const data = await res.json();
+      // Ensure availableServices are loaded
+      let servicesList = availableServices;
+      if (!servicesList.length) {
+        servicesList = await fetchServiceCenterServices(stationId);
+        setAvailableServices(servicesList);
+      }
+
+      const data = await fetchAppointmentDetail(stationId, summary.appointmentId);
+
+      // Add prices to services
+      const servicesWithPrices = (data.services || []).map((service: string) => {
+        const svc = servicesList.find((s: any) => s.serviceName === service);
+        return {
+          name: service,
+          price: svc ? (svc.customPrice ?? svc.serviceBasePrice ?? 0) : 0,
+        };
+      });
+      setServicesWithPrices(servicesWithPrices);
       setSelectedAppointment(data);
       setIsModalOpen(true);
     } catch (error: unknown) {
@@ -211,7 +236,7 @@ const AppointmentsPage = () => {
                   licensePlate={selectedAppointment.licensePlate}
                   date={selectedAppointment.appointmentDate}
                   vehicle={selectedAppointment.vehicleType}
-                  services={selectedAppointment.services}
+                  servicesWithPrices={servicesWithPrices}
                   onAccept={async () => {
                     try {
                       await updateAppointmentStatus(
