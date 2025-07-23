@@ -216,18 +216,7 @@ const ClientProfilePage = () => {
           >
             Service History
           </Button>
-          <Button
-            variant={activeView === "appointments" ? "primary" : "primary"}
-            size="medium"
-            onClick={() => setActiveView("appointments")}
-            className={
-              activeView !== "appointments"
-                ? "bg-white text-primary-200 border border-primary-200"
-                : ""
-            }
-          >
-            Check Appointment Status
-          </Button>
+          
         </div>
 
         {/* Service History or Appointments View */}

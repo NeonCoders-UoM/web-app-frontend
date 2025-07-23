@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import KebabMenu from '@/components/atoms/kebab-menu/kebab-menu';
 interface Action {
   label: string;
@@ -16,6 +17,8 @@ interface KebabMenuWithActionsProps {
 const KebabMenuWithActions: React.FC<KebabMenuWithActionsProps> = ({ actions, onActionSelect }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
+  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
 
  
   const actionMap: Record<string, Action> = {
@@ -69,7 +72,12 @@ const KebabMenuWithActions: React.FC<KebabMenuWithActionsProps> = ({ actions, on
   
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -78,14 +86,26 @@ const KebabMenuWithActions: React.FC<KebabMenuWithActionsProps> = ({ actions, on
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setMenuStyle({
+        position: 'absolute',
+        top: rect.bottom + window.scrollY + 4,
+        left: rect.right + window.scrollX - 192, // 192px is the menu width
+        zIndex: 9999,
+      });
+    }
+  }, [isOpen]);
+
   return (
-    <div className="relative" ref={menuRef}>
+    <div className="relative" ref={buttonRef} style={{ display: 'inline-block' }}>
       <div onClick={() => setIsOpen(!isOpen)}>
         <KebabMenu />
       </div>
 
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-neutral-100 rounded-md shadow-lg z-10">
+      {isOpen && typeof window !== 'undefined' && ReactDOM.createPortal(
+        <div ref={menuRef} style={menuStyle} className="w-48 bg-neutral-100 rounded-md shadow-lg">
           {actions.map((action) => {
             const actionDetails = actionMap[action];
             return (
@@ -102,7 +122,8 @@ const KebabMenuWithActions: React.FC<KebabMenuWithActionsProps> = ({ actions, on
               </button>
             );
           })}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
