@@ -19,9 +19,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   return (
     <div className="w-full">
-      <div className="flex items-center bg-neutral-100 border border-neutral-300 rounded-md shadow-sm h-[56px] gap-4">
+      <div className="flex items-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 h-14 gap-4">
         {/* Search Icon (SVG) */}
-        <span className="text-neutral-400 pl-4">
+        <span className="text-gray-400 pl-4">
           <svg
             className="w-5 h-5"
             fill="none"
@@ -41,7 +41,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         {/* Search Input */}
         <input
           type="text"
-          className="flex-1 h-full bg-transparent border-none focus:outline-none text-neutral-600 placeholder-neutral-500 text-md font-regular"
+          className="flex-1 h-full bg-transparent border-none focus:outline-none text-gray-700 placeholder-gray-400 text-sm font-medium"
           placeholder={placeholder}
           value={value}
           onChange={onChange}
@@ -53,7 +53,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         {onFilterClick && (
           <button
             onClick={onFilterClick}
-            className="h-[56px] px-4 bg-neutral-200 text-neutral-600 rounded-r-md hover:bg-neutral-300 focus:outline-none focus:ring-2 focus:ring-primary-200 disabled:bg-neutral-100 disabled:cursor-not-allowed"
+            className="h-14 px-6 bg-gradient-to-r from-gray-50 to-gray-100 text-gray-600 rounded-r-xl hover:from-gray-100 hover:to-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:bg-gray-50 disabled:cursor-not-allowed transition-all duration-200 font-medium text-sm"
             disabled={disabled}
             suppressHydrationWarning
           >

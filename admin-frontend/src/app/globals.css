@@ -24,3 +24,158 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Custom styles for modern sidebar */
+.sidebar-3d-shadow {
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-hover-effect {
+  transform: perspective(100px) rotateY(-2deg) translateZ(5px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-active-glow {
+  box-shadow: 
+    0 0 20px rgba(59, 130, 246, 0.4),
+    0 0 40px rgba(59, 130, 246, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Smooth transitions for main content */
+main {
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.5);
+  border-radius: 3px;
+}
+
+.sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.7);
+}
+
+/* Modern user card animations */
+@keyframes slide-in-from-top {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation-fill-mode: both;
+}
+
+.slide-in-from-top-2 {
+  animation: slide-in-from-top 0.2s ease-out;
+}
+
+/* Enhanced hover effects for user card */
+.user-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.user-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Modern status card animations */
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+  }
+}
+
+.status-card-enter {
+  animation: countUp 0.6s ease-out forwards;
+}
+
+.status-card-icon-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Gradient text effect for status values */
+.status-value-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Micro-interactions for better UX */
+.status-card-micro {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.status-card-micro:active {
+  transform: scale(0.98);
+}
+
+/* 3D Table Effects */
+.table-3d-container {
+  perspective: 1000px;
+}
+
+.table-3d-shadow {
+  box-shadow: 
+    0 25px 50px -12px rgba(59, 130, 246, 0.15),
+    0 10px 20px -5px rgba(99, 102, 241, 0.1),
+    0 4px 6px -2px rgba(139, 92, 246, 0.05);
+}
+
+.table-3d-hover:hover {
+  box-shadow: 
+    0 32px 64px -12px rgba(59, 130, 246, 0.2),
+    0 15px 30px -5px rgba(99, 102, 241, 0.15),
+    0 8px 12px -2px rgba(139, 92, 246, 0.1);
+}
+
+/* Enhanced table row hover effects */
+.table-row-3d:hover {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: linear-gradient(90deg, 
+    rgba(59, 130, 246, 0.03) 0%, 
+    rgba(99, 102, 241, 0.05) 50%, 
+    rgba(59, 130, 246, 0.03) 100%);
+}
+
+/* 3D Text shadows */
+.text-3d {
+  text-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(59, 130, 246, 0.1);
+}

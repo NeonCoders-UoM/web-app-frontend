@@ -160,37 +160,36 @@ const SuperAdminDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white p-6 overflow-x-hidden">
-      <div className="max-w-7xl mx-auto w-full">
-        <div className="flex justify-end items-center mb-[32px]">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8 overflow-x-hidden">
+      <div className="max-w-full mx-auto w-full">
+        <div className="flex justify-end items-center mb-10">
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
             pictureAlt="Moni Roy"
             name="Moni Roy"
             role="super-admin"
-            onLogout={() => router.push("/login")} // Updated for consistency
-            onProfileClick={() => router.push("/profile")} // Updated for consistency
-            onSettingsClick={() => router.push("/settings")} // Updated for consistency
+            onLogout={() => router.push("/login")}
           />
         </div>
 
-        <div className="px-4 md:px-8 lg:px-16 xl:px-32">
-        <h1 className="text-2xl font-semibold text-neutral-900 mb-[32px]">
+        <div className="px-6 md:px-12 lg:px-20 xl:px-32 2xl:px-40">
+        <h1 className="text-4xl font-bold text-gray-800 mb-12 drop-shadow-sm">
           Dashboard
         </h1>
         
         {/* Availability Notice */}
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <h3 className="text-lg font-semibold text-blue-800 mb-2">
+        <div className="mb-12 p-8 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/50 rounded-3xl shadow-lg backdrop-blur-sm">
+          <h3 className="text-xl font-bold text-blue-800 mb-4 flex items-center">
+            <div className="w-3 h-3 bg-blue-500 rounded-full mr-4 animate-pulse"></div>
             Service Center Availability
           </h3>
-          <p className="text-blue-700 text-sm leading-relaxed">
-            Availability status is based on closure schedules. Centers marked as "Closed" have scheduled closures for today.
+          <p className="text-blue-700 text-base leading-relaxed">
+            Availability status is based on closure schedules. Centers marked as &quot;Closed&quot; have scheduled closures for today.
             Use the closure schedule management to update availability.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-[44px]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-16 mb-16">
           <StatusCard
             title="Customers"
             value={stats?.customers || 0}
@@ -209,16 +208,17 @@ const SuperAdminDashboard: React.FC = () => {
           <StatusCard
             title="Available Centers"
             value={Array.from(availabilityMap.values()).filter(av => av.isAvailable).length}
-            icon="serviceCenters"
+            icon="availableCenters"
           />
         </div>
 
-        <div>
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-[32px]">
-            <h2 className="text-xl font-semibold text-neutral-900">
+        <div className="bg-gradient-to-br from-white/90 via-blue-50/20 to-indigo-50/10 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/70 p-12">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-12">
+            <h2 className="text-3xl font-bold text-gray-800 flex items-center">
+              <div className="w-2 h-12 bg-gradient-to-b from-blue-500 via-indigo-500 to-purple-600 rounded-full mr-6 shadow-lg"></div>
               Service Centers
             </h2>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-4">
               <Button
                 variant="primary"
                 size="medium"
@@ -243,14 +243,16 @@ const SuperAdminDashboard: React.FC = () => {
             </div>
           </div>
 
-          <Table
-            headers={headers}
-            data={data}
-            actions={actions}
-            showSearchBar={true}
-            onAction={handleAction}
-            onServiceCenterClick={handleServiceCenterClick}
-          />
+          <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 overflow-hidden">
+            <Table
+              headers={headers}
+              data={data}
+              actions={actions}
+              showSearchBar={true}
+              onAction={handleAction}
+              onServiceCenterClick={handleServiceCenterClick}
+            />
+          </div>
         </div>
         </div>
       </div>
