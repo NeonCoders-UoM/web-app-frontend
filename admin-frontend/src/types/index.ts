@@ -242,6 +242,7 @@ export interface SystemService {
   description: string;
   category: string;
   isActive: boolean;
+  basePrice: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -272,6 +273,7 @@ export interface CreateSystemServiceDTO {
   serviceName: string;
   description: string;
   category: string;
+  basePrice: number;
 }
 
 export interface UpdateSystemServiceDTO {

@@ -21,6 +21,7 @@ export default function SystemServiceForm({
     serviceName: "",
     description: "",
     category: "",
+    basePrice: 0,
   });
 
   const [errors, setErrors] = useState<
@@ -45,6 +46,7 @@ export default function SystemServiceForm({
         serviceName: initialData.serviceName || "",
         description: initialData.description || "",
         category: initialData.category || "",
+        basePrice: initialData.basePrice || 0,
       });
     }
   }, [initialData]);
@@ -57,7 +59,7 @@ export default function SystemServiceForm({
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === "basePrice" ? Number(value) : value,
     }));
     setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
@@ -73,6 +75,9 @@ export default function SystemServiceForm({
     }
     if (!formData.category.trim()) {
       newErrors.category = "Category is required";
+    }
+    if (formData.basePrice <= 0) {
+      newErrors.basePrice = "Base Price must be greater than 0";
     }
 
     setErrors(newErrors);
@@ -159,6 +164,28 @@ export default function SystemServiceForm({
             </select>
             {errors.category && (
               <p className="text-red-500 text-sm mt-1">{errors.category}</p>
+            )}
+          </div>
+
+          {/* Base Price */}
+          <div>
+            <label
+              htmlFor="basePrice"
+              className="block mb-1"
+              style={{ color: colors.neutral[600] }}
+            >
+              Base Price
+            </label>
+            <InputField
+              id="basePrice"
+              name="basePrice"
+              type="number"
+              placeholder="Enter base price"
+              value={formData.basePrice.toString()}
+              onChange={handleChange}
+            />
+            {errors.basePrice && (
+              <p className="text-red-500 text-sm mt-1">{errors.basePrice}</p>
             )}
           </div>
         </div>

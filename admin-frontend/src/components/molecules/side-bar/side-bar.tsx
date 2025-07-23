@@ -42,10 +42,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           label: "Dashboard",
           route: `/service-center-dashboard/${currentStationId}?stationId=${currentStationId}`,
         },
-        // {
-        //   label: "Services",
-        //   route: `/services?stationId=${currentStationId}`,
-        // },
+        { label: "Users", route: "/user-managment" },
         {
           label: "Appointments",
           route: `/appointment?stationId=${currentStationId}`,
@@ -85,7 +82,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       { label: "Vehicles", route: "/vehicle" },
       { label: "Appointments", route: "/appointment" },
       { label: "Feedback", route: "/feedback" },
-      { label: "Users", route: "/user-managment" },
+      // { label: "Users", route: "/user-managment" },
       { label: "Service Status", route: "/service-status" },
       { label: "Closure Schedule", route: "/closure-schedule" },
       { label: "Loyalty Points", route: "/loyalty-points" },

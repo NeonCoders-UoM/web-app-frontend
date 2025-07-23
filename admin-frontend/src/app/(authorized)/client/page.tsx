@@ -101,6 +101,8 @@ const ClientsPage = () => {
 
     if (action === "View") {
       router.push(`/client/${normalizedClientId}`);
+    } else if (action === "Edit") {
+      router.push(`/client/${normalizedClientId}/edit`);
     } else if (action === "Loyalty Points") {
       console.log(`Viewing loyalty points for client with ID: ${clientId}`);
     } else if (action === "Delete") {
@@ -165,7 +167,7 @@ const ClientsPage = () => {
           <ClientTable
             headers={tableHeaders}
             data={clientsData as unknown as Record<string, string>[]}
-            actions={["view", "delete"]}
+            actions={["view", "edit", "delete"]}
             showSearchBar={true}
             showClientCell={true}
             onActionSelect={handleActionSelect}
