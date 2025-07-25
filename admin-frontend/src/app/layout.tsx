@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Admin Frontend",
-  description: "Admin dashboard for VPass",
+  title: "V App",
+  description: "Admin dashboard for VApp",
 };
 
 export default function RootLayout({
