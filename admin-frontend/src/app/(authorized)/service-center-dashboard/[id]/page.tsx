@@ -172,7 +172,7 @@ const ServiceCenterDashboard = () => {
         </div>
 
         {/* Table Section */}
-        <div className="bg-gradient-to-br from-white/90 via-blue-50/20 to-indigo-50/10 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/70 p-12">
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 overflow-x-auto p-6">
           <h2 className="text-xl font-semibold mb-4">
             Leading Services -{" "}
             {serviceCenter?.serviceCenterName || "Service Center"}

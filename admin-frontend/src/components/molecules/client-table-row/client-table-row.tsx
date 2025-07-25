@@ -25,7 +25,7 @@ export const TableRow: React.FC<TableRowProps> = ({
   console.log("TableRow - Columns to render:", columns);
 
   return (
-    <tr className="hover:bg-neutral-100 transition-colors">
+    <tr className="hover:bg-neutral-100 transition-colors text-sm sm:text-base">
       {columns.map((key, index) => {
         const value = row[key] || "";
         console.log(
