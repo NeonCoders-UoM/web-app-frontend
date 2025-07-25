@@ -89,7 +89,7 @@ const FeedbackTable: React.FC<TableProps> = ({ data }) => {
   }, [isModalOpen]);
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto p-6">
       <table className="w-full border-collapse bg-white shadow-md rounded-lg">
         <TableHead
           headers={[

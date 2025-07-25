@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, SlidersHorizontal, Plus } from "lucide-react";
+//import { Search, SlidersHorizontal, Plus } from "lucide-react";
 import StatusCard from "@/components/atoms/status-cards/status-card";
 import Table from "@/components/organism/table/table";
 import Button from "@/components/atoms/button/button";
@@ -19,7 +19,7 @@ const AdminDashboard = () => {
   });
   const [serviceCenters, setServiceCenters] = useState<string[][]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  //const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
