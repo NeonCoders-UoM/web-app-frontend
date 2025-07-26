@@ -18,7 +18,8 @@ import { ServiceCenter, ServiceCenterServiceDTO } from "@/types";
 const ManageServices = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const queryServiceCenterId = searchParams.get("serviceCenterId") || searchParams.get("stationId");
+  const queryServiceCenterId =
+    searchParams.get("serviceCenterId") || searchParams.get("stationId");
 
   const [shiftCards, setShiftCards] = useState<
     { day: string; status: string }[]
