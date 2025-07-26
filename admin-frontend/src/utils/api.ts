@@ -29,6 +29,10 @@ import {
 } from "@/types";
 import axiosInstance from "./axios";
 
+export interface PaginatedServiceCenterResponse {
+  data: ServiceCenterDTO[];
+  totalCount: number;
+}
 
 // Mock data (as provided)
 const mockServiceCenters: ServiceCenter[] = [
@@ -853,6 +857,26 @@ export const fetchServiceCentersByStatus = async (status: string): Promise<Servi
     }));
   } catch (error) {
     console.error("Error in fetchServiceCentersByStatus:", error);
+    throw error;
+  }
+};
+
+// Fetch paginated & filtered service centers
+export const fetchServiceCentersPaginated = async (
+  searchTerm: string,
+  pageNumber: number,
+  pageSize: number
+): Promise<{ data: ServiceCenterDTO[]; totalCount: number }> => {
+  try {
+    const response = await axiosInstance.post("/ServiceCenters/search", {
+      searchTerm,
+      pageNumber,
+      pageSize,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error in fetchServiceCentersPaginated:", error);
     throw error;
   }
 };

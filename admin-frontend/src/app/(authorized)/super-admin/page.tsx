@@ -9,7 +9,8 @@ import StatusCard from "@/components/atoms/status-cards/status-card";
 import Table from "@/components/organism/table/table";
 import {
   fetchDashboardStats,
-  fetchServiceCenters,
+  fetchServiceCentersPaginated,
+  //fetchServiceCenters,
   deleteServiceCenter,
   checkAllServiceCentersAvailability,
 } from "@/utils/api";
@@ -21,23 +22,29 @@ const SuperAdminDashboard: React.FC = () => {
   const [serviceCenters, setServiceCenters] = useState<ServiceCenter[]>([]);
   const [availabilityMap, setAvailabilityMap] = useState<Map<string, { isAvailable: boolean; reason?: string }>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
+  // NEW Pagination & Search State
+  const [searchTerm, setSearchTerm] = useState('');
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [statsData, serviceCentersData, availabilityData] = await Promise.all([
+        const [statsData, /*serviceCentersData,*/ availabilityData] = await Promise.all([
           fetchDashboardStats(),
-          fetchServiceCenters(),
+          //fetchServiceCenters(),
           checkAllServiceCentersAvailability(),
         ]);
-        console.log(
+        /*console.log(
           "Fetched service centers in SuperAdminDashboard:",
           serviceCentersData
         );
-        console.log("Service centers availability:", availabilityData);
+        console.log("Service centers availability:", availabilityData);*/
         setStats(statsData);
-        setServiceCenters(serviceCentersData);
+        //setServiceCenters(serviceCentersData);
         setAvailabilityMap(availabilityData);
+        await fetchPage();
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
         alert("Failed to load dashboard data.");
@@ -46,7 +53,29 @@ const SuperAdminDashboard: React.FC = () => {
       }
     };
     loadData();
-  }, []);
+  }, [searchTerm, currentPage, itemsPerPage]); // re-run when any of these change
+
+  // NEW: Call backend to fetch current page with filters
+  const fetchPage = async () => {
+    try {
+      const result = await fetchServiceCentersPaginated(searchTerm, currentPage, itemsPerPage);
+
+      // Transform backend DTO into usable frontend objects
+      const transformed = result.data.map((sc) => ({
+        id: sc.station_id?.toString() || '',
+        serviceCenterName: sc.station_name || '',
+        email: sc.email || '',
+        telephoneNumber: sc.telephone || '',
+        address: sc.address || '',
+      }));
+
+      setServiceCenters(transformed);
+      setTotalPages(Math.ceil(result.totalCount / itemsPerPage));
+    } catch (err) {
+      console.error("Failed to fetch service centers:", err);
+      alert("Unable to load service center data.");
+    }
+  };
 
   // Refresh availability when page becomes visible
   useEffect(() => {
@@ -245,13 +274,19 @@ const SuperAdminDashboard: React.FC = () => {
 
           <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 overflow-hidden">
             <Table
-              headers={headers}
-              data={data}
-              actions={actions}
-              showSearchBar={true}
-              onAction={handleAction}
-              onServiceCenterClick={handleServiceCenterClick}
-            />
+  headers={headers}
+  data={data}
+  actions={actions}
+  showSearchBar={true}
+  onAction={handleAction}
+  onServiceCenterClick={handleServiceCenterClick}
+  itemsPerPage={itemsPerPage}
+  currentPage={currentPage}
+  totalPages={totalPages}
+  onSearchChange={(val) => setSearchTerm(val)}
+  onItemsPerPageChange={setItemsPerPage}
+  onPageChange={setCurrentPage}
+/>
           </div>
         </div>
         </div>
