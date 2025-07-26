@@ -10,6 +10,7 @@ interface AppointmentProps {
   vehicle: string;
   services?: string[];
   servicesWithPrices?: ServiceWithPrice[];
+  appointmentPrice?: number;
   onAccept: () => void;
   onReject: () => void;
 }
@@ -22,14 +23,32 @@ const AppointmentCard: React.FC<AppointmentProps> = ({
   vehicle,
   services,
   servicesWithPrices,
+  appointmentPrice,
   onAccept,
   onReject,
 }) => {
   return (
     <div className="bg-white p-[86px] rounded-[20px] shadow-md w-[600px] h-[500px]">
-      <h2 className="text-lg font-semibold mb-[56px]" style={{ color: colors.primary[200] }}>
+      <h2
+        className="text-lg font-semibold mb-[56px]"
+        style={{ color: colors.primary[200] }}
+      >
         Appointment Details
       </h2>
+
+      {/* Appointment Price Display */}
+      {appointmentPrice !== undefined && appointmentPrice > 0 && (
+        <div className="mb-[32px] p-[16px] bg-green-50 border border-green-200 rounded-[12px]">
+          <div className="text-center">
+            <span className="text-sm text-green-600 font-medium">
+              Total Appointment Price
+            </span>
+            <div className="text-2xl font-bold text-green-700 mt-[4px]">
+              LKR {appointmentPrice.toLocaleString()}
+            </div>
+          </div>
+        </div>
+      )}
       <div className="grid grid-cols-2 text-neutral-400 text-sm">
         <div>
           <span className="font-semibold mb-[8px]">Appointment ID:</span>
@@ -72,9 +91,10 @@ const AppointmentCard: React.FC<AppointmentProps> = ({
             </table>
           ) : (
             <ul className="list-inside mt-1 text-neutral-600">
-              {services && services.map((service, index) => (
-                <li key={index}>{service}</li>
-              ))}
+              {services &&
+                services.map((service, index) => (
+                  <li key={index}>{service}</li>
+                ))}
             </ul>
           )}
         </div>

@@ -1744,6 +1744,7 @@ export type AppointmentDetail = {
   serviceCenterId: number;
   serviceCenterName?: string;
   status?: string; // Add status field to track appointment status
+  appointmentPrice?: number; // Add appointment price field
 };
 
 export const fetchAdminAppointmentVehicleDetail = async (
@@ -1802,6 +1803,7 @@ export const fetchAppointmentDetail = async (
         serviceCenterId: parseInt(stationId.toString()),
         serviceCenterName: "N/A", // Will need to be fetched from backend
         status: "Pending", // Default status
+        appointmentPrice: 0, // Will need to be calculated from backend services
       };
       
       console.log('Returning basic appointment detail:', basicAppointmentDetail);
