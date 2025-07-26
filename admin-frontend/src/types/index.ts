@@ -38,6 +38,9 @@ export interface ServiceCenter {
   photoUrl?: string; // Frontend only
   registrationCopyUrl?: string; // Frontend only
   Station_status?: string; // Backend field
+  Latitude?: number; // Backend field
+  Longitude?: number; // Backend field
+  DefaultDailyAppointmentLimit?: number; // Backend field
 }
 
 // Backend DTO interfaces
@@ -51,6 +54,9 @@ export interface ServiceCenterDTO {
   telephone: string;
   address: string;
   station_status: string;
+  Latitude: number;
+  Longitude: number;
+  DefaultDailyAppointmentLimit: number;
 }
 
 export interface CreateServiceCenterDTO {
@@ -64,6 +70,7 @@ export interface CreateServiceCenterDTO {
   station_status: string;
   Latitude: number; // Changed to match backend
   Longitude: number; // Changed to match backend
+  DefaultDailyAppointmentLimit: number; // Daily appointment limit
 }
 
 export interface ServiceCenterServiceSelection {
@@ -89,6 +96,7 @@ export interface CreateServiceCenterWithServicesDTO {
   services: ServiceCenterServiceSelection[];
   lat : number;
   lng : number ;
+  defaultDailyAppointmentLimit: number; // Daily appointment limit
 }
 
 export interface UpdateServiceCenterDTO {
