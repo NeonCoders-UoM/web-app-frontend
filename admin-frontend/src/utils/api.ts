@@ -469,6 +469,9 @@ export const fetchServiceCenters = async (): Promise<ServiceCenter[]> => {
       registrationNumber: sc.registerationNumber || "",
       RegisterationNumber: sc.registerationNumber,
       Station_status: sc.station_status,
+      Latitude: sc.Latitude,
+      Longitude: sc.Longitude,
+      DefaultDailyAppointmentLimit: sc.DefaultDailyAppointmentLimit,
       commissionRate: "",
       availableServices: [],
       photoUrl: "",
@@ -795,7 +798,8 @@ export const createServiceCenterWithServices = async (data: CreateServiceCenterW
       address: data.address,
       station_status: data.station_status,
       Latitude: data.lat, // Changed to match backend
-      Longitude: data.lng // Changed to match backend
+      Longitude: data.lng, // Changed to match backend
+      DefaultDailyAppointmentLimit: data.defaultDailyAppointmentLimit // Add appointment limit
     };
     
     const response = await axiosInstance.post("/ServiceCenters", createData);

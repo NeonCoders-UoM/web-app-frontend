@@ -33,6 +33,7 @@ export default function EnhancedServiceCenterForm({
     services: [],
     lat: 0,
     lng: 0,
+    defaultDailyAppointmentLimit: 20, // Default appointment limit
   });
 
   const [packages, setPackages] = useState<Package[]>([]);
@@ -195,6 +196,7 @@ export default function EnhancedServiceCenterForm({
               { id: "address", label: "Address" },
               { id: "vatNumber", label: "VAT Number" },
               { id: "registerationNumber", label: "Registration Number" },
+              { id: "defaultDailyAppointmentLimit", label: "Daily Appointment Limit", type: "number" },
             ].map(({ id, label, type = "text" }) => (
               <div key={id}>
                 <label
