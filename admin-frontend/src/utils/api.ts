@@ -744,6 +744,8 @@ export const createServiceCenter = async (data: Omit<ServiceCenter, "id">): Prom
       telephone: data.telephoneNumber || data.Telephone || "",
       address: data.address || data.Address || "",
       station_status: data.Station_status || "Active",
+      Latitude: 0, // Default latitude
+      Longitude: 0, // Default longitude
     };
     
     const response = await axiosInstance.post("/ServiceCenters", createData);
@@ -1297,6 +1299,7 @@ export const fetchSystemServices = async (): Promise<SystemService[]> => {
         description: "Complete oil change with filter replacement",
         category: "Maintenance",
         isActive: true,
+        basePrice: 50.00,
         createdAt: "2024-01-01T00:00:00Z",
         updatedAt: "2024-01-01T00:00:00Z"
       },
@@ -1306,6 +1309,7 @@ export const fetchSystemServices = async (): Promise<SystemService[]> => {
         description: "Replace worn tires with new ones",
         category: "Tires",
         isActive: true,
+        basePrice: 200.00,
         createdAt: "2024-01-01T00:00:00Z",
         updatedAt: "2024-01-01T00:00:00Z"
       },
@@ -1315,6 +1319,7 @@ export const fetchSystemServices = async (): Promise<SystemService[]> => {
         description: "Brake pad replacement and brake fluid change",
         category: "Brakes",
         isActive: true,
+        basePrice: 150.00,
         createdAt: "2024-01-01T00:00:00Z",
         updatedAt: "2024-01-01T00:00:00Z"
       },
@@ -1324,6 +1329,7 @@ export const fetchSystemServices = async (): Promise<SystemService[]> => {
         description: "Diagnostic and repair of engine issues",
         category: "Engine",
         isActive: true,
+        basePrice: 300.00,
         createdAt: "2024-01-01T00:00:00Z",
         updatedAt: "2024-01-01T00:00:00Z"
       },
@@ -1333,6 +1339,7 @@ export const fetchSystemServices = async (): Promise<SystemService[]> => {
         description: "Comprehensive vehicle inspection",
         category: "Inspection",
         isActive: true,
+        basePrice: 100.00,
         createdAt: "2024-01-01T00:00:00Z",
         updatedAt: "2024-01-01T00:00:00Z"
       }
@@ -1738,6 +1745,7 @@ export interface AppointmentSummary {
   appointmentDate: string;
 }
 
+
 export const fetchAppointmentsForStation = async (stationId: string | number): Promise<AppointmentSummary[]> => {
   try {
     const response = await axiosInstance.get(`/Appointment/station/${stationId}`);
@@ -1758,6 +1766,8 @@ export type AppointmentDetail = {
   vehicleId: number;
   serviceCenterId: number;
   serviceCenterName?: string;
+  status?: string; // Add status field to track appointment status
+  appointmentPrice?: number; // Add appointment price field
 };
 
 export const fetchAdminAppointmentVehicleDetail = async (
@@ -1783,12 +1793,59 @@ export const fetchAppointmentDetail = async (
   appointmentId: number | string
 ): Promise<AppointmentDetail> => {
   try {
+    // First, try the simple endpoint
     const response = await axiosInstance.get(
       `/Appointment/station/${stationId}/details/${appointmentId}`
     );
     return response.data;
   } catch (error) {
-    console.error('Error fetching appointment detail:', error);
+    console.log('Simple endpoint failed, trying alternative approach...');
+    
+    try {
+      // If the simple endpoint fails, try to get all appointments for the station
+      // and find the specific appointment
+      const allAppointments = await fetchAppointmentsForStation(stationId);
+      const targetAppointment = allAppointments.find(
+        (apt) => apt.appointmentId.toString() === appointmentId.toString()
+      );
+      
+      if (!targetAppointment) {
+        throw new Error('Appointment not found');
+      }
+      
+      // For now, return a basic structure with the information we have
+      // This is a temporary solution until the backend endpoint is fixed
+      const basicAppointmentDetail: AppointmentDetail = {
+        appointmentId: targetAppointment.appointmentId,
+        licensePlate: "N/A", // Will need to be fetched from backend
+        vehicleType: "N/A", // Will need to be fetched from backend
+        ownerName: targetAppointment.ownerName,
+        appointmentDate: targetAppointment.appointmentDate,
+        services: [], // Will need to be fetched from backend
+        vehicleId: 0, // Will need to be fetched from backend
+        serviceCenterId: parseInt(stationId.toString()),
+        serviceCenterName: "N/A", // Will need to be fetched from backend
+        status: "Pending", // Default status
+        appointmentPrice: 0, // Will need to be calculated from backend services
+      };
+      
+      console.log('Returning basic appointment detail:', basicAppointmentDetail);
+      return basicAppointmentDetail;
+      
+    } catch (fallbackError) {
+      console.error('Error fetching appointment detail:', error);
+      console.error('Fallback approach also failed:', fallbackError);
+      throw error;
+    }
+  }
+};
+
+// Complete an appointment (mark as completed and send notification)
+export const completeAppointment = async (appointmentId: number): Promise<void> => {
+  try {
+    await axiosInstance.post(`/Appointment/${appointmentId}/complete`);
+  } catch (error) {
+    console.error("Error completing appointment:", error);
     throw error;
   }
 };

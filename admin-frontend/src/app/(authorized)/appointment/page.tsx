@@ -10,9 +10,12 @@ import {
   updateAppointmentStatus,
   fetchAppointmentsForStation,
 } from "@/utils/api";
-import { ServiceCenter } from "@/types";
+import { ServiceCenter, ServiceCenterServiceDTO } from "@/types";
 import type { AppointmentDetail } from "@/utils/api";
-import { fetchServiceCenterServices, fetchAppointmentDetail } from "@/utils/api";
+import {
+  fetchServiceCenterServices,
+  fetchAppointmentDetail,
+} from "@/utils/api";
 import "@/styles/fonts.css";
 
 // Types matching backend DTOs
@@ -53,8 +56,13 @@ const AppointmentsPage = () => {
   const [tableAppointments, setTableAppointments] = useState<
     TableAppointment[]
   >([]);
-  const [availableServices, setAvailableServices] = useState<any[]>([]);
-  const [servicesWithPrices, setServicesWithPrices] = useState<ServiceWithPrice[]>([]);
+  const [availableServices, setAvailableServices] = useState<
+    ServiceCenterServiceDTO[]
+  >([]);
+  const [servicesWithPrices, setServicesWithPrices] = useState<
+    ServiceWithPrice[]
+  >([]);
+  const [appointmentPrice, setAppointmentPrice] = useState<number>(0);
 
   // Fetch service center details
   useEffect(() => {
@@ -135,17 +143,31 @@ const AppointmentsPage = () => {
         setAvailableServices(servicesList);
       }
 
-      const data = await fetchAppointmentDetail(stationId, summary.appointmentId);
+      const data = await fetchAppointmentDetail(
+        stationId,
+        summary.appointmentId
+      );
 
       // Add prices to services
-      const servicesWithPrices = (data.services || []).map((service: string) => {
-        const svc = servicesList.find((s: any) => s.serviceName === service);
-        return {
-          name: service,
-          price: svc ? (svc.customPrice ?? svc.serviceBasePrice ?? 0) : 0,
-        };
-      });
+      const servicesWithPrices = (data.services || []).map(
+        (service: string) => {
+          const svc = servicesList.find(
+            (s: ServiceCenterServiceDTO) => s.serviceName === service
+          );
+          return {
+            name: service,
+            price: svc ? svc.customPrice ?? svc.serviceBasePrice ?? 0 : 0,
+          };
+        }
+      );
       setServicesWithPrices(servicesWithPrices);
+
+      // Calculate total appointment price - use backend price if available, otherwise calculate from services
+      const totalPrice =
+        data.appointmentPrice ||
+        servicesWithPrices.reduce((sum, service) => sum + service.price, 0);
+      setAppointmentPrice(totalPrice);
+
       setSelectedAppointment(data);
       setIsModalOpen(true);
     } catch (error: unknown) {
@@ -159,6 +181,8 @@ const AppointmentsPage = () => {
     setIsModalOpen(false);
     setSelectedAppointment(null);
     setDetailError(null);
+    setAppointmentPrice(0);
+    setServicesWithPrices([]);
   };
 
   // Close modal when clicking outside
@@ -210,10 +234,37 @@ const AppointmentsPage = () => {
           ) : appointmentsError ? (
             <div className="text-red-500">{appointmentsError}</div>
           ) : (
-            <AppointmentTable
-              data={tableAppointments}
-              onView={handleViewAppointment}
-            />
+            <>
+              {/* Price Display Section */}
+              {appointmentPrice > 0 && (
+                <div className="mb-[32px] p-[24px] bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-[16px] shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-green-800 mb-[4px]">
+                        Selected Appointment Price
+                      </h3>
+                      <p className="text-sm text-green-600">
+                        Total cost for the selected services
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-3xl font-bold text-green-700">
+                        LKR {appointmentPrice.toLocaleString()}
+                      </div>
+                      <div className="text-sm text-green-600 mt-[4px]">
+                        {servicesWithPrices.length} service
+                        {servicesWithPrices.length !== 1 ? "s" : ""}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <AppointmentTable
+                data={tableAppointments}
+                onView={handleViewAppointment}
+              />
+            </>
           )}
         </div>
 
@@ -237,6 +288,7 @@ const AppointmentsPage = () => {
                   date={selectedAppointment.appointmentDate}
                   vehicle={selectedAppointment.vehicleType}
                   servicesWithPrices={servicesWithPrices}
+                  appointmentPrice={appointmentPrice}
                   onAccept={async () => {
                     try {
                       await updateAppointmentStatus(
