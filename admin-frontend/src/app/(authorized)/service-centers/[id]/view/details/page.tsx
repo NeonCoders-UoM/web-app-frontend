@@ -132,12 +132,9 @@ const DetailsTab: React.FC = () => {
         <div className="flex justify-end items-center mb-[80px]">
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
-            pictureAlt="Moni Roy"
-            name="Moni Roy"
-            role="super-admin"
+            pictureAlt="User Profile"
+            useCurrentUser={true}
             onLogout={() => router.push("/login")}
-            onProfileClick={() => router.push("/profile")}
-            onSettingsClick={() => router.push("/settings")}
           />
         </div>
 

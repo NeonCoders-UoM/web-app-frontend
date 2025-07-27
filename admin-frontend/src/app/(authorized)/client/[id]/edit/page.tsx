@@ -94,13 +94,13 @@ const ClientEditPage = () => {
             style={{ color: colors.primary[200] }}
           ></h1>
           <UserProfileCard
-            pictureSrc="/images/profipic.jpg" // Already updated to use local image
-            pictureAlt="Moni Roy"
-            name="Moni Roy"
-            role="admin"
-            onLogout={() => console.log("Logout clicked")}
-            onProfileClick={() => console.log("Profile clicked")}
-            onSettingsClick={() => console.log("Settings clicked")}
+            pictureSrc="/images/profipic.jpg"
+            pictureAlt="User Profile"
+            useCurrentUser={true}
+            onLogout={() => {
+              localStorage.removeItem("token");
+              router.push("/login");
+            }}
           />
         </div>
 

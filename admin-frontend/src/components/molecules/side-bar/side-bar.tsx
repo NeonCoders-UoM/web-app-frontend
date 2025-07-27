@@ -6,16 +6,20 @@ import SidebarButton from "@/components/atoms/sidebar-button/sidebar-button";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 interface SidebarProps {
-  role: "super-admin" | "service-center-admin" | "cashier" | "data-operator";
+  role: "super-admin" | "admin" | "service-center-admin" | "cashier" | "data-operator";
   serviceCenters?: { id: string; name: string }[];
   logo?: string;
   stationId?: string;
+  selectedTab?: string;
+  setSelectedTab?: (tab: string) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   role,
   serviceCenters = [],
   stationId,
+  selectedTab,
+  setSelectedTab,
 }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -42,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           label: "Dashboard",
           route: `/service-center-dashboard/${currentStationId}?stationId=${currentStationId}`,
         },
-        { label: "Users", route: "/user-managment" },
+        
         {
           label: "Appointments",
           route: `/appointment?stationId=${currentStationId}`,
@@ -67,10 +71,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           label: "Closure Schedule",
           route: `/closure-schedule?stationId=${currentStationId}`,
         },
-        {
-          label: "Loyalty Points",
-          route: `/loyalty-points?stationId=${currentStationId}`,
-        },
+        
         { label: "Back to Admin", route: "/admin-dashboard" },
       ];
     }
@@ -82,40 +83,61 @@ const Sidebar: React.FC<SidebarProps> = ({
       { label: "Vehicles", route: "/vehicle" },
       { label: "Appointments", route: "/appointment" },
       { label: "Feedback", route: "/feedback" },
-      // { label: "Users", route: "/user-managment" },
+      { label: "Users", route: "/user-managment" },
       { label: "Service Status", route: "/service-status" },
       { label: "Closure Schedule", route: "/closure-schedule" },
-      { label: "Loyalty Points", route: "/loyalty-points" },
+      // { label: "Loyalty Points", route: "/loyalty-points" },
       { label: "Logout", route: "/login" },
+    ];
+  };
+
+  const getAdminSidebarOptions = () => {
+    return [
+      { label: "Users", route: "/user-managment" },
+    ];
+  };
+
+  const getServiceCenterAdminOptions = () => {
+    return [
+      { label: "Dashboard", route: `/service-center-dashboard/${currentStationId}` },
+      { label: "Clients", route: "/client" },
+      { label: "Vehicles", route: "/vehicle" },
+      { label: "Service Status", route: "/service-status" },
+      { label: "Appointments", route: "/appointment" },
+      { label: "Feedback", route: "/feedback" },
+      { label: "Closure Schedule", route: "/closure-schedule" },
+    ];
+  };
+
+  const getCashierOptions = () => {
+    return [
+      { label: "Dashboard", route: `/service-center-dashboard/${currentStationId}` },
+      { label: "Clients", route: "/client" },
+      { label: "Vehicles", route: "/vehicle" },
+      { label: "Service Status", route: "/service-status" },
+      { label: "Appointments", route: "/appointment" },
+      { label: "Feedback", route: "/feedback" },
+    ];
+  };
+
+  const getDataOperatorOptions = () => {
+    return [
+      { label: "Dashboard", route: `/service-center-dashboard/${currentStationId}` },
+      { label: "Clients", route: "/client" },
+      { label: "Vehicles", route: "/vehicle" },
+      { label: "Service Status", route: "/service-status" },
+      { label: "Appointments", route: "/appointment" },
+      { label: "Feedback", route: "/feedback" },
+      { label: "Closure Schedule", route: "/closure-schedule" },
     ];
   };
 
   const sidebarOptions: Record<string, { label: string; route: string }[]> = {
     "super-admin": getSidebarOptions(),
-    "service-center-admin": [
-      { label: "Dashboard", route: "/dashboard" },
-      { label: "Clients", route: "/client" },
-      { label: "Vehicles", route: "/vehicle" },
-      { label: "Service Status", route: "/service-status" },
-      { label: "Appointments", route: "/appointment" },
-      { label: "Feedback", route: "/feedback" },
-      { label: "Closure Schedule", route: "/closure-schedule" },
-    ],
-    cashier: [
-      { label: "Dashboard", route: "/dashboard" },
-      { label: "Clients", route: "/client" },
-      { label: "Vehicles", route: "/vehicle" },
-      { label: "Service Status", route: "/service-status" },
-      { label: "Feedback", route: "/feedback" },
-      { label: "Appointments", route: "/appointment" },
-    ],
-    "data-operator": [
-      { label: "Dashboard", route: "/dashboard" },
-      { label: "Clients", route: "/client" },
-      { label: "Vehicles", route: "/vehicle" },
-      { label: "Closure Schedule", route: "/closure-schedule" },
-      { label: "Feedback", route: "/feedback" },
-    ],
+    "admin": getAdminSidebarOptions(),
+    "service-center-admin": getServiceCenterAdminOptions(),
+    "cashier": getCashierOptions(),
+    "data-operator": getDataOperatorOptions(),
   };
 
   const sections = sidebarOptions[role] || [];
@@ -123,6 +145,45 @@ const Sidebar: React.FC<SidebarProps> = ({
   const handleServiceCenterClick = (centerId: string) => {
     router.push(`/service-center-dashboard/${centerId}?stationId=${centerId}`);
   };
+
+  // For admin, render Dashboard and Users as tabs
+  if (role === "admin" && selectedTab && setSelectedTab) {
+    return (
+      <div className="w-72 min-h-screen flex flex-col bg-[#010134] bg-gradient-to-b from-[#010134] to-[#010134] backdrop-blur-lg shadow-[4px_0_30px_rgba(0,0,128,0.5)] fixed left-0 top-0 z-50 sidebar-scrollbar overflow-y-auto border-r border-[#0000A0]/30">
+        {/* Logo Section */}
+        <div className="px-6 py-6 flex items-center justify-center border-b border-white/10 relative">
+          <Image
+            src="/images/logo3.png"
+            alt="Logo"
+            width={120}
+            height={40}
+          />
+        </div>
+        <div className="flex-1 px-4 py-4">
+          <div className="space-y-1">
+            <button
+              className={`w-full text-left px-4 py-3 rounded-lg font-medium text-white transition-colors ${selectedTab === "dashboard" ? "bg-blue-700/80" : "hover:bg-blue-900/40"}`}
+              onClick={() => setSelectedTab("dashboard")}
+            >
+              Dashboard
+            </button>
+            <button
+              className={`w-full text-left px-4 py-3 rounded-lg font-medium text-white transition-colors ${selectedTab === "users" ? "bg-blue-700/80" : "hover:bg-blue-900/40"}`}
+              onClick={() => setSelectedTab("users")}
+            >
+              Users
+            </button>
+          </div>
+        </div>
+        <div className="px-6 py-4 border-t border-[#0000A0]/30">
+          <div className="text-xs text-white/70 text-center">
+            <span className="block font-medium">VPass Admin</span>
+            <span className="text-white/50">v2.0.1</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-72 min-h-screen flex flex-col bg-[#010134] bg-gradient-to-b from-[#010134] to-[#010134] backdrop-blur-lg shadow-[4px_0_30px_rgba(0,0,128,0.5)] fixed left-0 top-0 z-50 sidebar-scrollbar overflow-y-auto border-r border-[#0000A0]/30">
@@ -136,7 +197,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         />
       </div>
 
-      {/* Service Centers Section for Super Admin */}
+      {/* Service Centers Section for Super Admin only */}
       {role === "super-admin" && serviceCenters.length > 0 && (
         <div className="px-6 py-6 border-b border-[#0000A0]/30">
           <div className="mb-6">

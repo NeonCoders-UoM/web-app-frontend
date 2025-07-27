@@ -614,6 +614,29 @@ export const fetchUsers = async (): Promise<User[]> => {
     throw error;
   }
 };
+
+// Fetch current user details
+export const fetchCurrentUser = async (): Promise<{ firstName: string; lastName: string; email: string; role: string } | null> => {
+  try {
+    const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
+    if (!userId) {
+      console.error("No userId found in localStorage");
+      return null;
+    }
+
+    const response = await axiosInstance.get(`/Admin/${userId}`);
+    return {
+      firstName: response.data.firstName,
+      lastName: response.data.lastName,
+      email: response.data.email,
+      role: response.data.role
+    };
+  } catch (error) {
+    console.error("Error fetching current user:", error);
+    return null;
+  }
+};
+
 // Fetch a single service center by ID
 export const fetchServiceCenterById = async (id: string): Promise<ServiceCenter | null> => {
   try {
