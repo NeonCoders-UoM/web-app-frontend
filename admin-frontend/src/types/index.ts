@@ -391,3 +391,14 @@ export interface FeedbackFilters {
   minRating?: number;
   maxRating?: number;
 }
+
+// Forgot Password DTOs
+export interface ForgotPasswordDto {
+  email: string;
+}
+
+export interface ResetPasswordDto {
+  email: string;
+  otp: string;
+  newPassword: string;
+}

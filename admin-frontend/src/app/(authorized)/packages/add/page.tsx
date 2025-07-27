@@ -47,15 +47,12 @@ const AddPackagePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white p-6">
       <div className="flex justify-end items-center mb-[32px]">
-        <UserProfileCard
-          pictureSrc="/images/profipic.jpg"
-          pictureAlt="Moni Roy"
-          name="Moni Roy"
-          role="super-admin"
-          onLogout={() => router.push("/login")}
-          onProfileClick={() => router.push("/profile")}
-          onSettingsClick={() => router.push("/settings")}
-        />
+      <UserProfileCard
+            pictureSrc="/images/profipic.jpg"
+            pictureAlt="User Profile"
+            useCurrentUser={true}
+            onLogout={() => router.push("/login")}
+          />
       </div>
 
       <div className="px-[182px]">

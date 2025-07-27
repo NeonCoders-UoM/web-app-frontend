@@ -18,6 +18,7 @@ interface InputFieldProps {
   step?: string;
   min?: string;
   max?: string;
+  maxLength?: number;
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -35,6 +36,7 @@ const InputField: React.FC<InputFieldProps> = ({
   step,
   min,
   max,
+  maxLength,
 }) => {
   const sizeClasses = {
     sm: "text-xsm h-10",
@@ -72,6 +74,7 @@ const InputField: React.FC<InputFieldProps> = ({
           step={step}
           min={min}
           max={max}
+          maxLength={maxLength}
           className={`flex-1 h-full bg-transparent border-none focus:outline-none text-${textColor} placeholder-${placeholderColor} font-regular pl-4 pr-2 ${selectedSizeClass}`}
           aria-label={ariaLabel}
           suppressHydrationWarning

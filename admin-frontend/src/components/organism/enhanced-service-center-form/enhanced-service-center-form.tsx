@@ -14,26 +14,28 @@ import {
 import { fetchPackages, fetchSystemServices } from "@/utils/api";
 
 interface EnhancedServiceCenterFormProps {
+  initialData?: CreateServiceCenterWithServicesDTO;
   onSubmit: (data: CreateServiceCenterWithServicesDTO) => void;
 }
 
 export default function EnhancedServiceCenterForm({
+  initialData,
   onSubmit,
 }: EnhancedServiceCenterFormProps) {
   const [formData, setFormData] = useState<CreateServiceCenterWithServicesDTO>({
-    ownerName: "",
-    vatNumber: "",
-    registerationNumber: "",
-    station_name: "",
-    email: "",
-    telephone: "",
-    address: "",
-    station_status: "Active",
-    packageId: 0,
-    services: [],
-    lat: 0,
-    lng: 0,
-    defaultDailyAppointmentLimit: 20, // Default appointment limit
+    ownerName: initialData?.ownerName || "",
+    vatNumber: initialData?.vatNumber || "",
+    registerationNumber: initialData?.registerationNumber || "",
+    station_name: initialData?.station_name || "",
+    email: initialData?.email || "",
+    telephone: initialData?.telephone || "",
+    address: initialData?.address || "",
+    station_status: initialData?.station_status || "Active",
+    packageId: initialData?.packageId || 0,
+    services: initialData?.services || [],
+    lat: initialData?.lat || 0,
+    lng: initialData?.lng || 0,
+    defaultDailyAppointmentLimit: initialData?.defaultDailyAppointmentLimit || 20, // Default appointment limit
   });
 
   const [packages, setPackages] = useState<Package[]>([]);

@@ -174,85 +174,9 @@ const mockServiceCenters: ServiceCenter[] = [
   },
 ];
 
-// Fallback client data for development/testing when backend is not available
-const fallbackClients: Client[] = [
-  {
-    customerId: 1,
-    firstName: "Devon",
-    lastName: "Lane",
-    email: "devon.lane@gmail.com",
-    phoneNumber: "+1 (961) 523-4453",
-    address: "456 Ocean Avenue, Miami, FL 12345",
-    nic: "2000345682",
-    loyaltyPoints: 13654,
-    // Legacy fields for backward compatibility
-    id: "client-1",
-    client: "Devon Lane",
-    phoneno: "+1 (961) 523-4453",
-    points: 13654,
-    profilePicture: "https://placehold.co/80x80/svg?text=Client",
-    tiers: [
-      { name: "Bronze", threshold: 5000 },
-      { name: "Silver", threshold: 10000 },
-      { name: "Gold", threshold: 20000 },
-    ],
-    vehicles: [],
-    serviceHistory: [],
-    appointments: [],
-  },
-  {
-    customerId: 2,
-    firstName: "Kathryn",
-    lastName: "Murphy",
-    email: "kathryn.murphy@gmail.com",
-    phoneNumber: "+1 (961) 523-4454",
-    address: "234 Oak Street, Flat 7",
-    nic: "2000345683",
-    loyaltyPoints: 12500,
-    // Legacy fields for backward compatibility
-    id: "client-2",
-    client: "Kathryn Murphy",
-    phoneno: "+1 (961) 523-4454",
-    points: 12500,
-    profilePicture: "https://placehold.co/80x80/svg?text=Client",
-    tiers: [
-      { name: "Bronze", threshold: 5000 },
-      { name: "Silver", threshold: 10000 },
-      { name: "Gold", threshold: 20000 },
-    ],
-    vehicles: [],
-    serviceHistory: [],
-    appointments: [],
-  },
-  {
-    customerId: 3,
-    firstName: "Eleanor",
-    lastName: "Pena",
-    email: "eleanor.pena@gmail.com",
-    phoneNumber: "+1 (961) 523-4455",
-    address: "234 Oak Street, Flat 7",
-    nic: "2000345684",
-    loyaltyPoints: 18000,
-    // Legacy fields for backward compatibility
-    id: "client-3",
-    client: "Eleanor Pena",
-    phoneno: "+1 (961) 523-4455",
-    points: 18000,
-    profilePicture: "https://placehold.co/80x80/svg?text=Client",
-    tiers: [
-      { name: "Bronze", threshold: 5000 },
-      { name: "Silver", threshold: 10000 },
-      { name: "Gold", threshold: 20000 },
-    ],
-    vehicles: [],
-    serviceHistory: [],
-    appointments: [],
-  },
-];
-
 // ========== Vehicle API Functions ==========
 
-// Backend vehicle response interface (matching your CustomersController)
+// Backend vehicle response interface (matching your backend API)
 interface VehicleResponse {
   vehicleId: number;
   registrationNumber: string;
@@ -262,6 +186,9 @@ interface VehicleResponse {
   mileage?: number;
   fuel: string;
   year: string;
+  customerId?: number;
+  customerName?: string;
+  customerEmail?: string;
 }
 
 // Vehicle registration DTO (for creating/updating vehicles)
@@ -294,88 +221,66 @@ interface VehicleDisplay {
   year: string;
 }
 
-// Fetch all vehicles from all customers
+// Fetch all vehicles from the system
 export const fetchVehicles = async (): Promise<VehicleDisplay[]> => {
   try {
-    // First fetch all customers
-    const customers = await fetchClients();
-    const allVehicles: VehicleDisplay[] = [];
-
-    // For each customer, fetch their vehicles
-    for (const customer of customers) {
+    console.log("fetchVehicles: Starting to fetch all vehicles from system...");
+    
+    // Try different possible API endpoints for getting all vehicles
+    let response;
+    let allVehicles: VehicleResponse[] = [];
+    
+    try {
+      // Try the main vehicles endpoint
+      response = await axiosInstance.get("/Vehicles");
+      allVehicles = response.data;
+      console.log("fetchVehicles: Successfully fetched from /Vehicles");
+    } catch (error1) {
+      console.log("fetchVehicles: /Vehicles failed, trying /api/Vehicles");
       try {
-        const response = await axiosInstance.get(`/Customers/${customer.customerId}/vehicles`);
-        const customerVehicles: VehicleResponse[] = response.data;
-
-        // Transform each vehicle to display format
-        const transformedVehicles = customerVehicles.map((vehicle) => ({
-          id: `#${vehicle.vehicleId.toString().padStart(4, "0")}`,
-          vehicleId: vehicle.vehicleId,
-          customerId: customer.customerId,
-          client: customer.client || `${customer.firstName} ${customer.lastName}`,
-          clientEmail: customer.email,
-          pictureSrc: customer.profilePicture || "https://placehold.co/80x80/svg?text=Client",
-          type: getVehicleType(vehicle.fuel), // Derive type from fuel
-          brand: vehicle.brand,
-          model: vehicle.model,
-          licenseplate: vehicle.registrationNumber,
-          registrationNumber: vehicle.registrationNumber,
-          chassisNumber: vehicle.chassisNumber,
-          mileage: vehicle.mileage,
-          fuel: vehicle.fuel,
-          year: vehicle.year,
-        }));
-
-        allVehicles.push(...transformedVehicles);
-      } catch (error) {
-        console.warn(`Failed to fetch vehicles for customer ${customer.customerId}:`, error);
-        // Continue with other customers even if one fails
+        response = await axiosInstance.get("/api/Vehicles");
+        allVehicles = response.data;
+        console.log("fetchVehicles: Successfully fetched from /api/Vehicles");
+      } catch (error2) {
+        console.log("fetchVehicles: /api/Vehicles failed, trying /Vehicle");
+        try {
+          response = await axiosInstance.get("/Vehicle");
+          allVehicles = response.data;
+          console.log("fetchVehicles: Successfully fetched from /Vehicle");
+        } catch (error3) {
+          console.log("fetchVehicles: All API endpoints failed");
+          throw new Error("All vehicle API endpoints failed");
+        }
       }
     }
+    
+    console.log("fetchVehicles: Total vehicles from API:", allVehicles.length);
 
-    return allVehicles;
+    // Transform vehicles to display format
+    const transformedVehicles = allVehicles.map((vehicle) => ({
+      id: `#${vehicle.vehicleId.toString().padStart(4, "0")}`,
+      vehicleId: vehicle.vehicleId,
+      customerId: vehicle.customerId || 0,
+      client: vehicle.customerName || "Unknown Customer",
+      clientEmail: vehicle.customerEmail || "unknown@example.com",
+      pictureSrc: "https://placehold.co/80x80/svg?text=Client",
+      type: getVehicleType(vehicle.fuel), // Derive type from fuel
+      brand: vehicle.brand,
+      model: vehicle.model,
+      licenseplate: vehicle.registrationNumber,
+      registrationNumber: vehicle.registrationNumber,
+      chassisNumber: vehicle.chassisNumber,
+      mileage: vehicle.mileage,
+      fuel: vehicle.fuel,
+      year: vehicle.year,
+    }));
+
+    console.log("fetchVehicles: Transformed vehicles:", transformedVehicles.length);
+    return transformedVehicles;
   } catch (error) {
     console.error("Error in fetchVehicles:", error);
-    
-    // Fallback data for development/testing
-    const fallbackVehicles: VehicleDisplay[] = [
-      {
-        id: "#0001",
-        vehicleId: 1,
-        customerId: 1,
-        client: "Devon Lane",
-        clientEmail: "devon.lane@gmail.com",
-        pictureSrc: "https://placehold.co/80x80/svg?text=Client",
-        type: "Sedan",
-        brand: "Toyota",
-        model: "Camry",
-        licenseplate: "ABC-1234",
-        registrationNumber: "ABC-1234",
-        chassisNumber: "1HGCM82633A123456",
-        mileage: 45000,
-        fuel: "Petrol",
-        year: "2020",
-      },
-      {
-        id: "#0002",
-        vehicleId: 2,
-        customerId: 2,
-        client: "Kathryn Murphy",
-        clientEmail: "kathryn.murphy@gmail.com",
-        pictureSrc: "https://placehold.co/80x80/svg?text=Client",
-        type: "SUV",
-        brand: "Honda",
-        model: "CR-V",
-        licenseplate: "XYZ-5678",
-        registrationNumber: "XYZ-5678",
-        chassisNumber: "2HGCM82633A654321",
-        mileage: 32000,
-        fuel: "Hybrid",
-        year: "2021",
-      }
-    ];
-    
-    return fallbackVehicles;
+    console.log("fetchVehicles: No vehicles available from backend");
+    return []; // Return empty array if backend fails
   }
 };
 
@@ -533,77 +438,38 @@ export const fetchClients = async (): Promise<Client[]> => {
     }));
   } catch (error) {
     console.error("Error in fetchClients:", error);
-    // Fallback to static client data if API call fails
-    return fallbackClients;
+    // Return empty array if API call fails
+    return [];
   }
 };
 
 // Fetch a single client by ID
 export const fetchClientById = async (id: string): Promise<Client | null> => {
   try {
-    // Extract numeric ID from client-X format
-    const numericId = id.startsWith('client-') ? id.replace('client-', '') : id;
-    
+    const numericId = id.startsWith('client-') ? parseInt(id.replace('client-', '')) : parseInt(id);
     const response = await axiosInstance.get(`/Customers/${numericId}`);
-    const customer = response.data;
     
-    // Fetch customer's vehicles
-    let vehicles: Vehicle[] = [];
-    try {
-      const vehiclesResponse = await axiosInstance.get(`/Customers/${numericId}/vehicles`);
-      vehicles = vehiclesResponse.data.map((vehicle: VehicleResponse) => ({
-        id: vehicle.vehicleId,
-        vehicleId: vehicle.vehicleId,
-        customerId: parseInt(numericId),
-        type: getVehicleType(vehicle.fuel),
-        brand: vehicle.brand,
-        model: vehicle.model,
-        year: vehicle.year,
-        fuel: vehicle.fuel,
-        fuelType: vehicle.fuel, // For backward compatibility
-        licensePlate: vehicle.registrationNumber,
-        registrationNumber: vehicle.registrationNumber,
-        transmission: "Manual", // Default value as backend doesn't have this
-        vin: vehicle.chassisNumber, // Use chassis number as VIN
-        chassisNumber: vehicle.chassisNumber,
-        mileage: vehicle.mileage,
-      }));
-    } catch (vehicleError) {
-      console.warn(`Failed to fetch vehicles for customer ${numericId}:`, vehicleError);
-      // Continue without vehicles if fetch fails
-    }
+    const customer: CustomerResponse = response.data;
     
-    // Transform the backend data to match frontend expectations
     return {
       customerId: customer.customerId,
       firstName: customer.firstName,
       lastName: customer.lastName,
       email: customer.email,
       phoneNumber: customer.phoneNumber,
-      address: customer.address,
-      nic: customer.nic,
       loyaltyPoints: customer.loyaltyPoints,
+      address: customer.address || "",
+      nic: customer.nic || "",
       // Legacy fields for backward compatibility
       id: `client-${customer.customerId}`,
       client: `${customer.firstName} ${customer.lastName}`,
       phoneno: customer.phoneNumber,
       points: customer.loyaltyPoints,
       profilePicture: "https://placehold.co/80x80/svg?text=Client",
-      vehicles: vehicles,
-      // Default empty arrays for other fields
-      tiers: [
-        { name: "Bronze", threshold: 5000 },
-        { name: "Silver", threshold: 10000 },
-        { name: "Gold", threshold: 20000 },
-      ],
-      serviceHistory: [], // Will be loaded separately by service history component
-      appointments: [], // Will be loaded separately if needed
     };
   } catch (error) {
-    console.error("Error in fetchClientById, using fallback data:", error);
-    // Fallback to static data if API call fails
-    const numericId = id.startsWith('client-') ? parseInt(id.replace('client-', '')) : parseInt(id);
-    return fallbackClients.find(client => client.customerId === numericId) || null;
+    console.error("Error in fetchClientById:", error);
+    return null;
   }
 };
 
@@ -681,6 +547,7 @@ export const fetchServiceCenterById = async (id: string): Promise<ServiceCenter 
 // Fetch dashboard stats
 export const fetchDashboardStats = async (): Promise<DashboardStats> => {
   try {
+    console.log("fetchDashboardStats: Starting to fetch dashboard stats...");
     // Get real counts from the backend
     const [clients, vehicles, serviceCenters] = await Promise.all([
       fetchClients(),
@@ -688,19 +555,24 @@ export const fetchDashboardStats = async (): Promise<DashboardStats> => {
       fetchServiceCenters(),
     ]);
     
-    return {
+    const stats = {
       customers: clients.length,
       vehicles: vehicles.length,
       serviceCenters: serviceCenters.length,
     };
+    
+    console.log("fetchDashboardStats: Real stats calculated:", stats);
+    return stats;
   } catch (error) {
     console.error("Error in fetchDashboardStats:", error);
-    // Fallback to static data if API calls fail
-    return {
+    // Return zeros if backend fails
+    const emptyStats = {
       customers: 0,
       vehicles: 0,
       serviceCenters: 0,
     };
+    console.log("fetchDashboardStats: Using empty stats due to backend failure:", emptyStats);
+    return emptyStats;
   }
 };
 

@@ -51,7 +51,9 @@ const VehiclesPage = () => {
     const loadVehicles = async () => {
       try {
         setIsLoading(true);
+        console.log("Fetching vehicles...");
         const vehicleData = await fetchVehicles();
+        console.log("Vehicle data received:", vehicleData);
         setVehicles(vehicleData);
       } catch (error) {
         console.error("Error fetching vehicles:", error);
@@ -100,6 +102,8 @@ const VehiclesPage = () => {
     }
   };
 
+  console.log("VehiclesPage: Current vehicles state:", vehicles);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8 overflow-x-hidden">
       <div className="max-w-full mx-auto w-full">
@@ -146,6 +150,10 @@ const VehiclesPage = () => {
 
         {isLoading ? (
           <div>Loading vehicles...</div>
+        ) : vehicles.length === 0 ? (
+          <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 p-8 text-center">
+            <p className="text-neutral-500">No vehicles found. Please check your connection or try again later.</p>
+          </div>
         ) : (
           <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 overflow-x-auto">
               <ClientTable

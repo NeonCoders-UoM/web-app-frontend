@@ -15,7 +15,16 @@ const AddServiceCenter: React.FC = () => {
     try {
       await createServiceCenterWithServices(data);
       alert("Service Center created successfully with services!");
-      router.push("/super-admin"); // Redirect to super admin dashboard
+      
+      // Redirect based on user role
+      const userRole = localStorage.getItem("userRole");
+      if (userRole === "SuperAdmin") {
+        router.push("/super-admin");
+      } else if (userRole === "Admin") {
+        router.push("/admin-dashboard");
+      } else {
+        router.push("/super-admin"); // Fallback
+      }
     } catch (error) {
       console.error("Error creating service center:", error);
       alert("Failed to create service center. Please try again.");
@@ -26,15 +35,12 @@ const AddServiceCenter: React.FC = () => {
     <div className="min-h-screen bg-white p-6 flex flex-col">
       {/* Header with title and user profile card */}
       <div className="flex justify-end items-center">
-        <UserProfileCard
-          pictureSrc="/images/profipic.jpg"
-          pictureAlt="Moni Roy"
-          name="Moni Roy"
-          role="super-admin" // Updated role to super-admin
-          onLogout={() => console.log("Logout clicked")}
-          onProfileClick={() => console.log("Profile clicked")}
-          onSettingsClick={() => console.log("Settings clicked")}
-        />
+      <UserProfileCard
+            pictureSrc="/images/profipic.jpg"
+            pictureAlt="User Profile"
+            useCurrentUser={true}
+            onLogout={() => router.push("/login")}
+          />
       </div>
 
       <div className="min-h-screen flex items-center justify-center">
@@ -44,7 +50,7 @@ const AddServiceCenter: React.FC = () => {
           </h1>
           {/* Centered form */}
           <div>
-            <EnhancedServiceCenterForm onSubmit={handleSubmit} />
+            <EnhancedServiceCenterForm initialData={undefined} onSubmit={handleSubmit} />
           </div>
         </div>
       </div>

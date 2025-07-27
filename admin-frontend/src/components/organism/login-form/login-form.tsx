@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, ArrowUpIcon } from "lucide-react";
 import Button from "@/components/atoms/button/button";
 import InputField from "@/components/atoms/input-fields/input-fields";
+import ForgotPasswordForm from "@/components/organism/forgot-password-form/test-component";
 import axiosInstance from "@/utils/axios";
 import { useRouter } from "next/navigation";
 import { getDashboardRoute } from "@/utils/auth";
@@ -33,6 +34,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -168,6 +170,15 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     setShowPassword(!showPassword);
   };
 
+  if (showForgotPassword) {
+    return (
+      <ForgotPasswordForm
+        onBack={() => setShowForgotPassword(false)}
+        onSuccess={() => setShowForgotPassword(false)}
+      />
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
@@ -208,9 +219,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
             >
               Password
             </label>
-            <a href="#" className="text-sm text-blue-600 hover:underline">
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
+              className="text-sm text-blue-600 hover:underline"
+            >
               Forgot Password?
-            </a>
+            </button>
           </div>
           <InputField
             id="password"

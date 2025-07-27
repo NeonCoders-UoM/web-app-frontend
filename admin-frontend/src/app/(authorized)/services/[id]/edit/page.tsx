@@ -82,15 +82,12 @@ const EditServicePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white p-6 flex flex-col">
       <div className="flex justify-end items-center">
-        <UserProfileCard
-          pictureSrc="/images/profipic.jpg"
-          pictureAlt="Moni Roy"
-          name="Moni Roy"
-          role="super-admin"
-          onLogout={() => router.push("/login")}
-          onProfileClick={() => router.push("/profile")}
-          onSettingsClick={() => router.push("/settings")}
-        />
+      <UserProfileCard
+            pictureSrc="/images/profipic.jpg"
+            pictureAlt="User Profile"
+            useCurrentUser={true}
+            onLogout={() => router.push("/login")}
+          />
       </div>
 
       <div className="min-h-screen flex items-center justify-center">

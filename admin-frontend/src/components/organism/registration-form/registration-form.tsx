@@ -1,13 +1,15 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Button from "@/components/atoms/button/button"
 import InputField from "@/components/atoms/input-fields/input-fields"
 import Dropdown from "@/components/atoms/dropdown/dropdown"
 import colors from "@/styles/colors"
 import axiosInstance from "@/utils/axios"
+import { fetchServiceCenters } from "@/utils/api"
+import { ServiceCenter } from "@/types"
 
 interface UserData {
   id: string
@@ -15,6 +17,7 @@ interface UserData {
   lastName: string
   email: string
   userRole: string
+  stationId?: string
 }
 
 interface RegistrationFormProps {
@@ -28,6 +31,7 @@ interface FormData {
   email: string
   newPassword: string
   userRole: string
+  stationId: string
 }
 
 const roleMap: { [key: string]: number } = {
@@ -41,12 +45,31 @@ const roleMap: { [key: string]: number } = {
 const RegistrationForm: React.FC<RegistrationFormProps> = ({ user, isEditMode = false }) => {
   const router = useRouter()
   const [formData, setFormData] = useState<FormData>({
-    firstName: user?.firstName || "",
-    lastName: user?.lastName || "",
-    email: user?.email || "",
+    firstName: isEditMode ? (user?.firstName || "") : "",
+    lastName: isEditMode ? (user?.lastName || "") : "",
+    email: isEditMode ? (user?.email || "") : "",
     newPassword: "",
-    userRole: user?.userRole || "",
+    userRole: isEditMode ? (user?.userRole || "") : "",
+    stationId: isEditMode ? (user?.stationId || "") : "",
   })
+  const [serviceCenters, setServiceCenters] = useState<ServiceCenter[]>([])
+  const [isLoadingServiceCenters, setIsLoadingServiceCenters] = useState(false)
+
+  // Fetch service centers on component mount
+  useEffect(() => {
+    const loadServiceCenters = async () => {
+      setIsLoadingServiceCenters(true)
+      try {
+        const centers = await fetchServiceCenters()
+        setServiceCenters(centers)
+      } catch (error) {
+        console.error("Error fetching service centers:", error)
+      } finally {
+        setIsLoadingServiceCenters(false)
+      }
+    }
+    loadServiceCenters()
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -54,7 +77,11 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ user, isEditMode = 
   }
 
   const handleRoleSelect = (option: string) => {
-    setFormData((prev) => ({ ...prev, userRole: option }))
+    setFormData((prev) => ({ ...prev, userRole: option, stationId: "" }))
+  }
+
+  const handleStationSelect = (option: string) => {
+    setFormData((prev) => ({ ...prev, stationId: option }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,15 +93,23 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ user, isEditMode = 
       return
     }
 
+    // Check if station ID is required but not provided
+    const requiresStationId = ["Service Center Admin", "Cashier", "Data Operator"].includes(formData.userRole)
+    if (requiresStationId && !formData.stationId) {
+      alert("Please select a service center for this role.")
+      return
+    }
+
     try {
       if (isEditMode && user?.id) {
         // ✅ UPDATE user (PUT)
         await axiosInstance.put(`/Admin/${user.id}`, {
-  firstName: formData.firstName,
-  lastName: formData.lastName,
-  userRoleId: userRoleId,
-  password: formData.newPassword || undefined
-})
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          userRoleId: userRoleId,
+          password: formData.newPassword || undefined,
+          Station_id: formData.stationId || undefined
+        })
 
         alert("User updated successfully!")
       } else {
@@ -85,6 +120,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ user, isEditMode = 
           email: formData.email,
           userRoleId,
           password: formData.newPassword,
+          Station_id: formData.stationId || undefined
         })
 
         alert("User created successfully!")
@@ -101,7 +137,17 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ user, isEditMode = 
     }
   }
 
-  const userRoleOptions = ["Super Admin", "Admin", "Service Center Admin", "Cashier", "Data Operator"]
+  const userRoleOptions = (() => {
+    const currentUserRole = typeof window !== 'undefined' ? localStorage.getItem('userRole') : null;
+    
+    // If current user is Admin, exclude Super Admin from options
+    if (currentUserRole === 'Admin') {
+      return ["Admin", "Service Center Admin", "Cashier", "Data Operator"];
+    }
+    
+    // For Super Admin, show all options
+    return ["Super Admin", "Admin", "Service Center Admin", "Cashier", "Data Operator"];
+  })();
 
   return (
     <div
@@ -183,6 +229,24 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ user, isEditMode = 
             selectedOption={formData.userRole}
           />
         </div>
+
+        {["Service Center Admin", "Cashier", "Data Operator"].includes(formData.userRole) && (
+          <div className="space-y-2">
+            <label className="block text-sm font-medium" style={{ color: colors.neutral[200] }}>
+              Service Center
+            </label>
+            <Dropdown
+              options={serviceCenters.map(center => center.serviceCenterName)}
+              placeholder={isLoadingServiceCenters ? "Loading service centers..." : "Select a Service Center"}
+              onSelect={(centerName) => {
+                const center = serviceCenters.find(c => c.serviceCenterName === centerName)
+                handleStationSelect(center?.id || "")
+              }}
+              className="w-full"
+              selectedOption={serviceCenters.find(c => c.id === formData.stationId)?.serviceCenterName || ""}
+            />
+          </div>
+        )}
 
         <div className="pt-4 flex justify-center ">
           <Button type="submit" variant="primary" size="medium" className="px-8 py-2.5 font-medium">
