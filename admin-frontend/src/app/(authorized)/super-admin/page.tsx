@@ -274,19 +274,19 @@ const SuperAdminDashboard: React.FC = () => {
 
           <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 overflow-hidden">
             <Table
-  headers={headers}
-  data={data}
-  actions={actions}
-  showSearchBar={true}
-  onAction={handleAction}
-  onServiceCenterClick={handleServiceCenterClick}
-  itemsPerPage={itemsPerPage}
-  currentPage={currentPage}
-  totalPages={totalPages}
-  onSearchChange={(val) => setSearchTerm(val)}
-  onItemsPerPageChange={setItemsPerPage}
-  onPageChange={setCurrentPage}
-/>
+              headers={headers}
+              data={data}
+              actions={actions}
+              showSearchBar={true}
+              onAction={handleAction}
+              onServiceCenterClick={handleServiceCenterClick}
+              itemsPerPage={itemsPerPage}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onSearchChange={(val) => setSearchTerm(val)}
+              onItemsPerPageChange={setItemsPerPage}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </div>
         </div>

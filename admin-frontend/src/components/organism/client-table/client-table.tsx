@@ -18,6 +18,13 @@ interface TableProps {
   showSearchBar?: boolean;
   showClientCell?: boolean;
   onActionSelect?: (action: string, clientId: string) => void;
+  // NEW pagination/search props:
+  currentPage?: number;
+  itemsPerPage?: number;
+  totalPages?: number;
+  onSearchChange?: (value: string) => void;
+  onItemsPerPageChange?: (count: number) => void;
+  onPageChange?: (page: number) => void;
 }
 
 const ClientTable: React.FC<TableProps> = ({
