@@ -1,31 +1,31 @@
 "use client";
 
-import React, { useState } from 'react';
-import colors from '../../../styles/colors';
-import * as HeroIcons from '@heroicons/react/24/outline';
+import React, { useState } from "react";
+import colors from "../../../styles/colors";
+import * as HeroIcons from "@heroicons/react/24/outline";
 
 interface ButtonProps {
-  variant?: 'primary' | 'secondary' | 'text';
-  size?: 'small' | 'medium' | 'large';
+  variant?: "primary" | "secondary" | "text";
+  size?: "small" | "medium" | "large";
   children: React.ReactNode;
   onClick?: () => void;
   icon?: keyof typeof HeroIcons;
-  iconPosition?: 'left' | 'right';
+  iconPosition?: "left" | "right";
   disabled?: boolean;
   className?: string;
-  type?: 'button' | 'submit' | 'reset';
+  type?: "button" | "submit" | "reset";
 }
 
 const Button: React.FC<ButtonProps> = ({
-  variant = 'primary',
-  size = 'medium',
+  variant = "primary",
+  size = "medium",
   children,
   onClick,
   icon,
-  iconPosition = 'left',
+  iconPosition = "left",
   disabled = false,
-  className = '',
-  type = 'button',
+  className = "",
+  type = "button",
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isActive, setIsActive] = useState(false);
@@ -39,36 +39,36 @@ const Button: React.FC<ButtonProps> = ({
   const handleMouseUp = () => setIsActive(false);
 
   const baseStyles = {
-    borderRadius: '4px',
-    fontFamily: 'var(--font-family-text)',
-    fontWeight: 'var(--font-weight-medium)',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    transition: 'all 0.2s ease',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '0 16px',
-    gap: '8px',
+    borderRadius: "4px",
+    fontFamily: "var(--font-family-text)",
+    fontWeight: "var(--font-weight-medium)",
+    cursor: disabled ? "not-allowed" : "pointer",
+    transition: "all 0.2s ease",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "0 16px",
+    gap: "8px",
     opacity: disabled ? 0.5 : 1,
-    minWidth: '0', // Allow natural width based on content
+    minWidth: "0", // Allow natural width based on content
   };
 
   const sizeStyles = {
     small: {
-      padding: '8px 16px',
-      fontSize: 'var(--font-size-xsm)',
-      iconSize: '16px',
+      padding: "8px 16px",
+      fontSize: "var(--font-size-xsm)",
+      iconSize: "16px",
     },
     medium: {
-      padding: '12px 20px',
-      fontSize: 'var(--font-size-sm)',
-      iconSize: '20px',
+      padding: "12px 20px",
+      fontSize: "var(--font-size-sm)",
+      iconSize: "20px",
     },
     large: {
-      padding: '16px 24px',
-      fontSize: 'var(--font-size-md)',
-      iconSize: '24px',
-      width:"450px"
+      padding: "16px 24px",
+      fontSize: "var(--font-size-md)",
+      iconSize: "24px",
+      width: "450px",
     },
   };
 
@@ -77,17 +77,17 @@ const Button: React.FC<ButtonProps> = ({
       default: {
         backgroundColor: colors.primary[200],
         color: colors.neutral[100],
-        border: 'none',
+        border: "none",
       },
       hover: {
         backgroundColor: colors.primary[300],
         color: colors.neutral[100],
-        border: 'none',
+        border: "none",
       },
       active: {
         backgroundColor: colors.primary[100],
         color: colors.neutral[100],
-        border: 'none',
+        border: "none",
       },
     },
     secondary: {
@@ -109,29 +109,28 @@ const Button: React.FC<ButtonProps> = ({
     },
     text: {
       default: {
-        backgroundColor: 'transparent',
+        backgroundColor: "transparent",
         color: colors.primary[200],
-        border: 'none',
+        border: "none",
       },
       hover: {
-        backgroundColor: 'transparent',
+        backgroundColor: "transparent",
         color: colors.primary[300],
-        border: 'none',
+        border: "none",
       },
       active: {
-        backgroundColor: 'transparent',
+        backgroundColor: "transparent",
         color: colors.primary[100],
-        border: 'none',
+        border: "none",
       },
     },
   };
 
-  const currentState = isActive ? 'active' : isHovered ? 'hover' : 'default';
-  console.log('Button variant:', variant, 'currentState:', currentState); // Debug log
+  const currentState = isActive ? "active" : isHovered ? "hover" : "default";
   const styles = {
     ...baseStyles,
     ...sizeStyles[size],
-    ...(variantStyles[variant] || variantStyles['primary'])[currentState], // Fallback to 'primary'
+    ...(variantStyles[variant] || variantStyles["primary"])[currentState], // Fallback to 'primary'
   };
 
   const IconComponent = icon ? HeroIcons[icon] : null;
@@ -149,7 +148,7 @@ const Button: React.FC<ButtonProps> = ({
       className={className}
       suppressHydrationWarning={true}
     >
-      {icon && iconPosition === 'left' && IconComponent && (
+      {icon && iconPosition === "left" && IconComponent && (
         <IconComponent
           style={{
             width: sizeStyles[size].iconSize,
@@ -159,7 +158,7 @@ const Button: React.FC<ButtonProps> = ({
         />
       )}
       {children}
-      {icon && iconPosition === 'right' && IconComponent && (
+      {icon && iconPosition === "right" && IconComponent && (
         <IconComponent
           style={{
             width: sizeStyles[size].iconSize,

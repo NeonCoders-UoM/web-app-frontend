@@ -1675,7 +1675,7 @@ export const fetchAppointmentDetail = async (
     );
     return response.data;
   } catch (error) {
-    console.log('Simple endpoint failed, trying alternative approach...');
+
     
     try {
       // If the simple endpoint fails, try to get all appointments for the station
@@ -1705,7 +1705,7 @@ export const fetchAppointmentDetail = async (
         appointmentPrice: 0, // Will need to be calculated from backend services
       };
       
-      console.log('Returning basic appointment detail:', basicAppointmentDetail);
+
       return basicAppointmentDetail;
       
     } catch (fallbackError) {
@@ -1716,7 +1716,7 @@ export const fetchAppointmentDetail = async (
   }
 };
 
-// Complete an appointment (mark as completed and send notification)
+// Complete an appointment (mark as completed)
 export const completeAppointment = async (appointmentId: number): Promise<void> => {
   try {
     await axiosInstance.post(`/Appointment/${appointmentId}/complete`);
@@ -1725,3 +1725,4 @@ export const completeAppointment = async (appointmentId: number): Promise<void> 
     throw error;
   }
 };
+
