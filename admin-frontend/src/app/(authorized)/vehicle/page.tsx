@@ -101,9 +101,9 @@ const VehiclesPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
-      <div className="flex-1 p-[58px]">
-        <div className="flex justify-between items-center mb-[80px]">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8 overflow-x-hidden">
+      <div className="max-w-full mx-auto w-full">
+        <div className="flex justify-between items-center mb-10">
           <h1 className="text-xl font-bold text-neutral-600">
             {serviceCenterId
               ? `Vehicles - Service Center ${serviceCenterId}`
@@ -120,7 +120,7 @@ const VehiclesPage = () => {
           />
         </div>
 
-        <div className="flex justify-between items-center mb-[36px]">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div className="relative">
             <select
               aria-label="Filter Clients"
@@ -147,29 +147,31 @@ const VehiclesPage = () => {
         {isLoading ? (
           <div>Loading vehicles...</div>
         ) : (
-          <ClientTable
-            headers={tableHeaders}
-            data={vehicles.map((vehicle) => ({
-              id: vehicle.id,
-              client: vehicle.client,
-              type: vehicle.type,
-              brand: vehicle.brand,
-              model: vehicle.model,
-              licenseplate: vehicle.licenseplate,
-              year: vehicle.year,
-              fuel: vehicle.fuel,
-              // Add additional data for potential use
-              vehicleid: vehicle.vehicleId.toString(),
-              customerid: vehicle.customerId.toString(),
-              registrationnumber: vehicle.registrationNumber,
-              chassisnumber: vehicle.chassisNumber,
-              mileage: vehicle.mileage?.toString() || "N/A",
-            }))}
-            actions={["view", "delete"]}
-            showSearchBar={true}
-            showClientCell={true}
-            onActionSelect={handleActionSelect}
-          />
+          <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 overflow-x-auto">
+              <ClientTable
+                headers={tableHeaders}
+                data={vehicles.map((vehicle) => ({
+                  id: vehicle.id,
+                  client: vehicle.client,
+                  type: vehicle.type,
+                  brand: vehicle.brand,
+                  model: vehicle.model,
+                  licenseplate: vehicle.licenseplate,
+                  year: vehicle.year,
+                  fuel: vehicle.fuel,
+                  // Add additional data for potential use
+                  vehicleid: vehicle.vehicleId.toString(),
+                  customerid: vehicle.customerId.toString(),
+                  registrationnumber: vehicle.registrationNumber,
+                  chassisnumber: vehicle.chassisNumber,
+                  mileage: vehicle.mileage?.toString() || "N/A",
+                }))}
+                actions={["view", "delete"]}
+                showSearchBar={true}
+                showClientCell={true}
+                onActionSelect={handleActionSelect}
+              />
+          </div>
         )}
 
         <VehicleDetailsModal

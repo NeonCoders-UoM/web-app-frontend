@@ -126,7 +126,7 @@ const ServiceCenterDashboard = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8 overflow-x-hidden">
       {/* Sidebar */}
       {/* <Sidebar
         role="super-admin"
@@ -138,9 +138,9 @@ const ServiceCenterDashboard = () => {
       /> */}
 
       {/* Main Content */}
-      <div className="flex-1 p-[58px]">
+      <div className="max-w-full mx-auto w-full">
         {/* Header with user profile */}
-        <div className="flex justify-end mb-[32px]">
+        <div className="flex justify-end items-center mb-10">
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
             pictureAlt="Moni Roy"
@@ -172,7 +172,7 @@ const ServiceCenterDashboard = () => {
         </div>
 
         {/* Table Section */}
-        <div className="bg-white ">
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 overflow-x-auto p-6">
           <h2 className="text-xl font-semibold mb-4">
             Leading Services -{" "}
             {serviceCenter?.serviceCenterName || "Service Center"}

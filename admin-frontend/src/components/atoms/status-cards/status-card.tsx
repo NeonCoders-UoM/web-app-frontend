@@ -33,10 +33,10 @@ const iconConfig = {
   },
   availableCenters: { 
     icon: LineChart, 
-    bgColor: "bg-[#010134]", 
+    bgColor: "bg-gradient-to-br from-[#010134] to-[#010134]/80", 
     lightBg: "bg-[#010134]/10",
     shadowColor: "shadow-[#010134]/20",
-    cardBg: "bg-gradient-to-br from-[#010134]/5 to-[#010134]/10"
+    cardBg: "bg-gradient-to-br from-[#010134]/2 to-[#010134]/"
   },
 };
 
