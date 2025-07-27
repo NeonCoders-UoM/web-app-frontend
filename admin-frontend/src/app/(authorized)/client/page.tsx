@@ -113,11 +113,11 @@ const ClientsPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8 overflow-x-hidden">
       {/* Main Content */}
-      <div className="flex-1 p-6">
+      <div className="max-w-full mx-auto w-full">
         {/* Header with user profile */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-10">
           <h1 className="text-xl font-bold text-neutral-600">
             {serviceCenterId
               ? `Clients - Service Center ${serviceCenterId}`
@@ -125,12 +125,12 @@ const ClientsPage = () => {
           </h1>
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
-            pictureAlt="Moni Roy"
-            name="Moni Roy"
-            role="admin"
-            onLogout={() => console.log("Logout clicked")}
-            onProfileClick={() => console.log("Profile clicked")}
-            onSettingsClick={() => console.log("Settings clicked")}
+            pictureAlt="User Profile"
+            useCurrentUser={true}
+            onLogout={() => {
+              localStorage.removeItem("token");
+              router.push("/login");
+            }}
           />
         </div>
 
@@ -157,22 +157,24 @@ const ClientsPage = () => {
             </div>
           </div>
         </div>
-
-        {/* Client Table */}
-        {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-200"></div>
-          </div>
-        ) : (
-          <ClientTable
-            headers={tableHeaders}
-            data={clientsData as unknown as Record<string, string>[]}
-            actions={["view", "edit", "delete"]}
-            showSearchBar={true}
-            showClientCell={true}
-            onActionSelect={handleActionSelect}
-          />
-        )}
+        
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 overflow-x-auto">
+          {/* Client Table */}
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : (
+            <ClientTable
+              headers={tableHeaders}
+              data={clientsData as unknown as Record<string, string>[]}
+              actions={["view", "edit", "delete"]}
+              showSearchBar={true}
+              showClientCell={true}
+              onActionSelect={handleActionSelect}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

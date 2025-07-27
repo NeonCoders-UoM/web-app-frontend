@@ -6,6 +6,7 @@ import Button from "@/components/atoms/button/button";
 import InputField from "@/components/atoms/input-fields/input-fields";
 import axiosInstance from "@/utils/axios";
 import { useRouter } from "next/navigation";
+import { getDashboardRoute } from "@/utils/auth";
 
 interface LoginFormProps {
   onSuccess?: (data: {
@@ -45,30 +46,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     }
   }, []);
 
-  const redirectToDashboard = (roleId: string | number) => {
-    // Convert roleId to string for consistent comparison
-    const roleIdStr = String(roleId);
 
-    switch (roleIdStr) {
-      case "1": // Super Admin
-        router.push("/super-admin");
-        break;
-      case "2": // Admin
-        router.push("/admin/dashboard");
-        break;
-      case "3": // Service Center Admin
-        router.push("/service-center/dashboard");
-        break;
-      case "4": // Cashier
-        router.push("/cashier/dashboard");
-        break;
-      case "5": // Data Operator
-        router.push("/data-operator/dashboard");
-        break;
-      default:
-        throw new Error(`Invalid role ID: ${roleIdStr}`);
-    }
-  };
 
   const handleLogin = async (data: {
     email: string;
@@ -84,12 +62,18 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         password: data.password,
       });
 
-      const { token, userId, userRole, userRoleId } = response.data;
+      const { token, userId, userRole, userRoleId, station_id, serviceCenterName } = response.data;
 
       localStorage.setItem("token", token);
       localStorage.setItem("userId", userId.toString());
       localStorage.setItem("userRole", userRole);
       localStorage.setItem("userRoleId", userRoleId.toString());
+      
+      // Store station_id and service center name for service center admins
+      if (station_id) {
+        localStorage.setItem("station_id", station_id.toString());
+        localStorage.setItem("serviceCenterName", serviceCenterName || "");
+      }
 
       if (data.remember) {
         localStorage.setItem("rememberedEmail", data.email);
@@ -97,9 +81,34 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         localStorage.removeItem("rememberedEmail");
       }
 
-      console.log("Login response:", { userId, userRole, userRoleId });
+      console.log("Login response:", { userId, userRole, userRoleId, station_id, serviceCenterName });
       console.log("Using role ID for dashboard redirect:", userRoleId);
-      redirectToDashboard(userRoleId);
+      
+      // Create user object for redirection
+      const user = {
+        userId: userId.toString(),
+        userRole,
+        userRoleId: userRoleId.toString(),
+        stationId: station_id?.toString(),
+        serviceCenterName,
+      };
+      
+      // Handle different user roles
+      if (userRole === "SuperAdmin") {
+        router.push("/super-admin");
+      } else if (userRole === "Admin") {
+        router.push("/admin-dashboard");
+      } else if (userRole === "ServiceCenterAdmin" || userRole === "Cashier" || userRole === "DataOperator") {
+        if (station_id) {
+          router.push(`/service-center-dashboard/${station_id}`);
+        } else {
+          throw new Error("Service Center Admin, Cashier, and Data Operator must have a station_id");
+        }
+      } else {
+        // For other roles, use the utility function
+        const dashboardRoute = getDashboardRoute(user);
+        router.push(dashboardRoute);
+      }
     } catch (err) {
       console.error("Login failed:", err);
       setError("Invalid credentials");

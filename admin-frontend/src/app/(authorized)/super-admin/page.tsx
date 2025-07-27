@@ -122,7 +122,7 @@ const SuperAdminDashboard: React.FC = () => {
   };
 
   const handleServiceCenterClick = (id: string) => {
-    console.log("Navigating to:", `/service-centers/${id}/admin-dashboard`);
+    console.log("Super Admin navigating to service center dashboard:", id);
     router.push(`/service-center-dashboard/${id}`);
   };
 
@@ -165,9 +165,8 @@ const SuperAdminDashboard: React.FC = () => {
         <div className="flex justify-end items-center mb-10">
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
-            pictureAlt="Moni Roy"
-            name="Moni Roy"
-            role="super-admin"
+            pictureAlt="User Profile"
+            useCurrentUser={true}
             onLogout={() => router.push("/login")}
           />
         </div>
@@ -177,17 +176,7 @@ const SuperAdminDashboard: React.FC = () => {
           Dashboard
         </h1>
         
-        {/* Availability Notice */}
-        <div className="mb-12 p-8 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/50 rounded-3xl shadow-lg backdrop-blur-sm">
-          <h3 className="text-xl font-bold text-blue-800 mb-4 flex items-center">
-            <div className="w-3 h-3 bg-blue-500 rounded-full mr-4 animate-pulse"></div>
-            Service Center Availability
-          </h3>
-          <p className="text-blue-700 text-base leading-relaxed">
-            Availability status is based on closure schedules. Centers marked as &quot;Closed&quot; have scheduled closures for today.
-            Use the closure schedule management to update availability.
-          </p>
-        </div>
+        
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-16 mb-16">
           <StatusCard

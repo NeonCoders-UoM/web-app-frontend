@@ -11,7 +11,7 @@ interface TableHeaderProps {
 const TableHeader: React.FC<TableHeaderProps> = ({ title, sortable, onSort }) => {
   return (
     <th
-      className="px-[24px] py-[22px] text-left font-semibold border-b border-neutral-400 cursor-pointer select-none "
+      className="px-[24px] py-[22px] text-left font-semibold border-b border-neutral-400 cursor-pointer select-none text-sm sm:text-base"
       onClick={sortable ? onSort : undefined}
     >
       <div className="flex items-center space-x-2">

@@ -23,6 +23,11 @@ const SidebarWrapper = () => {
     "/service-centers/add",
     "/service-centers/[id]/edit",
     "/service-centers/[id]/view",
+    "/services",
+    "/packages",
+    "/user-managment",
+    "/user-managment/add-user",
+    "/user-managment/edit/[id]",
   ];
 
   // Function to check if pathname matches any hideSidebarRoutes pattern

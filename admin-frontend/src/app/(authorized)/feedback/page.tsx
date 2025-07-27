@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import FeedbackTable from "@/components/organism/feedback-table/feedback-table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import ReviewSummaryCard from "@/components/organism/review-summary-card/review-summary-card";
@@ -10,6 +11,7 @@ import { formatDate } from "@/lib/utils";
 import "@/styles/fonts.css";
 
 const FeedbackPage = () => {
+  const router = useRouter();
   const [feedbackData, setFeedbackData] = useState<FeedbackDTO[]>([]);
   const [feedbackStats, setFeedbackStats] = useState<FeedbackStatsDTO | null>(null);
   const [loading, setLoading] = useState(true);
@@ -92,19 +94,19 @@ const FeedbackPage = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8 overflow-x-hidden">
       {/* Main Content */}
-      <div className="flex-1 p-[58px]">
+      <div className="max-w-full mx-auto w-full">
         {/* Header with user profile */}
-        <div className="flex justify-end items-center mb-[36px]">
+        <div className="flex justify-end items-center mb-10">
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
-            pictureAlt="Moni Roy"
-            name="Moni Roy"
-            role="admin"
-            onLogout={() => console.log("Logout clicked")}
-            onProfileClick={() => console.log("Profile clicked")}
-            onSettingsClick={() => console.log("Settings clicked")}
+            pictureAlt="User Profile"
+            useCurrentUser={true}
+            onLogout={() => {
+              localStorage.removeItem("token");
+              router.push("/login");
+            }}
           />
         </div>
         
@@ -128,7 +130,9 @@ const FeedbackPage = () => {
         </div>
 
         {/* Feedback Table Component */}
-        <FeedbackTable data={transformedFeedbackData} />
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 overflow-x-auto">
+          <FeedbackTable data={transformedFeedbackData} />
+        </div>
       </div>
     </div>
   );

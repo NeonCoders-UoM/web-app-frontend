@@ -429,7 +429,7 @@ const ManageServices = () => {
       <h1 className="h2 text-neutral-600">Service Center Closure Schedule</h1>
 
       {/* Business Context */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+      {/* <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
         <h3 className="text-lg font-semibold text-blue-800 mb-2">
           About Closure Scheduling
         </h3>
@@ -439,7 +439,7 @@ const ManageServices = () => {
           for appointments and services. Scheduled closures will be visible to
           customers when they try to book appointments.
         </p>
-      </div>
+      </div> */}
 
       {/* Service Center and Week Selection */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -598,7 +598,7 @@ const ManageServices = () => {
       </div>
 
       {/* Customer Impact Notice */}
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+      {/* <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
         <h4 className="text-md font-semibold text-yellow-800 mb-2">
           Customer Impact
         </h4>
@@ -608,10 +608,10 @@ const ManageServices = () => {
           conflicts and improves customer experience by setting clear
           expectations about your service center&apos;s availability.
         </p>
-      </div>
+      </div> */}
 
       {/* Week Selection Notice */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      {/* <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h4 className="text-md font-semibold text-blue-800 mb-2">
           Week Selection
         </h4>
@@ -621,10 +621,10 @@ const ManageServices = () => {
           to see your scheduled closures. The current week is selected by
           default.
         </p>
-      </div>
+      </div> */}
 
       {/* Service Availability Impact Notice */}
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
+      {/* <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
         <h4 className="text-md font-semibold text-green-800 mb-2">
           Service Availability Impact
         </h4>
@@ -634,7 +634,7 @@ const ManageServices = () => {
           services are currently offered by the service center. Re-enable
           services when they become available again.
         </p>
-      </div>
+      </div> */}
 
       {/* Services Table */}
       <div className="mt-8">
@@ -642,25 +642,7 @@ const ManageServices = () => {
           Service Availability Management for{" "}
           {selectedServiceCenter?.serviceCenterName}
         </h2>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <h3 className="text-lg font-semibold text-blue-800 mb-2">
-            About Service Availability
-          </h3>
-          <p className="text-blue-700 text-sm">
-            Toggle the availability of services for this service center. When a
-            service is disabled, it will not appear in the service list for
-            customers booking appointments. This helps manage which services are
-            currently offered by the service center.
-          </p>
-          <div className="mt-3 p-3 bg-yellow-100 border border-yellow-300 rounded">
-            <p className="text-yellow-800 text-xs">
-              <strong>Note:</strong> Backend support for service availability
-              updates may not be fully implemented yet. UI changes will be
-              reflected immediately, but backend persistence depends on API
-              support.
-            </p>
-          </div>
-        </div>
+        
         {serviceCenterServices.length > 0 ? (
           <ServiceAvailabilityTable
             data={tableData}

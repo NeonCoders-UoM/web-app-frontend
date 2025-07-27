@@ -102,7 +102,7 @@ const ClientTable: React.FC<TableProps> = ({
   }, [itemsPerPage]);
 
   return (
-    <div>
+    <div className="p-6">
       {showSearchBar && (
         <SearchBar
           value={searchTerm}

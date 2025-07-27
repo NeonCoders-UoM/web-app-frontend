@@ -272,10 +272,12 @@ export default function Page() {
       <div className="flex justify-end items-center mb-[74px]">
         <UserProfileCard
           pictureSrc="/images/profipic.jpg"
-          pictureAlt="Moni Roy"
-          name="Moni Roy"
-          role="admin"
-          onLogout={() => console.log("Logout clicked")}
+          pictureAlt="User Profile"
+          useCurrentUser={true}
+          onLogout={() => {
+            localStorage.removeItem("token");
+            window.location.href = "/login";
+          }}
         />
       </div>
 

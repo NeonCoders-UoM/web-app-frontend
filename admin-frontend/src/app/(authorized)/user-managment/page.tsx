@@ -73,15 +73,12 @@ const UsersPage = () => {
           <h1 className="text-lg font-bold text-neutral-600">User List</h1>
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
-            pictureAlt="Moni Roy"
-            name="Moni Roy"
-            role="admin"
+            pictureAlt="User Profile"
+            useCurrentUser={true}
             onLogout={() => {
               localStorage.removeItem("token");
               router.push("/login");
             }}
-            onProfileClick={() => console.log("Profile clicked")}
-            onSettingsClick={() => console.log("Settings clicked")}
           />
         </div>
 

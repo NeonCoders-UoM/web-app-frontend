@@ -98,20 +98,20 @@ const PackagesPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white p-6">
-      <div className="flex justify-end items-center mb-[32px]">
+      <div className="flex justify-end items-center mb-6">
         <UserProfileCard
           pictureSrc="/images/profipic.jpg"
-          pictureAlt="Moni Roy"
-          name="Moni Roy"
-          role="super-admin"
-          onLogout={() => router.push("/login")}
-          onProfileClick={() => router.push("/profile")}
-          onSettingsClick={() => router.push("/settings")}
+          pictureAlt="User Profile"
+          useCurrentUser={true}
+          onLogout={() => {
+            localStorage.removeItem("token");
+            router.push("/login");
+          }}
         />
       </div>
 
-      <div className="px-[182px]">
-        <div className="flex justify-between items-center mb-[32px]">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold text-neutral-900">Packages</h1>
           <div className="flex items-center space-x-4">
             <Button
