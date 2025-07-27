@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import ClientTable from "@/components/organism/client-table/client-table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
-import { fetchClients } from "@/utils/api";
+import { fetchClients, fetchCustomersPaginated } from "@/utils/api";
 
 // Interface for transformed client data that matches table expectations
 interface TransformedClient {
@@ -32,12 +32,27 @@ const ClientsPage = () => {
   const [clientFilter, setClientFilter] = useState("All Clients");
   const [clientsData, setClientsData] = useState<TransformedClient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  // NEW state for search, pagination
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(6);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
         const clients = await fetchClients();
+        
+        const statusParam = clientFilter.includes("Active")
+          ? clientFilter.replace(" Clients", "")
+          : "";
+        const result = await fetchCustomersPaginated(
+          searchTerm,
+          statusParam,
+          currentPage,
+          itemsPerPage
+        );
 
         // Transform client data to match table column expectations
         const transformedClients: TransformedClient[] = clients.map(
@@ -67,7 +82,7 @@ const ClientsPage = () => {
             return result;
           }
         );
-
+        setTotalPages(Math.ceil(result.totalCount / itemsPerPage)); // Calculate total pages based on total count
         setClientsData(transformedClients);
         console.log("Fetched and transformed clientsData:", transformedClients); // Debug log
       } catch (error) {
@@ -77,7 +92,7 @@ const ClientsPage = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [searchTerm, clientFilter, currentPage, itemsPerPage]);
 
   const tableHeaders = [
     { title: "Id", sortable: true },
@@ -140,7 +155,10 @@ const ClientsPage = () => {
             <select
               className="appearance-none bg-white border border-neutral-150 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-primary-100"
               value={clientFilter}
-              onChange={(e) => setClientFilter(e.target.value)}
+              onChange={(e) => {
+                setClientFilter(e.target.value);
+                setCurrentPage(1);
+              }}
             >
               <option value="All Clients">All Clients</option>
               <option value="Active Clients">Active Clients</option>
@@ -171,6 +189,13 @@ const ClientsPage = () => {
             showSearchBar={true}
             showClientCell={true}
             onActionSelect={handleActionSelect}
+            // NEW props for controlled search, filter, pagination:
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            totalPages={totalPages}
+            onSearchChange={setSearchTerm}
+            onItemsPerPageChange={setItemsPerPage}
+            onPageChange={setCurrentPage}
           />
         )}
       </div>

@@ -298,6 +298,48 @@ interface VehicleDisplay {
   year: string;
 }
 
+//Define request shape for vehicle search
+interface VehicleSearchPayload {
+  searchTerm?: string;
+  status?: string;
+  pageNumber: number;
+  pageSize: number;
+}
+
+// Define shape of vehicle DTO from backend
+interface VehicleDto {
+  VehicleId: number;
+  CustomerId: number;
+  Client: string;
+  Brand: string;
+  Model: string;
+  Fuel: string;
+  Year?: number;
+  RegistrationNumber: string;
+}
+
+//Paginated result wrapper (matching backend structure)
+interface PaginatedResult<T> {
+  data: T[];
+  totalCount: number;
+}
+
+// Function to search and paginate vehicles
+export const searchVehicles = async (
+  payload: VehicleSearchPayload
+): Promise<PaginatedResult<VehicleDto>> => {
+  try {
+    const response = await axiosInstance.post<PaginatedResult<VehicleDto>>(
+      "/Vehicles/search", // adjust to match your controller route
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error in searchVehicles:", error);
+    throw error;
+  }
+};
+
 // Fetch all vehicles from all customers
 export const fetchVehicles = async (): Promise<VehicleDisplay[]> => {
   try {
@@ -537,6 +579,25 @@ export const fetchClients = async (): Promise<Client[]> => {
     // Fallback to static client data if API call fails
     return fallbackClients;
   }
+};
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  totalCount: number;
+}
+
+export const fetchCustomersPaginated = async (
+  searchTerm: string,
+  status: string,
+  pageNumber: number,
+  pageSize: number
+): Promise<PaginatedResponse<CustomerResponse>> => {
+  const body = { searchTerm, status, pageNumber, pageSize };
+  const response = await axiosInstance.post<PaginatedResponse<CustomerResponse>>(
+    "/Customers/search",
+    body
+  );
+  return response.data;
 };
 
 // Fetch a single client by ID

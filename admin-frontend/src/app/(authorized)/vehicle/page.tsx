@@ -6,7 +6,7 @@ import ClientTable from "@/components/organism/client-table/client-table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import "@/styles/fonts.css";
 import VehicleDetailsModal from "@/components/atoms/vehicle-details-card/vehicle-details-card";
-import { fetchVehicles, deleteVehicle } from "@/utils/api";
+import { fetchVehicles, deleteVehicle, searchVehicles } from "@/utils/api";
 
 interface Vehicle {
   id: string;
@@ -36,6 +36,13 @@ const VehiclesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
 
+  // New state for search+pagination
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+
+
   const tableHeaders = [
     { title: "Id", sortable: true },
     { title: "Client", sortable: true },
@@ -51,8 +58,15 @@ const VehiclesPage = () => {
     const loadVehicles = async () => {
       try {
         setIsLoading(true);
+        const response = await searchVehicles({
+          searchTerm,
+          status: clientFilter === "All Vehicles" ? undefined : clientFilter,
+          pageNumber: currentPage,
+          pageSize: itemsPerPage,
+        });
         const vehicleData = await fetchVehicles();
         setVehicles(vehicleData);
+        setTotalPages(Math.ceil(response.totalCount / itemsPerPage));
       } catch (error) {
         console.error("Error fetching vehicles:", error);
       } finally {
@@ -60,7 +74,7 @@ const VehiclesPage = () => {
       }
     };
     loadVehicles();
-  }, []);
+  }, [searchTerm, clientFilter, currentPage, itemsPerPage]);
 
   const handleActionSelect = async (action: string, vehicleId: string) => {
     const vehicle = vehicles.find((v) => v.id === vehicleId);
@@ -169,6 +183,13 @@ const VehiclesPage = () => {
             showSearchBar={true}
             showClientCell={true}
             onActionSelect={handleActionSelect}
+            // NEW prop
+            currentPage={currentPage}          
+            totalPages={totalPages}          
+            itemsPerPage={itemsPerPage}       
+            onPageChange={setCurrentPage}    
+            onItemsPerPageChange={setItemsPerPage}
+            onSearchChange={setSearchTerm}
           />
         )}
 
