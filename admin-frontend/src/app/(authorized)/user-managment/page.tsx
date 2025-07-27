@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import ClientTable from "@/components/organism/client-table/client-table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import Button from "@/components/atoms/button/button";
-import { fetchUsers } from "@/utils/api";
+//import { fetchUsers } from "@/utils/api";
 import { User } from "@/types";
 import axiosInstance from "@/utils/axios";
 
@@ -15,13 +15,26 @@ const UsersPage = () => {
   const [usersData, setUsersData] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const users = await fetchUsers();
+        const resp = await axiosInstance.post("/Admin/search", {
+          searchTerm,
+          role: userFilter,
+          pageNumber: currentPage,
+          pageSize: itemsPerPage,
+        });
+        //const users = await fetchUsers();
+        const { users, totalCount } = resp.data;
         console.log("Fetched users:", users);
         setUsersData(users);
+        setTotalPages(Math.ceil(totalCount / itemsPerPage));
       } catch (error) {
         console.error("Error fetching users:", error);
       } finally {
@@ -30,7 +43,7 @@ const UsersPage = () => {
     };
 
     fetchData();
-  }, []);
+  }, [searchTerm, userFilter, currentPage, itemsPerPage]);
 
   const tableHeaders = [
     { title: "ID", sortable: true },
@@ -90,7 +103,7 @@ const UsersPage = () => {
             <select
               className="appearance-none bg-white border border-neutral-200 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-primary-100"
               value={userFilter}
-              onChange={(e) => setUserFilter(e.target.value)}
+              onChange={(e) => {setUserFilter(e.target.value); setCurrentPage(1); }}
             >
               <option value="All Users">All Users</option>
               <option value="Admin">Admin</option>
@@ -137,6 +150,13 @@ const UsersPage = () => {
             showSearchBar={true}
             showClientCell={true}
             onActionSelect={handleActionSelect}
+            // NEW
+            currentPage={currentPage}     
+            totalPages={totalPages} 
+            itemsPerPage={itemsPerPage} 
+            onPageChange={setCurrentPage} 
+            onItemsPerPageChange={setItemsPerPage}
+            onSearchChange={setSearchTerm}
           />
         )}
       </div>
