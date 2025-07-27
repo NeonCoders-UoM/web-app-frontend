@@ -80,7 +80,7 @@ const Table: React.FC<TableProps> = ({
   }, [itemsPerPage]);
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto p-6">
       {showSearchBar && (
         <SearchBar
           value={searchTerm}

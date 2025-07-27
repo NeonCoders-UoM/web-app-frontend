@@ -180,11 +180,11 @@ const AppointmentsPage = () => {
   }, [isModalOpen]);
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8 overflow-x-hidden">
       {/* Main Content */}
-      <div className="flex-1 p-[58px]">
+      <div className="max-w-full mx-auto w-full">
         {/* Header with user profile */}
-        <div className="flex justify-end items-center mb-[80px]">
+        <div className="flex justify-end items-center mb-10">
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
             pictureAlt="User Profile"
@@ -196,7 +196,7 @@ const AppointmentsPage = () => {
           />
         </div>
 
-        <div className="pr-[50px]">
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 overflow-x-auto p-6">
           <h1 className="h2 text-neutral-800 mb-[40px]">
             {stationId
               ? `Appointments - Service Center ${

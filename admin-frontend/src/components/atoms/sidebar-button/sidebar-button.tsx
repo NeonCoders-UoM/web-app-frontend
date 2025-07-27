@@ -49,18 +49,7 @@ const SidebarButton: React.FC<SidebarButtonProps> = ({ label, isActive, onClick 
         `}
       />
       
-      {/* Icon placeholder */}
-      <div 
-        className={`
-          w-2 h-2 rounded-full mr-3 transition-all duration-300
-          ${isActive 
-            ? 'bg-blue-300 shadow-lg shadow-blue-300/50' 
-            : isHovered 
-              ? 'bg-gray-400' 
-              : 'bg-gray-600 group-hover:bg-gray-400'
-          }
-        `}
-      />
+      <div className="w-3 h-3 mr-2" /> {/* Empty spacer */}
       
       {/* Text with subtle animation */}
       <span className={`
@@ -91,7 +80,7 @@ const SidebarButton: React.FC<SidebarButtonProps> = ({ label, isActive, onClick 
           `}
           style={{
             transform: 'translateY(3px) translateX(3px)',
-            filter: 'blur(6px)',
+            filter: 'none',
           }}
         />
       )}

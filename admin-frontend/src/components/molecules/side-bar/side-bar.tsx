@@ -79,9 +79,10 @@ const Sidebar: React.FC<SidebarProps> = ({
     // Default admin options
     return [
       { label: "Dashboard", route: "/admin-dashboard" },
+      { label: "Users", route: "/user-managment" },
+      { label: "Appointments", route: "/appointment" },
       { label: "Clients", route: "/client" },
       { label: "Vehicles", route: "/vehicle" },
-      { label: "Appointments", route: "/appointment" },
       { label: "Feedback", route: "/feedback" },
       { label: "Users", route: "/user-managment" },
       { label: "Service Status", route: "/service-status" },
