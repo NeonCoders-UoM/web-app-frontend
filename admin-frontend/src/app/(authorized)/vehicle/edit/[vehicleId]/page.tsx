@@ -78,12 +78,12 @@ export default function EditVehiclePage({ params }: EditVehiclePageProps) {
       <div className="flex justify-end items-center mb-[36px]">
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
-            pictureAlt="Moni Roy"
-            name="Moni Roy"
-            role="super-admin"
-            onLogout={() => console.log("Logout clicked")}
-            onProfileClick={() => console.log("Profile clicked")}
-            onSettingsClick={() => console.log("Settings clicked")}
+            pictureAlt="User Profile"
+            useCurrentUser={true}
+            onLogout={() => {
+              localStorage.removeItem("token");
+              router.push("/login");
+            }}
           />
       </div>
       <div>

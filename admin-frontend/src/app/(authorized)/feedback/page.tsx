@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import FeedbackTable from "@/components/organism/feedback-table/feedback-table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import ReviewSummaryCard from "@/components/organism/review-summary-card/review-summary-card";
@@ -10,6 +11,7 @@ import { formatDate } from "@/lib/utils";
 import "@/styles/fonts.css";
 
 const FeedbackPage = () => {
+  const router = useRouter();
   const [feedbackData, setFeedbackData] = useState<FeedbackDTO[]>([]);
   const [feedbackStats, setFeedbackStats] = useState<FeedbackStatsDTO | null>(null);
   const [loading, setLoading] = useState(true);
@@ -99,12 +101,12 @@ const FeedbackPage = () => {
         <div className="flex justify-end items-center mb-10">
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
-            pictureAlt="Moni Roy"
-            name="Moni Roy"
-            role="admin"
-            onLogout={() => console.log("Logout clicked")}
-            onProfileClick={() => console.log("Profile clicked")}
-            onSettingsClick={() => console.log("Settings clicked")}
+            pictureAlt="User Profile"
+            useCurrentUser={true}
+            onLogout={() => {
+              localStorage.removeItem("token");
+              router.push("/login");
+            }}
           />
         </div>
         

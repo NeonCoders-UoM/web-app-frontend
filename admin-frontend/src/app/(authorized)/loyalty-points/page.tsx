@@ -38,11 +38,13 @@ export default function AddServicesPage() {
       {/* Header with User Profile */}
       <div className="flex justify-end mb-[56px]">
         <UserProfileCard
-          name="Moni Roy"
-          role="admin"
-          onLogout={() => console.log("Logged out")}
-          onProfileClick={() => console.log("Profile clicked")}
-          onSettingsClick={() => console.log("Settings clicked")}
+          pictureSrc="/images/profipic.jpg"
+          pictureAlt="User Profile"
+          useCurrentUser={true}
+          onLogout={() => {
+            localStorage.removeItem("token");
+            window.location.href = "/login";
+          }}
         />
       </div>
 

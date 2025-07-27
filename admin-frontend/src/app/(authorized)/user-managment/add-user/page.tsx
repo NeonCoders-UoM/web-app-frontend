@@ -36,15 +36,12 @@ const AddUserPage = () => {
       <div className="absolute top-0 right-0 mt-4 mr-4">
         <UserProfileCard
             pictureSrc="/images/profipic.jpg"
-            pictureAlt="Moni Roy"
-            name="Moni Roy"
-            role="admin"
+            pictureAlt="User Profile"
+            useCurrentUser={true}
             onLogout={() => {
               localStorage.removeItem("token");
               router.push("/login");
             }}
-            onProfileClick={() => console.log("Profile clicked")}
-            onSettingsClick={() => console.log("Settings clicked")}
           />
       </div>
 

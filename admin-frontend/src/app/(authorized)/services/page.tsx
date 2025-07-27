@@ -193,20 +193,20 @@ const ServicesPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white p-6">
-      <div className="flex justify-end items-center mb-[32px]">
+      <div className="flex justify-end items-center mb-6">
         <UserProfileCard
           pictureSrc="/images/profipic.jpg"
-          pictureAlt="Moni Roy"
-          name="Moni Roy"
-          role="super-admin"
-          onLogout={() => router.push("/login")}
-          onProfileClick={() => router.push("/profile")}
-          onSettingsClick={() => router.push("/settings")}
+          pictureAlt="User Profile"
+          useCurrentUser={true}
+          onLogout={() => {
+            localStorage.removeItem("token");
+            router.push("/login");
+          }}
         />
       </div>
 
-      <div className="px-[182px]">
-        <h1 className="text-2xl font-semibold text-neutral-900 mb-[32px]">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-2xl font-semibold text-neutral-900 mb-6">
           {serviceCenterId
             ? `Service Center Services - ${
                 serviceCenter?.serviceCenterName || serviceCenterId
@@ -215,7 +215,7 @@ const ServicesPage: React.FC = () => {
         </h1>
 
         <div>
-          <div className="flex justify-between items-center mb-[32px]">
+          <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold text-neutral-900">
               {serviceCenterId ? "Service Center Services" : "System Services"}
             </h2>

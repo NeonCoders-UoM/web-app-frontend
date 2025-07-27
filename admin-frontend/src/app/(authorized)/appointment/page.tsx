@@ -187,12 +187,12 @@ const AppointmentsPage = () => {
         <div className="flex justify-end items-center mb-10">
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
-            pictureAlt="Moni Roy"
-            name="Moni Roy"
-            role="admin"
-            onLogout={() => console.log("Logout clicked")}
-            onProfileClick={() => console.log("Profile clicked")}
-            onSettingsClick={() => console.log("Settings clicked")}
+            pictureAlt="User Profile"
+            useCurrentUser={true}
+            onLogout={() => {
+              localStorage.removeItem("token");
+              window.location.href = "/login";
+            }}
           />
         </div>
 

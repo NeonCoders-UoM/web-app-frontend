@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import StatusCard from "@/components/atoms/status-cards/status-card";
 import Table from "@/components/organism/table/table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
@@ -17,7 +17,35 @@ import "@/styles/fonts.css";
 
 const ServiceCenterDashboard = () => {
   const params = useParams();
+  const router = useRouter();
   const serviceCenterId = params.id as string;
+
+  // Authorization check for different user roles
+  useEffect(() => {
+    const userRole = localStorage.getItem("userRole");
+    const userRoleId = localStorage.getItem("userRoleId");
+    const userStationId = localStorage.getItem("station_id");
+
+    // Super Admin and Admin can access any service center
+    if (userRole === "SuperAdmin" || userRole === "Admin") {
+      // No restrictions - they can access any service center
+      return;
+    }
+
+    // Service Center Admin, Cashier, and Data Operator can only access their assigned service center
+    if (userRole === "ServiceCenterAdmin" || userRole === "Cashier" || userRole === "DataOperator") {
+      if (userStationId && userStationId !== serviceCenterId) {
+        console.warn("Unauthorized access: User trying to access different service center");
+        router.push(`/service-center-dashboard/${userStationId}`);
+        return;
+      }
+    } else {
+      // If not authorized, redirect to login
+      console.warn("Unauthorized access: User is not authorized to access service centers");
+      router.push("/login");
+      return;
+    }
+  }, [serviceCenterId, router]);
 
   const [serviceCenter, setServiceCenter] = useState<ServiceCenter | null>(
     null
@@ -143,12 +171,12 @@ const ServiceCenterDashboard = () => {
         <div className="flex justify-end items-center mb-10">
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
-            pictureAlt="Moni Roy"
-            name="Moni Roy"
-            role="super-admin"
-            onLogout={() => console.log("Logout clicked")}
-            onProfileClick={() => console.log("Profile clicked")}
-            onSettingsClick={() => console.log("Settings clicked")}
+            pictureAlt="User Profile"
+            useCurrentUser={true}
+            onLogout={() => {
+              localStorage.removeItem("token");
+              router.push("/login");
+            }}
           />
         </div>
 
