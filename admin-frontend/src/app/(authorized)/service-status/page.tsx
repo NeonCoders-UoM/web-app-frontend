@@ -8,9 +8,9 @@ import UserProfileCard from "@/components/molecules/user-card/user-card";
 import Button from "@/components/atoms/button/button";
 import {
   addServiceHistory,
+  completeAppointment,
   fetchAppointmentDetail,
   fetchServiceCenterServices,
-  completeAppointment,
 } from "@/utils/api";
 
 // Use the AppointmentDetail type from api.ts
@@ -108,7 +108,7 @@ export default function Page() {
         return;
       }
       const data = await fetchAppointmentDetail(stationIdNum, trimmedId);
-      console.log("Fetched appointment details:", data);
+
       setAppointmentDetails(data);
       // Handle the case where services might be empty (from fallback approach)
       if (data.services && data.services.length > 0) {
@@ -184,10 +184,7 @@ export default function Page() {
   };
 
   const handleSubmit = async () => {
-    setFeedback(null);
-    setFeedbackType(null);
-
-    if (!services || !appointmentDetails) {
+    if (!appointmentDetails || !services) {
       setFeedback("No appointment or services to submit.");
       setFeedbackType("error");
       return;
@@ -202,6 +199,8 @@ export default function Page() {
     }
 
     setLoading(true);
+    setFeedback("");
+
     try {
       const vehicleId = appointmentDetails.vehicleId;
       const serviceCenterId = appointmentDetails.serviceCenterId;
@@ -220,26 +219,40 @@ export default function Page() {
 
       // Step 1: Create service history records for completed services
       for (const service of selectedServices) {
-        await addServiceHistory(vehicleId, {
-          serviceType: service.service,
-          description: "Completed as per appointment",
-          serviceCenterId,
-          servicedByUserId,
-          serviceDate,
-          cost: service.price || 0,
-          mileage: undefined, // TODO: Add real mileage if available
-        });
+        try {
+          await addServiceHistory(vehicleId, {
+            serviceType: service.service,
+            description: "Completed as per appointment",
+            serviceCenterId,
+            servicedByUserId,
+            serviceDate,
+            cost: service.price || 0,
+            mileage: undefined, // TODO: Add real mileage if available
+          });
+        } catch (serviceError) {
+          console.error(
+            `Error adding service history for ${service.service}:`,
+            serviceError
+          );
+          throw new Error(
+            `Failed to add service history for ${service.service}: ${
+              serviceError instanceof Error
+                ? serviceError.message
+                : "Unknown error"
+            }`
+          );
+        }
       }
 
-      // Step 2: Mark appointment as "Completed" and send notification
+      // Step 2: Mark appointment as "Completed" using the backend endpoint
       await completeAppointment(appointmentDetails.appointmentId);
 
       setFeedback(
-        "Appointment completed successfully! Service history updated and customer notified."
+        "Appointment completed successfully! Service history has been created and the appointment is marked as completed."
       );
       setFeedbackType("success");
 
-      // Update appointment details to reflect completed status instead of clearing
+      // Update appointment details to reflect completed status
       setAppointmentDetails({
         ...appointmentDetails,
         status: "Completed",
@@ -250,6 +263,29 @@ export default function Page() {
       setAppointmentId("");
     } catch (error) {
       console.error("Error completing appointment:", error);
+
+      // More detailed error logging to help debug the issue
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+      }
+
+      // Check if it's an API error with response details
+      if (error && typeof error === "object" && "response" in error) {
+        const apiError = error as {
+          response?: {
+            status?: number;
+            data?: { message?: string; error?: string };
+          };
+        };
+        console.error("API Error Status:", apiError.response?.status);
+        console.error("API Error Data:", apiError.response?.data);
+        console.error(
+          "API Error Message:",
+          apiError.response?.data?.message || apiError.response?.data?.error
+        );
+      }
+
       setFeedback("Error completing appointment. Please try again.");
       setFeedbackType("error");
     } finally {
