@@ -18,6 +18,7 @@ interface TableProps {
   showSearchBar?: boolean;
   showClientCell?: boolean;
   onActionSelect?: (action: string, clientId: string) => void;
+  showFilterButton?: boolean; // NEW PROP
 }
 
 const ClientTable: React.FC<TableProps> = ({
@@ -27,6 +28,7 @@ const ClientTable: React.FC<TableProps> = ({
   showSearchBar = false,
   showClientCell = false,
   onActionSelect,
+  showFilterButton = true, // NEW DEFAULT
 }) => {
   const [filteredData, setFilteredData] = useState<Record<string, string>[]>(
     []
@@ -107,7 +109,7 @@ const ClientTable: React.FC<TableProps> = ({
         <SearchBar
           value={searchTerm}
           onChange={handleSearchChange}
-          onFilterClick={handleFilterClick}
+          onFilterClick={showFilterButton ? handleFilterClick : undefined}
           placeholder="Search by name, type, brand, or other..."
         />
       )}

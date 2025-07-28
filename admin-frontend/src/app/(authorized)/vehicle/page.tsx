@@ -5,46 +5,23 @@ import { useSearchParams } from "next/navigation";
 import ClientTable from "@/components/organism/client-table/client-table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import "@/styles/fonts.css";
-import VehicleDetailsModal from "@/components/atoms/vehicle-details-card/vehicle-details-card";
-import { fetchVehicles, deleteVehicle } from "@/utils/api";
+import { fetchVehicles, deleteVehicle, VehicleBasic } from "@/utils/api";
 
-interface Vehicle {
-  id: string;
-  vehicleId: number;
-  customerId: number;
-  client: string;
-  clientEmail: string;
-  pictureSrc: string;
-  type: string;
-  brand: string;
-  model: string;
-  licenseplate: string;
-  registrationNumber: string;
-  chassisNumber: string;
-  mileage?: number;
-  fuel: string;
-  year: string;
-}
-
+// Use VehicleBasic from api.ts
 const VehiclesPage = () => {
   const searchParams = useSearchParams();
   const serviceCenterId = searchParams.get("serviceCenterId");
 
   const [clientFilter, setClientFilter] = useState("All Clients");
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [vehicles, setVehicles] = useState<VehicleBasic[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
 
   const tableHeaders = [
-    { title: "Id", sortable: true },
-    { title: "Client", sortable: true },
-    { title: "Type", sortable: true },
-    { title: "Brand", sortable: true },
+    { title: "Vehicle ID", sortable: true },
+    { title: "Customer ID", sortable: true },
     { title: "Model", sortable: true },
-    { title: "License Plate", sortable: true },
-    { title: "Year", sortable: true },
-    { title: "Fuel", sortable: true },
+    { title: "Chassis Number", sortable: true },
+    { title: "Mileage", sortable: true },
   ];
 
   useEffect(() => {
@@ -65,12 +42,12 @@ const VehiclesPage = () => {
   }, []);
 
   const handleActionSelect = async (action: string, vehicleId: string) => {
-    const vehicle = vehicles.find((v) => v.id === vehicleId);
+    const vehicle = vehicles.find((v) => v.vehicleId.toString() === vehicleId);
 
     switch (action.toLowerCase()) {
       case "view":
-        setSelectedVehicle(vehicle || null);
-        setIsModalOpen(true);
+        // setSelectedVehicle(vehicle || null); // This line is removed
+        // setIsModalOpen(true); // This line is removed
         break;
       case "loyalty points":
         console.log(`Viewing loyalty points for vehicle ID: ${vehicleId}`);
@@ -79,7 +56,7 @@ const VehiclesPage = () => {
         if (
           vehicle &&
           window.confirm(
-            `Are you sure you want to delete ${vehicle.brand} ${vehicle.model} (${vehicle.licenseplate})?`
+            `Are you sure you want to delete vehicle ID: ${vehicleId}?`
           )
         ) {
           try {
@@ -124,29 +101,7 @@ const VehiclesPage = () => {
           />
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div className="relative">
-            <select
-              aria-label="Filter Clients"
-              className="appearance-none bg-white border border-neutral-150 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-primary-100"
-              value={clientFilter}
-              onChange={(e) => setClientFilter(e.target.value)}
-            >
-              <option value="All Vehicles">All Vehicles</option>
-              <option value="Active Vehicles">Active Vehicles</option>
-              <option value="Inactive Vehicles">Inactive Vehicles</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-400">
-              <svg
-                className="fill-current h-4 w-4"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-              >
-                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-              </svg>
-            </div>
-          </div>
-        </div>
+        {/* Removed filter dropdown for vehicles */}
 
         {isLoading ? (
           <div>Loading vehicles...</div>
@@ -159,34 +114,22 @@ const VehiclesPage = () => {
               <ClientTable
                 headers={tableHeaders}
                 data={vehicles.map((vehicle) => ({
-                  id: vehicle.id,
-                  client: vehicle.client,
-                  type: vehicle.type,
-                  brand: vehicle.brand,
-                  model: vehicle.model,
-                  licenseplate: vehicle.licenseplate,
-                  year: vehicle.year,
-                  fuel: vehicle.fuel,
-                  // Add additional data for potential use
                   vehicleid: vehicle.vehicleId.toString(),
                   customerid: vehicle.customerId.toString(),
-                  registrationnumber: vehicle.registrationNumber,
+                  model: vehicle.model,
                   chassisnumber: vehicle.chassisNumber,
-                  mileage: vehicle.mileage?.toString() || "N/A",
+                  mileage: vehicle.mileage.toString(),
                 }))}
-                actions={["view", "delete"]}
+                actions={[]}
                 showSearchBar={true}
-                showClientCell={true}
+                showClientCell={false}
                 onActionSelect={handleActionSelect}
+                showFilterButton={false}
               />
           </div>
         )}
 
-        <VehicleDetailsModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          vehicle={selectedVehicle}
-        />
+        {/* VehicleDetailsModal is removed */}
       </div>
     </div>
   );

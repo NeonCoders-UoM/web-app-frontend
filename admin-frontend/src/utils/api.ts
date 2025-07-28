@@ -202,33 +202,23 @@ export interface VehicleRegistrationDto {
   year: string;
 }
 
-// Frontend vehicle interface (for display)
-interface VehicleDisplay {
-  id: string;
+// Define VehicleBasic type to match backend response
+export type VehicleBasic = {
   vehicleId: number;
   customerId: number;
-  client: string;
-  clientEmail: string;
-  pictureSrc: string;
-  type: string; // We'll derive this from fuel type or set as "Car"
-  brand: string;
   model: string;
-  licenseplate: string; // This will be registrationNumber
-  registrationNumber: string;
   chassisNumber: string;
-  mileage?: number;
-  fuel: string;
-  year: string;
-}
+  mileage: number;
+};
 
 // Fetch all vehicles from the system
-export const fetchVehicles = async (): Promise<VehicleDisplay[]> => {
+export const fetchVehicles = async (): Promise<VehicleBasic[]> => {
   try {
     console.log("fetchVehicles: Starting to fetch all vehicles from system...");
     
     // Try different possible API endpoints for getting all vehicles
     let response;
-    let allVehicles: VehicleResponse[] = [];
+    let allVehicles: any[] = [];
     
     try {
       // Try the main vehicles endpoint
@@ -256,23 +246,13 @@ export const fetchVehicles = async (): Promise<VehicleDisplay[]> => {
     
     console.log("fetchVehicles: Total vehicles from API:", allVehicles.length);
 
-    // Transform vehicles to display format
-    const transformedVehicles = allVehicles.map((vehicle) => ({
-      id: `#${vehicle.vehicleId.toString().padStart(4, "0")}`,
+    // Transform vehicles to display format (only the fields provided by backend)
+    const transformedVehicles: VehicleBasic[] = allVehicles.map((vehicle) => ({
       vehicleId: vehicle.vehicleId,
-      customerId: vehicle.customerId || 0,
-      client: vehicle.customerName || "Unknown Customer",
-      clientEmail: vehicle.customerEmail || "unknown@example.com",
-      pictureSrc: "https://placehold.co/80x80/svg?text=Client",
-      type: getVehicleType(vehicle.fuel), // Derive type from fuel
-      brand: vehicle.brand,
+      customerId: vehicle.customerId,
       model: vehicle.model,
-      licenseplate: vehicle.registrationNumber,
-      registrationNumber: vehicle.registrationNumber,
       chassisNumber: vehicle.chassisNumber,
       mileage: vehicle.mileage,
-      fuel: vehicle.fuel,
-      year: vehicle.year,
     }));
 
     console.log("fetchVehicles: Transformed vehicles:", transformedVehicles.length);
@@ -285,7 +265,8 @@ export const fetchVehicles = async (): Promise<VehicleDisplay[]> => {
 };
 
 // Helper function to derive vehicle type from fuel type
-const getVehicleType = (fuel: string): string => {
+const getVehicleType = (fuel: string | undefined): string => {
+  if (!fuel) return 'Car';
   const fuelLower = fuel.toLowerCase();
   if (fuelLower.includes('diesel')) return 'Truck';
   if (fuelLower.includes('hybrid')) return 'Hybrid';

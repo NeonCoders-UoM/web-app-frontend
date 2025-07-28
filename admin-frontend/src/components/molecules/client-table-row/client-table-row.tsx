@@ -46,12 +46,15 @@ export const TableRow: React.FC<TableRowProps> = ({
         return <TableCell key={index}>{value}</TableCell>;
       })}
 
-      <TableCell>
-        <KebabMenuWithActions
-          actions={actions}
-          onActionSelect={(action) => onActionSelect?.(action, row.id)}
-        />
-      </TableCell>
+      {/* Only render kebab menu if actions are provided */}
+      {actions.length > 0 && (
+        <TableCell>
+          <KebabMenuWithActions
+            actions={actions}
+            onActionSelect={(action) => onActionSelect?.(action, row.id)}
+          />
+        </TableCell>
+      )}
     </tr>
   );
 };
