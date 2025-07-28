@@ -34,7 +34,7 @@ const ForgotPasswordFormNoIcons: React.FC<ForgotPasswordFormProps> = ({ onBack, 
     setError("");
 
     try {
-      const response = await axiosInstance.post("auth/forgot-password", { email });
+      const response = await axiosInstance.post("Auth/forgot-password", { email });
       setSuccess(response.data || "OTP sent to your email address");
       setStep("otp");
     } catch (err: any) {
@@ -68,7 +68,7 @@ const ForgotPasswordFormNoIcons: React.FC<ForgotPasswordFormProps> = ({ onBack, 
     setError("");
 
     try {
-      const response = await axiosInstance.post("auth/resend-forgot-password-otp", email);
+      const response = await axiosInstance.post("Auth/resend-forgot-password-otp", email);
       setSuccess(response.data || "New OTP sent to your email address");
     } catch (err: any) {
       setError(err.response?.data || "Failed to resend OTP");
@@ -97,10 +97,11 @@ const ForgotPasswordFormNoIcons: React.FC<ForgotPasswordFormProps> = ({ onBack, 
     setError("");
 
     try {
-      const response = await axiosInstance.post("auth/reset-password", {
+      const response = await axiosInstance.post("Auth/reset-password", {
         email,
         otp,
         newPassword,
+        confirmPassword,
       });
       setSuccess(response.data || "Password reset successfully");
       setTimeout(() => {

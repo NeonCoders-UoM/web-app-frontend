@@ -31,15 +31,27 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBack, onSucce
       return;
     }
 
+    // Basic email validation
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
     try {
-      const response = await axiosInstance.post("auth/forgot-password", { email });
-      setSuccess(response.data || "OTP sent to your email address");
+      console.log("Sending forgot password request for email:", email);
+      const response = await axiosInstance.post("Auth/forgot-password", { email });
+      
+      console.log("Forgot password response:", response.data);
+      // Backend returns success message directly
+      setSuccess(response.data || "OTP sent to your email address. Please check your inbox.");
       setStep("otp");
     } catch (err: any) {
-      setError(err.response?.data || "Failed to send OTP");
+      console.error("Send OTP error:", err);
+      console.error("Error response:", err.response?.data);
+      setError(err.response?.data || "Failed to send OTP. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -53,13 +65,15 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBack, onSucce
 
     setIsLoading(true);
     setError("");
+    
+    console.log("Verifying OTP for email:", email, "OTP:", otp);
 
     try {
-      // For now, just move to reset step
-      // In a real implementation, you might want to verify OTP first
+      // For now, just move to reset step since backend might not have verify endpoint
+      // In a real implementation, you would verify OTP first
       setStep("reset");
     } catch (err: any) {
-      setError(err.response?.data || "Failed to verify OTP");
+      setError(err.response?.data || "Failed to verify OTP. Please check the code and try again.");
     } finally {
       setIsLoading(false);
     }
@@ -70,10 +84,13 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBack, onSucce
     setError("");
 
     try {
-      const response = await axiosInstance.post("auth/resend-forgot-password-otp", email);
-      setSuccess(response.data || "New OTP sent to your email address");
+      const response = await axiosInstance.post("Auth/resend-forgot-password-otp", email);
+      
+      // Backend returns success message directly
+      setSuccess(response.data || "New OTP sent to your email address. Please check your inbox.");
     } catch (err: any) {
-      setError(err.response?.data || "Failed to resend OTP");
+      console.error("Resend OTP error:", err);
+      setError(err.response?.data || "Failed to resend OTP. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -95,21 +112,42 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBack, onSucce
       return;
     }
 
+    if (!email || !otp) {
+      setError("Missing email or OTP. Please go back and try again.");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
+    
+    console.log("Attempting to reset password for:", { email, otp, newPassword: "***" });
 
     try {
-      const response = await axiosInstance.post("auth/reset-password", {
+      console.log("Sending reset password request:", { email, otp, newPassword: "***", confirmPassword: "***" });
+      const response = await axiosInstance.post("Auth/reset-password", {
         email,
         otp,
         newPassword,
+        confirmPassword,
       });
-      setSuccess(response.data || "Password reset successfully");
+      
+      console.log("Reset password response:", response.data);
+      // Backend returns success message directly
+      setSuccess(response.data || "Password reset successfully! You can now login with your new password.");
       setTimeout(() => {
         onSuccess();
       }, 2000);
     } catch (err: any) {
-      setError(err.response?.data || "Failed to reset password");
+      console.error("Reset password error:", err);
+      console.error("Error response:", err.response?.data);
+      
+      // Handle validation errors properly
+      if (err.response?.data?.errors) {
+        const errorMessages = Object.values(err.response.data.errors).flat().join(', ');
+        setError(errorMessages);
+      } else {
+        setError(err.response?.data || "Failed to reset password. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }

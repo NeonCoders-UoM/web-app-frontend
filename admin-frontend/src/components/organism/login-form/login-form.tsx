@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, ArrowUpIcon } from "lucide-react";
 import Button from "@/components/atoms/button/button";
 import InputField from "@/components/atoms/input-fields/input-fields";
-import ForgotPasswordForm from "@/components/organism/forgot-password-form/test-component";
+import ForgotPasswordForm from "@/components/organism/forgot-password-form/forgot-password-form";
 import axiosInstance from "@/utils/axios";
 import { useRouter } from "next/navigation";
 import { getDashboardRoute } from "@/utils/auth";
@@ -59,7 +59,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
     setError("");
 
     try {
-      const response = await axiosInstance.post("auth/login", {
+      const response = await axiosInstance.post("Auth/login", {
         email: data.email,
         password: data.password,
       });
