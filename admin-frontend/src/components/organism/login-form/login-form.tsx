@@ -240,7 +240,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
                 onClick={togglePasswordVisibility}
                 className="cursor-pointer text-neutral-400"
               >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
               </span>
             }
             status={errors.password && isSubmitted ? "error" : "default"}

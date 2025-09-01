@@ -208,47 +208,57 @@ const AdminDashboard = () => {
           )}
 
           {selectedTab === "users" && (
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-8">
-                <h1 className="text-lg font-bold text-neutral-600">User List</h1>
-                <Button variant="primary" size="medium" onClick={() => router.push("/user-managment/add-user")} icon="PlusIcon" iconPosition="left">
-                  Create User
-                </Button>
-              </div>
-              <div className="flex justify-between items-center mb-6">
-                <div className="relative">
-                  <select className="appearance-none bg-white border border-neutral-200 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-primary-100" value={userFilter} onChange={(e) => setUserFilter(e.target.value)}>
-                    <option value="All Users">All Users</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Service Staff">Service Staff</option>
-                    <option value="Data Operator">Data Operator</option>
-                    <option value="Cashier">Cashier</option>
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-400">
-                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8 overflow-x-hidden">
+              {/* Main Content */}
+              <div className="max-w-full mx-auto w-full">
+                {/* Header with user profile */}
+                <div className="flex justify-between items-center mb-10">
+                  <h1 className="text-xl font-bold text-neutral-600">User List</h1>
+                </div>
+
+                {/* User Filter and Create Button */}
+                <div className="flex justify-between items-center mb-6">
+                  <div className="relative">
+                    <select className="appearance-none bg-white border border-neutral-150 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-primary-100" value={userFilter} onChange={(e) => setUserFilter(e.target.value)}>
+                      <option value="All Users">All Users</option>
+                      <option value="Admin">Admin</option>
+                      <option value="Service Staff">Service Staff</option>
+                      <option value="Data Operator">Data Operator</option>
+                      <option value="Cashier">Cashier</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-400">
+                      <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                    </div>
                   </div>
+                  <Button variant="primary" size="medium" onClick={() => router.push("/user-managment/add-user")} icon="PlusIcon" iconPosition="left">
+                    Create User
+                  </Button>
+                </div>
+
+                <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 overflow-x-auto">
+                  {/* User Table */}
+                  {isLoadingUsers ? (
+                    <div className="flex justify-center items-center h-64">
+                      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                    </div>
+                  ) : (
+                    <ClientTable
+                      headers={userTableHeaders}
+                      data={filteredUsers.map((u) => ({
+                        id: u.userId.toString(),
+                        firstname: u.firstName,
+                        lastname: u.lastName,
+                        email: u.email,
+                        userrole: u.role,
+                      }))}
+                      actions={["edit", "delete"]}
+                      showSearchBar={true}
+                      showClientCell={true}
+                      onActionSelect={handleUserActionSelect}
+                    />
+                  )}
                 </div>
               </div>
-              {isLoadingUsers ? (
-                <div className="flex justify-center items-center h-64">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-200"></div>
-                </div>
-              ) : (
-                <ClientTable
-                  headers={userTableHeaders}
-                  data={filteredUsers.map((u) => ({
-                    id: u.userId.toString(),
-                    firstname: u.firstName,
-                    lastname: u.lastName,
-                    email: u.email,
-                    userrole: u.role,
-                  }))}
-                  actions={["edit", "delete"]}
-                  showSearchBar={true}
-                  showClientCell={true}
-                  onActionSelect={handleUserActionSelect}
-                />
-              )}
             </div>
           )}
         </div>

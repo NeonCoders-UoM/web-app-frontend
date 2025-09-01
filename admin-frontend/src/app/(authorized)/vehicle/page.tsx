@@ -30,21 +30,18 @@ const VehiclesPage = () => {
   const searchParams = useSearchParams();
   const serviceCenterId = searchParams.get("serviceCenterId");
 
-  const [clientFilter, setClientFilter] = useState("All Clients");
+  const [vehicleFilter, setVehicleFilter] = useState("All Vehicles");
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
 
   const tableHeaders = [
-    { title: "Id", sortable: true },
-    { title: "Client", sortable: true },
-    { title: "Type", sortable: true },
-    { title: "Brand", sortable: true },
+    { title: "Vehicle ID", sortable: true },
+    { title: "Customer ID", sortable: true },
     { title: "Model", sortable: true },
+    { title: "Chassis Number", sortable: true },
     { title: "License Plate", sortable: true },
-    { title: "Year", sortable: true },
-    { title: "Fuel", sortable: true },
   ];
 
   useEffect(() => {
@@ -127,14 +124,14 @@ const VehiclesPage = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div className="relative">
             <select
-              aria-label="Filter Clients"
+              aria-label="Filter Vehicles"
               className="appearance-none bg-white border border-neutral-150 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-primary-100"
-              value={clientFilter}
-              onChange={(e) => setClientFilter(e.target.value)}
+              value={vehicleFilter}
+              onChange={(e) => setVehicleFilter(e.target.value)}
             >
               <option value="All Vehicles">All Vehicles</option>
-              <option value="Active Vehicles">Active Vehicles</option>
-              <option value="Inactive Vehicles">Inactive Vehicles</option>
+              <option value="By Customer">By Customer</option>
+              <option value="By Model">By Model</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-400">
               <svg
@@ -160,23 +157,15 @@ const VehiclesPage = () => {
                 headers={tableHeaders}
                 data={vehicles.map((vehicle) => ({
                   id: vehicle.id,
-                  client: vehicle.client,
-                  type: vehicle.type,
-                  brand: vehicle.brand,
-                  model: vehicle.model,
-                  licenseplate: vehicle.licenseplate,
-                  year: vehicle.year,
-                  fuel: vehicle.fuel,
-                  // Add additional data for potential use
                   vehicleid: vehicle.vehicleId.toString(),
                   customerid: vehicle.customerId.toString(),
-                  registrationnumber: vehicle.registrationNumber,
+                  model: vehicle.model,
                   chassisnumber: vehicle.chassisNumber,
-                  mileage: vehicle.mileage?.toString() || "N/A",
+                  licenseplate: vehicle.licenseplate,
                 }))}
                 actions={["view", "delete"]}
                 showSearchBar={true}
-                showClientCell={true}
+                showClientCell={false}
                 onActionSelect={handleActionSelect}
               />
           </div>

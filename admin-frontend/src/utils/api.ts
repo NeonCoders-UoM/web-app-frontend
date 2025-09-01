@@ -179,16 +179,10 @@ const mockServiceCenters: ServiceCenter[] = [
 // Backend vehicle response interface (matching your backend API)
 interface VehicleResponse {
   vehicleId: number;
-  registrationNumber: string;
-  brand: string;
+  customerId: number;
   model: string;
   chassisNumber: string;
   mileage?: number;
-  fuel: string;
-  year: string;
-  customerId?: number;
-  customerName?: string;
-  customerEmail?: string;
 }
 
 // Vehicle registration DTO (for creating/updating vehicles)
@@ -256,24 +250,39 @@ export const fetchVehicles = async (): Promise<VehicleDisplay[]> => {
     
     console.log("fetchVehicles: Total vehicles from API:", allVehicles.length);
 
+    // Fetch all customers to get customer information
+    let customers: Client[] = [];
+    try {
+      customers = await fetchClients();
+      console.log("fetchVehicles: Successfully fetched customers:", customers.length);
+    } catch (error) {
+      console.log("fetchVehicles: Failed to fetch customers, will use default values");
+      customers = [];
+    }
+
     // Transform vehicles to display format
-    const transformedVehicles = allVehicles.map((vehicle) => ({
-      id: `#${vehicle.vehicleId.toString().padStart(4, "0")}`,
-      vehicleId: vehicle.vehicleId,
-      customerId: vehicle.customerId || 0,
-      client: vehicle.customerName || "Unknown Customer",
-      clientEmail: vehicle.customerEmail || "unknown@example.com",
-      pictureSrc: "https://placehold.co/80x80/svg?text=Client",
-      type: getVehicleType(vehicle.fuel), // Derive type from fuel
-      brand: vehicle.brand,
-      model: vehicle.model,
-      licenseplate: vehicle.registrationNumber,
-      registrationNumber: vehicle.registrationNumber,
-      chassisNumber: vehicle.chassisNumber,
-      mileage: vehicle.mileage,
-      fuel: vehicle.fuel,
-      year: vehicle.year,
-    }));
+    const transformedVehicles = allVehicles.map((vehicle) => {
+      // Find customer information
+      const customer = customers.find(c => c.customerId === vehicle.customerId);
+      
+      return {
+        id: `#${vehicle.vehicleId.toString().padStart(4, "0")}`,
+        vehicleId: vehicle.vehicleId,
+        customerId: vehicle.customerId,
+        client: customer ? `${customer.firstName} ${customer.lastName}` : "Unknown Customer",
+        clientEmail: customer ? customer.email : "unknown@example.com",
+        pictureSrc: "https://placehold.co/80x80/svg?text=Client",
+        type: "Car", // Default type since we don't have fuel info
+        brand: "Unknown", // Default brand since backend doesn't provide it
+        model: vehicle.model,
+        licenseplate: vehicle.chassisNumber, // Use chassis number as license plate for now
+        registrationNumber: vehicle.chassisNumber, // Use chassis number as registration
+        chassisNumber: vehicle.chassisNumber,
+        mileage: vehicle.mileage,
+        fuel: "Unknown", // Default fuel type
+        year: "Unknown", // Default year
+      };
+    });
 
     console.log("fetchVehicles: Transformed vehicles:", transformedVehicles.length);
     return transformedVehicles;
