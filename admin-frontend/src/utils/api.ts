@@ -28,6 +28,7 @@ import {
   FeedbackFilters
 } from "@/types";
 import axiosInstance from "./axios";
+import axios from 'axios';
 
 
 // Mock data (as provided)
@@ -630,6 +631,7 @@ export const createServiceCenter = async (data: Omit<ServiceCenter, "id">): Prom
       station_status: data.Station_status || "Active",
       Latitude: 0, // Default latitude
       Longitude: 0, // Default longitude
+      DefaultDailyAppointmentLimit: data.DefaultDailyAppointmentLimit || 10 // Default appointment limit
     };
     
     const response = await axiosInstance.post("/ServiceCenters", createData);
@@ -873,24 +875,135 @@ export const toggleServiceCenterServiceAvailability = async (
   }
 };
 
-// Service Availability APIs
-export const addServiceAvailability = async (serviceAvailability: ServiceAvailabilityDTO): Promise<ServiceAvailabilityDTO> => {
+// Toggle service availability for specific days
+export const toggleServiceAvailabilityForDay = async (
+  serviceCenterId: number,
+  serviceId: number,
+  date: Date,
+  isAvailable: boolean
+): Promise<ServiceAvailabilityDTO> => {
   try {
-    const response = await axiosInstance.post('/ServiceAvailability', serviceAvailability);
-    return response.data;
+    console.log(`Toggling service ${serviceId} availability for service center ${serviceCenterId}, date ${date.toISOString().split('T')[0]} to ${isAvailable}`);
+
+    // Format date for backend (YYYY-MM-DD)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`;
+
+    // First, check if a ServiceAvailability record already exists for this date
+    const existingAvailabilities = await getServiceAvailability(serviceCenterId, serviceId, dateString);
+
+    if (existingAvailabilities.length > 0) {
+      // Update existing record
+      const existingRecord = existingAvailabilities[0];
+      const updatedRecord = await updateServiceAvailability(existingRecord.id!, {
+        serviceCenterId,
+        serviceId,
+        date: dateString,
+        isAvailable
+      });
+      console.log("Updated existing service availability record:", updatedRecord);
+      return updatedRecord;
+    } else {
+      // Create new record - use direct axios call since addServiceAvailability is not defined yet
+      const response = await axiosInstance.post('/ServiceAvailability', {
+        serviceCenterId,
+        serviceId,
+        date: dateString,
+        isAvailable
+      });
+      console.log("Created new service availability record:", response.data);
+      return response.data;
+    }
   } catch (error) {
-    console.error("Error in addServiceAvailability:", error);
+    console.error("Error in toggleServiceAvailabilityForDay:", error);
     throw error;
+  }
+};
+
+// Check if a service is available on a specific date (considering both global and day-specific availability)
+export const checkServiceAvailability = async (
+  serviceCenterId: number,
+  serviceId: number,
+  date: Date = new Date()
+): Promise<boolean> => {
+  try {
+    // First, check if the service is globally available
+    const services = await fetchServiceCenterServices(serviceCenterId.toString());
+    const service = services.find(s => s.serviceId === serviceId);
+
+    if (!service) {
+      return false; // Service doesn't exist in this service center
+    }
+
+    // If service is globally unavailable, return false
+    if (!service.isAvailable) {
+      return false;
+    }
+
+    // Format date for backend (YYYY-MM-DD)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`;
+
+    try {
+      const daySpecificAvailability = await getServiceAvailability(
+        serviceCenterId,
+        serviceId,
+        dateString
+      );
+
+      if (daySpecificAvailability.length > 0) {
+        // There's a day-specific override, use that instead of global availability
+        return daySpecificAvailability[0].isAvailable;
+      }
+    } catch (error) {
+      console.warn(`Could not check day-specific availability for service ${serviceId}:`, error);
+      // Fall back to global availability if day-specific check fails
+    }
+
+    // No day-specific override found, use global availability
+    return service.isAvailable;
+  } catch (error) {
+    console.error("Error checking service availability:", error);
+    return false; // Default to unavailable on error
+  }
+};
+
+// Get all services with their availability status for a specific date
+export const getServicesWithAvailability = async (
+  serviceCenterId: number,
+  date: Date = new Date()
+): Promise<Array<{ service: ServiceCenterServiceDTO; isAvailable: boolean }>> => {
+  try {
+    const services = await fetchServiceCenterServices(serviceCenterId.toString());
+    const servicesWithAvailability = await Promise.all(
+      services.map(async (service) => {
+        const isAvailable = await checkServiceAvailability(serviceCenterId, service.serviceId, date);
+        return { service, isAvailable };
+      })
+    );
+    return servicesWithAvailability;
+  } catch (error) {
+    console.error("Error getting services with availability:", error);
+    return [];
   }
 };
 
 export const getServiceAvailabilities = async (
   serviceCenterId: number,
-  weekNumber: number
+  startDate?: string,
+  endDate?: string
 ): Promise<ServiceAvailabilityDTO[]> => {
   try {
+    const params: { startDate?: string; endDate?: string } = {};
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+
     const response = await axiosInstance.get(`/ServiceAvailability/${serviceCenterId}`, {
-      params: { weekNumber }
+      params
     });
     return response.data;
   } catch (error) {
@@ -902,17 +1015,26 @@ export const getServiceAvailabilities = async (
 export const getServiceAvailability = async (
   serviceCenterId: number,
   serviceId: number,
-  weekNumber: number,
-  day?: string
+  date?: string
 ): Promise<ServiceAvailabilityDTO[]> => {
   try {
     const response = await axiosInstance.get(
       `/ServiceAvailability/${serviceCenterId}/${serviceId}`,
-      { params: { weekNumber, day } }
+      { params: date ? { date } : {} }
     );
     return response.data;
   } catch (error) {
     console.error("Error in getServiceAvailability:", error);
+    throw error;
+  }
+};
+
+export const addServiceAvailability = async (availabilityData: ServiceAvailabilityDTO): Promise<ServiceAvailabilityDTO> => {
+  try {
+    const response = await axiosInstance.post('/ServiceAvailability', availabilityData);
+    return response.data;
+  } catch (error) {
+    console.error("Error in addServiceAvailability:", error);
     throw error;
   }
 };
@@ -1371,19 +1493,79 @@ export const deletePackage = async (id: number): Promise<void> => {
 // Add a new closure schedule
 export const addClosureSchedule = async (closureData: CreateClosureScheduleDTO): Promise<ClosureSchedule> => {
   try {
-    const response = await axiosInstance.post('/ClosureSchedule', closureData);
-    return response.data;
+    console.log("DEBUG: Sending closure data to API:", closureData);
+    console.log("DEBUG: Closure data details:");
+    console.log("  - serviceCenterId:", closureData.serviceCenterId);
+    console.log("  - closureDate:", closureData.closureDate);
+
+    // Try different endpoint variations for POST
+    const postEndpoints = [
+      '/ClosureSchedule',
+      '/api/ClosureSchedule'
+    ];
+
+    for (const endpoint of postEndpoints) {
+      try {
+        console.log(`DEBUG: Trying POST endpoint: ${endpoint}`);
+        const response = await axiosInstance.post(endpoint, closureData);
+        console.log(`DEBUG: Success with POST endpoint ${endpoint}:`, response.data);
+        console.log("DEBUG: Response status:", response.status);
+        return response.data;
+      } catch (endpointError) {
+        const axiosError = endpointError as { response?: { status?: number }, message?: string };
+        console.log(`DEBUG: POST endpoint ${endpoint} failed:`, axiosError.response?.status || axiosError.message || 'Unknown error');
+        continue;
+      }
+    }
+
+    // If all endpoints fail, throw the last error
+    throw new Error('All POST endpoints for closure schedule failed');
   } catch (error) {
     console.error("Error adding closure schedule:", error);
+    if (axios.isAxiosError(error)) {
+      console.error("Error response data:", error.response?.data);
+      console.error("Error response status:", error.response?.status);
+      console.error("Error response headers:", error.response?.headers);
+      console.error("Error request data that was sent:", error.config?.data);
+      console.error("Error request URL:", error.config?.url);
+      console.error("Error request method:", error.config?.method);
+    }
     throw error;
   }
 };
 
-// Get closures for a specific service center and week
-export const getClosures = async (serviceCenterId: number, weekNumber: number): Promise<ClosureSchedule[]> => {
+// Get closures for a specific service center and date
+export const getClosures = async (serviceCenterId: number, date: Date): Promise<ClosureSchedule[]> => {
   try {
-    const response = await axiosInstance.get(`/ClosureSchedule/${serviceCenterId}?weekNumber=${weekNumber}`);
-    return response.data;
+    console.log(`DEBUG: Fetching closures for service center ${serviceCenterId}, date ${date.toISOString().split('T')[0]}`);
+
+    // Format date for backend (YYYY-MM-DD)
+    const dateString = date.toISOString().split('T')[0];
+
+    // Try different endpoint variations
+    const endpoints = [
+      `/ClosureSchedule/${serviceCenterId}?date=${dateString}`,
+      `/api/ClosureSchedule/${serviceCenterId}?date=${dateString}`,
+      `/ClosureSchedule/${serviceCenterId}/${dateString}`,
+      `/api/ClosureSchedule/${serviceCenterId}/${dateString}`
+    ];
+
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`DEBUG: Trying endpoint: ${endpoint}`);
+        const response = await axiosInstance.get(endpoint);
+        console.log(`DEBUG: Success with endpoint ${endpoint}, retrieved ${response.data.length} closures:`, response.data);
+        return response.data;
+      } catch (endpointError) {
+        const axiosError = endpointError as { response?: { status?: number }, message?: string };
+        console.log(`DEBUG: Endpoint ${endpoint} failed:`, axiosError.response?.status || axiosError.message || 'Unknown error');
+        continue;
+      }
+    }
+
+    // If all endpoints fail, return empty array
+    console.log(`DEBUG: All endpoints failed, returning empty array`);
+    return [];
   } catch (error) {
     console.error("Error fetching closures:", error);
     // Return empty array if no closures found or error occurs
@@ -1416,21 +1598,19 @@ export const deleteClosureSchedule = async (id: number): Promise<void> => {
 
 // Check if a service center is available on a specific date (for customers)
 export const checkServiceCenterAvailability = async (
-  serviceCenterId: number, 
+  serviceCenterId: number,
   date: string
 ): Promise<{ isAvailable: boolean; reason?: string }> => {
   try {
-    // Convert date to week number and day
+    // Convert date string to Date object
     const targetDate = new Date(date);
-    const weekNumber = getWeekNumber(targetDate);
-    const dayOfWeek = getDayOfWeek(targetDate);
-    
-    // Get closures for that week
-    const closures = await getClosures(serviceCenterId, weekNumber);
-    
-    // Check if the specific day is closed
-    const isClosed = closures.some(closure => closure.day === dayOfWeek);
-    
+
+    // Get closures for that date
+    const closures = await getClosures(serviceCenterId, targetDate);
+
+    // Check if there are any closures for this date
+    const isClosed = closures.length > 0;
+
     return {
       isAvailable: !isClosed,
       reason: isClosed ? 'Service center is closed on this day' : undefined
@@ -1447,14 +1627,17 @@ export const checkAllServiceCentersAvailability = async (): Promise<Map<string, 
   try {
     const serviceCenters = await fetchServiceCenters();
     const availabilityMap = new Map<string, { isAvailable: boolean; reason?: string }>();
-    const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    const currentDate = new Date();
+    const localDateString = currentDate.getFullYear() + '-' +
+      String(currentDate.getMonth() + 1).padStart(2, '0') + '-' +
+      String(currentDate.getDate()).padStart(2, '0'); // YYYY-MM-DD format in local timezone
     
     // Check availability for each service center
     for (const serviceCenter of serviceCenters) {
       const serviceCenterId = serviceCenter.Station_id || parseInt(serviceCenter.id);
       if (serviceCenterId) {
         try {
-          const availability = await checkServiceCenterAvailability(serviceCenterId, currentDate);
+          const availability = await checkServiceCenterAvailability(serviceCenterId, localDateString);
           availabilityMap.set(serviceCenter.id, availability);
         } catch (error) {
           console.error(`Error checking availability for service center ${serviceCenter.id}:`, error);
@@ -1477,18 +1660,22 @@ export const getServiceCenterClosures = async (serviceCenterId: number): Promise
     // Get closures for current week and next few weeks
     const currentWeek = getWeekNumber(new Date());
     const closures: ClosureSchedule[] = [];
-    
+
     // Get closures for current week and next 4 weeks
     for (let week = currentWeek; week <= currentWeek + 4; week++) {
+      // Calculate the date for the first day of this week
+      const firstDayOfYear = new Date(new Date().getFullYear(), 0, 1);
+      const targetDate = new Date(firstDayOfYear.getTime() + (week - 1) * 7 * 24 * 60 * 60 * 1000);
+
       try {
-        const weekClosures = await getClosures(serviceCenterId, week);
+        const weekClosures = await getClosures(serviceCenterId, targetDate);
         closures.push(...weekClosures);
       } catch (error) {
         console.warn(`Failed to fetch closures for week ${week}:`, error);
         // Continue with other weeks
       }
     }
-    
+
     return closures;
   } catch (error) {
     console.error("Error getting service center closures:", error);
@@ -1501,11 +1688,6 @@ const getWeekNumber = (date: Date): number => {
   const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
   const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
   return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-};
-
-const getDayOfWeek = (date: Date): string => {
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  return days[date.getDay()];
 };
 
 // ===============================

@@ -2,18 +2,42 @@
 
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Table } from "@/components/organism/closure-schedule-table/closure-schedule-table";
 import ScheduleShopClosures from "@/components/molecules/schedule-shop-closures/schedule-shop-closures";
 import ShiftCard from "@/components/atoms/shiftcard/shiftcard";
-import ServiceAvailabilityTable from "@/components/organism/service-availability-table/service-availability-table";
 import {
   addClosureSchedule,
   getClosures,
   fetchServiceCenters,
   fetchServiceCenterServices,
-  toggleServiceCenterServiceAvailability,
+  toggleServiceAvailabilityForDay,
+  getServiceAvailabilities,
 } from "@/utils/api";
-import { ServiceCenter, ServiceCenterServiceDTO } from "@/types";
+import {
+  ClosureSchedule,
+  ServiceCenter,
+  ServiceCenterServiceDTO,
+  ServiceAvailabilityDTO,
+} from "@/types";
+import { getAuthUser } from "@/utils/auth";
+
+interface ServiceAvailabilityData {
+  id: number;
+  isAvailable: boolean;
+}
+
+interface DateServiceAvailability {
+  date: Date;
+  services: Array<{
+    serviceId: number;
+    serviceName: string;
+    isAvailable: boolean;
+  }>;
+}
+
+interface ServiceAvailabilityData {
+  id: number;
+  isAvailable: boolean;
+}
 
 const ManageServices = () => {
   const searchParams = useSearchParams();
@@ -22,65 +46,401 @@ const ManageServices = () => {
     searchParams.get("serviceCenterId") || searchParams.get("stationId");
 
   const [shiftCards, setShiftCards] = useState<
-    { day: string; status: string }[]
+    { day: string; status: string; specificDate?: string }[]
   >([]);
   const [serviceCenters, setServiceCenters] = useState<ServiceCenter[]>([]);
   const [currentServiceCenterId, setCurrentServiceCenterId] = useState<
     number | null
   >(null);
-  const [currentWeek, setCurrentWeek] = useState<number>(() => {
-    // Get current week number
-    const now = new Date();
-    const firstDayOfYear = new Date(now.getFullYear(), 0, 1);
-    const pastDaysOfYear =
-      (now.getTime() - firstDayOfYear.getTime()) / 86400000;
-    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-  });
   const [isLoading, setIsLoading] = useState(true);
   const [selectedServiceCenter, setSelectedServiceCenter] =
     useState<ServiceCenter | null>(null);
   const [serviceCenterServices, setServiceCenterServices] = useState<
     ServiceCenterServiceDTO[]
   >([]);
-  const [allWeeks, setAllWeeks] = useState<string[]>([]);
+  const [dateServiceAvailabilities, setDateServiceAvailabilities] = useState<
+    DateServiceAvailability[]
+  >([]);
+  const [isLoadingAvailabilities, setIsLoadingAvailabilities] = useState(false);
+  const [modifiedServiceAvailabilities, setModifiedServiceAvailabilities] =
+    useState<{ [dateKey: string]: { [serviceId: number]: boolean } }>({});
+  const [selectedDatesForPreview, setSelectedDatesForPreview] = useState<
+    Date[]
+  >([]);
+  const [isClosureMode, setIsClosureMode] = useState(true); // Track whether we're in closure mode or service mode
 
-  // Generate all weeks for the current year
-  const generateAllWeeks = () => {
-    const weeks: string[] = [];
-    const currentYear = new Date().getFullYear();
-
-    // Generate weeks for the entire year (52 weeks)
-    for (let week = 1; week <= 52; week++) {
-      const startDate = new Date(currentYear, 0, 1 + (week - 1) * 7);
-      const endDate = new Date(startDate);
-      endDate.setDate(startDate.getDate() + 6);
-
-      const startMonth = startDate.toLocaleDateString("en-US", {
-        month: "short",
-      });
-      const endMonth = endDate.toLocaleDateString("en-US", { month: "short" });
-      const startDay = startDate.getDate();
-      const endDay = endDate.getDate();
-
-      let weekLabel = `Week ${week}`;
-      if (startMonth === endMonth) {
-        weekLabel += ` (${startMonth} ${startDay}-${endDay})`;
-      } else {
-        weekLabel += ` (${startMonth} ${startDay}-${endMonth} ${endDay})`;
-      }
-
-      weeks.push(weekLabel);
+  // Function to fetch service availabilities for selected dates
+  const fetchDateServiceAvailabilities = async (dates: Date[]) => {
+    if (!currentServiceCenterId || dates.length === 0) {
+      setDateServiceAvailabilities([]);
+      setSelectedDatesForPreview([]);
+      return;
     }
 
-    return weeks;
+    setSelectedDatesForPreview(dates);
+    console.log(
+      "Fetching availabilities for dates:",
+      dates.map((d) => d.toDateString())
+    );
+
+    try {
+      setIsLoadingAvailabilities(true);
+
+      // Get current closures to determine if selected dates are closed
+      const allClosures: ClosureSchedule[] = [];
+
+      // Load closures for the selected dates
+      for (const date of dates) {
+        try {
+          const dayClosures = await getClosures(currentServiceCenterId, date);
+          console.log(
+            `DEBUG: Closures loaded for ${date.toDateString()}:`,
+            dayClosures
+          );
+          allClosures.push(...dayClosures);
+        } catch (error) {
+          console.warn(
+            `Failed to load closures for ${date.toDateString()}:`,
+            error
+          );
+        }
+      }
+
+      const validClosures = allClosures.filter(
+        (closure) =>
+          closure.closureDate && typeof closure.closureDate === "string"
+      );
+      const invalidClosures = allClosures.filter(
+        (closure) =>
+          !closure.closureDate || typeof closure.closureDate !== "string"
+      );
+
+      if (invalidClosures.length > 0) {
+        console.warn(
+          "DEBUG: Found invalid closures without closureDate field:",
+          invalidClosures
+        );
+      }
+
+      console.log(
+        "DEBUG: Valid closures with closureDate:",
+        validClosures.map((c) => ({ id: c.id, closureDate: c.closureDate }))
+      );
+
+      // Create a set of closed dates for quick lookup
+      const closedDates = new Set(
+        validClosures.map((closure) => {
+          const date = new Date(closure.closureDate);
+          return date.toISOString().split("T")[0]; // Normalize to UTC YYYY-MM-DD
+        })
+      );
+
+      console.log("DEBUG: Current closures loaded:", allClosures);
+      console.log(
+        "DEBUG: Filtered closures with valid closureDate field:",
+        validClosures
+      );
+      console.log("DEBUG: Closed dates set:", closedDates);
+
+      // Try to fetch actual ServiceAvailability data from backend
+      let actualAvailabilities: ServiceAvailabilityDTO[] = [];
+      try {
+        // Get the date range for the selected dates
+        const sortedDates = dates.sort((a, b) => a.getTime() - b.getTime());
+        const startDate = sortedDates[0].toISOString().split("T")[0];
+        const endDate = sortedDates[sortedDates.length - 1]
+          .toISOString()
+          .split("T")[0];
+
+        console.log(
+          `DEBUG: Fetching actual service availabilities from ${startDate} to ${endDate}`
+        );
+        actualAvailabilities = await getServiceAvailabilities(
+          currentServiceCenterId,
+          startDate,
+          endDate
+        );
+        console.log(
+          "DEBUG: Fetched actual availabilities:",
+          actualAvailabilities
+        );
+      } catch (fetchError) {
+        console.warn(
+          "DEBUG: Failed to fetch actual service availabilities, using defaults:",
+          fetchError
+        );
+        actualAvailabilities = [];
+      }
+
+      // Create availability map for quick lookup
+      const availabilityMap = new Map<string, Map<number, boolean>>();
+      actualAvailabilities.forEach((availability: ServiceAvailabilityDTO) => {
+        const dateKey = new Date(availability.date).toISOString().split("T")[0]; // Normalize to UTC YYYY-MM-DD
+        if (!availabilityMap.has(dateKey)) {
+          availabilityMap.set(dateKey, new Map<number, boolean>());
+        }
+        availabilityMap
+          .get(dateKey)!
+          .set(availability.serviceId, availability.isAvailable);
+      });
+
+      console.log("DEBUG: Availability map:", availabilityMap);
+
+      // Create default state based on actual data or closure status
+      const defaultAvailabilities: DateServiceAvailability[] = [];
+
+      for (const date of dates) {
+        // Create date at noon local time to avoid timezone conversion issues
+        const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+
+        const year = localDate.getFullYear();
+        const month = String(localDate.getMonth() + 1).padStart(2, "0");
+        const day = String(localDate.getDate()).padStart(2, "0");
+        const dateString = `${year}-${month}-${day}`; // YYYY-MM-DD format in local timezone
+
+        // Use UTC version for backend comparison (this is what the API uses)
+        const utcDateString = localDate.toISOString().split("T")[0]; // YYYY-MM-DD in UTC
+
+        console.log(`DEBUG: Processing date: ${localDate.toDateString()}`);
+        console.log(`DEBUG: Local dateString: ${dateString}`);
+        console.log(`DEBUG: UTC dateString: ${utcDateString}`);
+
+        // Check if the specific date is in the closed dates set
+        console.log(`DEBUG: Looking for closure on date: ${dateString}`);
+        console.log(
+          `DEBUG: Checking if closedDates has UTC:`,
+          closedDates.has(utcDateString)
+        );
+        console.log(`DEBUG: All closed dates in set:`, Array.from(closedDates));
+
+        // Use UTC format for comparison
+        const isDateClosed = closedDates.has(utcDateString);
+
+        if (isDateClosed) {
+          console.log(
+            `DEBUG: Found closure for date ${dateString}/${utcDateString} - ALL SERVICES UNAVAILABLE`
+          );
+        } else {
+          console.log(
+            `DEBUG: No closure found for ${dateString}/${utcDateString} - services may be available`
+          );
+        }
+
+        console.log(`DEBUG: Date ${dateString} closed status: ${isDateClosed}`);
+
+        // If date is closed: all services unavailable
+        // If date is not closed: check actual availability data or use defaults
+        let defaultServices;
+
+        console.log(
+          `DEBUG: Determining services for ${dateString}, isClosureMode: ${isClosureMode}, isDateClosed: ${isDateClosed}`
+        );
+
+        if (isDateClosed) {
+          // Date is closed - ALL SERVICES UNAVAILABLE regardless of mode
+          console.log(`DEBUG: Date is closed - forcing all services unavailable`);
+          defaultServices = serviceCenterServices.map((service) => ({
+            serviceId: service.serviceId,
+            serviceName: service.serviceName || "Unknown Service",
+            isAvailable: false, // Force unavailable for closed dates
+          }));
+        } else if (isClosureMode) {
+          // In closure mode and date is not closed, just show based on closure status
+          console.log(`DEBUG: Using closure mode logic for ${dateString}`);
+          defaultServices = serviceCenterServices.map((service) => ({
+            serviceId: service.serviceId,
+            serviceName: service.serviceName || "Unknown Service",
+            isAvailable: true, // Available if not closed
+          }));
+          console.log(
+            `DEBUG: Closure mode result - all services available: true`
+          );
+        } else {
+          // In service mode, check if we have actual availability data for this date
+          const dateAvailabilityMap =
+            availabilityMap.get(utcDateString);
+
+          if (dateAvailabilityMap) {
+            // Use actual availability data from backend
+            console.log(
+              `DEBUG: Using actual availability data for ${utcDateString}`
+            );
+            defaultServices = serviceCenterServices.map((service) => {
+              const actualAvailability = dateAvailabilityMap.get(
+                service.serviceId
+              );
+              return {
+                serviceId: service.serviceId,
+                serviceName: service.serviceName || "Unknown Service",
+                isAvailable:
+                  actualAvailability !== undefined
+                    ? actualAvailability
+                    : true, // Default to available if no data
+              };
+            });
+          } else {
+            // No actual data, check if we have modified availabilities for this date
+            const dateKey = date.toDateString();
+            const modifiedServices = modifiedServiceAvailabilities[dateKey];
+
+            if (modifiedServices) {
+              // Use modified availabilities
+              defaultServices = serviceCenterServices.map((service) => ({
+                serviceId: service.serviceId,
+                serviceName: service.serviceName || "Unknown Service",
+                isAvailable:
+                  modifiedServices[service.serviceId] ?? true, // Default to available
+              }));
+            } else {
+              // No modifications, use default (available)
+              defaultServices = serviceCenterServices.map((service) => ({
+                serviceId: service.serviceId,
+                serviceName: service.serviceName || "Unknown Service",
+                isAvailable: true, // Default to available
+              }));
+            }
+          }
+        }
+
+        const dateAvailability: DateServiceAvailability = {
+          date: localDate,
+          services: defaultServices,
+        };
+
+        console.log(`DEBUG: Final availability for ${dateString}:`, {
+          date: dateString,
+          isClosed: isDateClosed,
+          servicesCount: defaultServices.length,
+          availableCount: defaultServices.filter((s) => s.isAvailable).length,
+          unavailableCount: defaultServices.filter((s) => !s.isAvailable)
+            .length,
+          firstService: defaultServices[0]
+            ? {
+                name: defaultServices[0].serviceName,
+                available: defaultServices[0].isAvailable,
+              }
+            : null,
+        });
+
+        defaultAvailabilities.push(dateAvailability);
+      }
+
+      console.log(
+        "DEBUG: Final availabilities:",
+        defaultAvailabilities.map((da) => ({
+          date:
+            da.date.getFullYear() +
+            "-" +
+            String(da.date.getMonth() + 1).padStart(2, "0") +
+            "-" +
+            String(da.date.getDate()).padStart(2, "0"),
+          closed: !da.services[0]?.isAvailable,
+          services: da.services.map((s) => ({
+            id: s.serviceId,
+            available: s.isAvailable,
+          })),
+        }))
+      );
+
+      setDateServiceAvailabilities(defaultAvailabilities);
+    } catch (error) {
+      console.error("Error setting up default availabilities:", error);
+      setDateServiceAvailabilities([]);
+    } finally {
+      setIsLoadingAvailabilities(false);
+    }
   };
+
+  // Function to handle mode changes from calendar component
+  const handleModeChange = (isClosureModeParam: boolean) => {
+    setIsClosureMode(isClosureModeParam);
+    console.log(
+      "Mode changed to:",
+      isClosureModeParam ? "closure mode" : "service mode"
+    );
+
+    // Clear modified state when switching to closure mode
+    if (isClosureModeParam) {
+      setModifiedServiceAvailabilities({});
+      console.log("Cleared modified service availabilities for closure mode");
+    }
+
+    // Always refresh the preview when mode changes to ensure consistency
+    if (selectedDatesForPreview.length > 0) {
+      console.log("Refreshing preview after mode change");
+      fetchDateServiceAvailabilities(selectedDatesForPreview);
+    }
+  };
+
+  // Function to handle service availability changes from calendar component
+  const handleServiceAvailabilityChange = (serviceAvailabilities: {
+    [serviceId: number]: boolean;
+  }) => {
+    console.log("Current mode - isClosureMode:", isClosureMode);
+    console.log("Selected dates for preview:", selectedDatesForPreview.length);
+
+    // Only apply changes if we're not in closure mode
+    if (isClosureMode) {
+      console.log(
+        "Ignoring service availability change - currently in closure mode"
+      );
+      return;
+    }
+
+    console.log("Service availability change received:", serviceAvailabilities);
+
+    const updatedAvailabilities = { ...modifiedServiceAvailabilities };
+
+    // Apply the same service availability to all selected dates
+    // This ensures consistency across selected dates
+    selectedDatesForPreview.forEach((date) => {
+      const dateKey = date.toDateString();
+      updatedAvailabilities[dateKey] = { ...serviceAvailabilities };
+    });
+
+    setModifiedServiceAvailabilities(updatedAvailabilities);
+    console.log(
+      "Updated modified service availabilities:",
+      updatedAvailabilities
+    );
+
+    // Update the preview display
+    const updatedPreview = dateServiceAvailabilities.map((dateAvailability) => {
+      const dateKey = dateAvailability.date.toDateString();
+      const modifiedServices = updatedAvailabilities[dateKey];
+
+      if (modifiedServices) {
+        return {
+          ...dateAvailability,
+          services: dateAvailability.services.map((service) => ({
+            ...service,
+            isAvailable:
+              modifiedServices[service.serviceId] ?? service.isAvailable,
+          })),
+        };
+      }
+      return dateAvailability;
+    });
+
+    setDateServiceAvailabilities(updatedPreview);
+    console.log("Updated preview with modified availabilities");
+  };
+
+  // Function to calculate week number from date
+  const getWeekNumber = (date: Date): number => {
+    const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+    const pastDaysOfYear =
+      (date.getTime() - firstDayOfYear.getTime()) / 86400000;
+    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+  };
+
+  // Get current week number from current date
+  const currentWeek = getWeekNumber(new Date());
 
   // Get current user role and determine service center access
   const getUserRole = () => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("userRole");
-    }
-    return null;
+    const user = getAuthUser();
+    return user?.userRole || null;
   };
 
   // Load service centers and determine which one to use
@@ -89,10 +449,6 @@ const ManageServices = () => {
       try {
         const centers = await fetchServiceCenters();
         setServiceCenters(centers);
-
-        // Generate all weeks
-        const weeks = generateAllWeeks();
-        setAllWeeks(weeks);
 
         // If queryServiceCenterId is provided, use that specific service center
         if (queryServiceCenterId) {
@@ -156,7 +512,11 @@ const ManageServices = () => {
     loadServiceCenterServices();
   }, [currentServiceCenterId]);
 
-  // Load closures for the current service center and week
+  // Clear date service availabilities when service center changes
+  useEffect(() => {
+    setDateServiceAvailabilities([]);
+    setIsLoadingAvailabilities(false);
+  }, [currentServiceCenterId]);
   useEffect(() => {
     const loadClosures = async () => {
       if (currentServiceCenterId === null) return;
@@ -164,23 +524,53 @@ const ManageServices = () => {
       try {
         setIsLoading(true);
         console.log(
-          `Loading closures for service center ${currentServiceCenterId}, week ${currentWeek}`
+          `Loading closures for service center ${currentServiceCenterId}`
         );
 
-        const closuresData = await getClosures(
-          currentServiceCenterId,
-          currentWeek
-        );
+        // Load closures for the current week (7 days)
+        const allClosures: ClosureSchedule[] = [];
+        const today = new Date();
 
-        console.log("Closures loaded from database:", closuresData);
+        // Load closures for the current week (today + 6 days)
+        for (let i = 0; i < 7; i++) {
+          const date = new Date(today);
+          date.setDate(today.getDate() + i);
 
-        // Transform closures to shift cards
-        const transformedShiftCards = closuresData.map((closure) => ({
-          day: closure.day,
-          status: "Closed",
-        }));
+          try {
+            const dayClosures = await getClosures(currentServiceCenterId, date);
+            allClosures.push(...dayClosures);
+          } catch (error) {
+            console.warn(
+              `Failed to load closures for ${date.toDateString()}:`,
+              error
+            );
+          }
+        }
+
+        console.log("Closures loaded from database:", allClosures);
+
+        // Transform closures to shift cards with specific date information
+        const transformedShiftCards = allClosures
+          .filter(
+            (closure) =>
+              closure.closureDate && typeof closure.closureDate === "string"
+          )
+          .map((closure) => {
+            // Parse the closure date to get day of week
+            const closureDate = new Date(closure.closureDate);
+            const dayOfWeek = closureDate.toLocaleDateString("en-US", {
+              weekday: "short",
+            });
+            const dateString = closureDate.toISOString().split("T")[0]; // Use UTC format
+
+            return {
+              day: dayOfWeek,
+              status: "Closed",
+              specificDate: dateString,
+            };
+          });
+
         setShiftCards(transformedShiftCards);
-
         console.log("Shift cards updated:", transformedShiftCards);
       } catch (error) {
         console.error("Error loading closures:", error);
@@ -191,7 +581,7 @@ const ManageServices = () => {
     };
 
     loadClosures();
-  }, [currentServiceCenterId, currentWeek]);
+  }, [currentServiceCenterId]);
 
   const handleServiceCenterChange = (serviceCenterId: number) => {
     console.log("Changing service center to:", serviceCenterId);
@@ -208,130 +598,271 @@ const ManageServices = () => {
     setShiftCards([]);
   };
 
-  const handleWeekChange = (newWeek: number) => {
-    console.log("Changing week to:", newWeek);
-    setCurrentWeek(newWeek);
-    // Clear existing closures when switching weeks - they will be reloaded by useEffect
-    setShiftCards([]);
-  };
-
-  const handleSave = async (week: string, days: string[]) => {
-    if (days.length === 0) {
-      alert("Please select at least one day to schedule closure.");
-      return;
-    }
-
-    if (currentServiceCenterId === null) {
-      alert("Please select a service center first.");
-      return;
-    }
-
-    try {
-      // Extract week number from the week string (e.g., "Week 12 (Jan 1-7)" -> 12)
-      const weekMatch = week.match(/Week (\d+)/);
-      const weekNumber = weekMatch ? parseInt(weekMatch[1]) : currentWeek;
-
-      console.log(
-        `Adding closures for service center ${currentServiceCenterId}, week ${weekNumber}, days:`,
-        days
-      );
-
-      // Add closures for each selected day
-      for (const day of days) {
-        try {
-          await addClosureSchedule({
-            serviceCenterId: currentServiceCenterId,
-            weekNumber: weekNumber,
-            day: day,
-          });
-        } catch (error) {
-          console.error(`Error adding closure for ${day}:`, error);
-          // Continue with other days even if one fails
-        }
-      }
-
-      // Reload closures from database to ensure UI reflects actual data
-      try {
-        const updatedClosures = await getClosures(
-          currentServiceCenterId,
-          weekNumber
-        );
-        const transformedShiftCards = updatedClosures.map((closure) => ({
-          day: closure.day,
-          status: "Closed",
-        }));
-        setShiftCards(transformedShiftCards);
-        console.log("Closures reloaded from database:", updatedClosures);
-      } catch (error) {
-        console.error("Error reloading closures:", error);
-        // Fallback to manual update if reload fails
-        const newShiftCards = days.map((day) => ({
-          day: `${day} (Week ${weekNumber})`,
-          status: "Closed",
-        }));
-        setShiftCards((prev) => [...prev, ...newShiftCards]);
-      }
-
-      console.log("Closures added successfully");
-      alert(
-        `Successfully scheduled ${days.length} closure(s) for ${selectedServiceCenter?.serviceCenterName}`
-      );
-    } catch (error) {
-      console.error("Error saving closures:", error);
-      alert("Failed to save closures. Please try again.");
-    }
-  };
-
-  const handleServiceAvailabilityToggle = async (
-    serviceId: string,
-    currentAvailability: boolean
+  const handleSave = async (
+    dates: Date[],
+    serviceData: ServiceAvailabilityData[]
   ) => {
     if (currentServiceCenterId === null) {
       alert("Please select a service center first.");
       return;
     }
 
+    if (dates.length === 0) {
+      alert("Please select at least one date.");
+      return;
+    }
+
     try {
-      const newAvailability = !currentAvailability;
+      if (serviceData.length > 0) {
+        // Handle service-specific availability
+        console.log(
+          `Processing service availability for service center ${currentServiceCenterId}, dates:`,
+          dates
+        );
 
-      console.log(
-        `Toggling service ${serviceId} availability for service center ${currentServiceCenterId}`
-      );
-      console.log(`Making PATCH request to toggle availability`);
+        for (const date of dates) {
+          for (const service of serviceData) {
+            try {
+              // Create date at noon local time to avoid timezone conversion issues
+              const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
 
-      // Update the backend and get the updated list
-      const updatedServices = await toggleServiceCenterServiceAvailability(
-        currentServiceCenterId.toString(),
-        serviceId, // This is actually the serviceCenterServiceId from the table
-        newAvailability
-      );
-      setServiceCenterServices(updatedServices);
+              // Set availability for each service on the selected date
+              await toggleServiceAvailabilityForDay(
+                currentServiceCenterId,
+                service.id,
+                localDate,
+                service.isAvailable
+              );
+            } catch (error) {
+              console.error(
+                `Error updating service ${
+                  service.id
+                } availability for ${date.toDateString()}:`,
+                error
+              );
+              // Continue with other services/dates
+            }
+          }
+        }
 
-      console.log("Service availability updated successfully");
-      alert(
-        `Service availability ${
-          newAvailability ? "enabled" : "disabled"
-        } successfully`
-      );
-    } catch (error: any) {
-      console.error("Error updating service availability:", error);
-      console.error(
-        "Full error details:",
-        error.response?.data || error.message
-      );
-      alert("Failed to update service availability. Please try again.");
+        // Refresh service data
+        const services = await fetchServiceCenterServices(
+          currentServiceCenterId.toString()
+        );
+        setServiceCenterServices(services);
+
+        const availableCount = serviceData.filter((s) => s.isAvailable).length;
+        const unavailableCount = serviceData.filter(
+          (s) => !s.isAvailable
+        ).length;
+
+        alert(
+          `Successfully updated availability: ${availableCount} available, ${unavailableCount} unavailable on ${dates.length} date(s)`
+        );
+
+        // Refresh the date service availabilities display
+        console.log("Refreshing preview after save");
+        await fetchDateServiceAvailabilities(dates);
+
+        // Clear the modified state after saving
+        setModifiedServiceAvailabilities({});
+        setSelectedDatesForPreview([]);
+      } else {
+        // Handle full service center closures (existing logic)
+        console.log(
+          `Processing full closure for service center ${currentServiceCenterId}, dates:`,
+          dates
+        );
+
+        let totalClosuresCreated = 0;
+        let failedServiceUpdates = 0;
+        const failedDates: string[] = [];
+
+        for (const date of dates) {
+          try {
+            // Create date at noon local time to avoid timezone conversion issues
+            const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+
+            // Format date as YYYY-MM-DD in UTC
+            const utcDateString = localDate.toISOString().split("T")[0];
+
+            console.log(`DEBUG: Adding closure for date ${utcDateString}:`, {
+              serviceCenterId: currentServiceCenterId,
+              closureDate: utcDateString,
+            });
+
+            // Create the closure first
+            await addClosureSchedule({
+              serviceCenterId: currentServiceCenterId,
+              closureDate: utcDateString,
+            });
+            totalClosuresCreated++;
+
+            // Automatically make all services unavailable for this closure date
+            console.log(
+              `DEBUG: Making all services unavailable for closure date ${utcDateString}`
+            );
+
+            let serviceUpdateSuccess = true;
+            try {
+              // Get all services for this service center
+              const services = await fetchServiceCenterServices(
+                currentServiceCenterId.toString()
+              );
+
+              // Create unavailable entries for all services on this closure date
+              let successfulUpdates = 0;
+              for (const service of services) {
+                try {
+                  await toggleServiceAvailabilityForDay(
+                    currentServiceCenterId,
+                    service.serviceId,
+                    localDate,
+                    false // Make unavailable
+                  );
+                  console.log(
+                    `DEBUG: Made service ${service.serviceName} (${service.serviceId}) unavailable for ${utcDateString}`
+                  );
+                  successfulUpdates++;
+                } catch (serviceError) {
+                  console.warn(
+                    `Failed to make service ${service.serviceName} unavailable for ${utcDateString}:`,
+                    serviceError
+                  );
+                  failedServiceUpdates++;
+                  serviceUpdateSuccess = false;
+                  // Continue with other services even if one fails
+                }
+              }
+
+              console.log(
+                `DEBUG: Service updates for ${utcDateString}: ${successfulUpdates}/${services.length} successful`
+              );
+
+              if (!serviceUpdateSuccess) {
+                failedDates.push(utcDateString);
+                console.warn(
+                  `DEBUG: Some service updates failed for date ${utcDateString}`
+                );
+              }
+            } catch (servicesError) {
+              console.warn(
+                `Failed to fetch services for automatic unavailability on ${utcDateString}:`,
+                servicesError
+              );
+              failedDates.push(utcDateString);
+              serviceUpdateSuccess = false;
+            }
+          } catch (error) {
+            console.error(
+              `Error adding closure for ${date.toDateString()}:`,
+              error
+            );
+            failedDates.push(
+              date.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              })
+            );
+            // Continue with other dates even if one fails
+          }
+        }
+
+        // Reload closures from database
+        try {
+          // Load closures for the current week (7 days)
+          const allUpdatedClosures: ClosureSchedule[] = [];
+          const today = new Date();
+
+          // Load closures for the current week (today + 6 days)
+          for (let i = 0; i < 7; i++) {
+            const date = new Date(today);
+            date.setDate(today.getDate() + i);
+
+            try {
+              const dayClosures = await getClosures(
+                currentServiceCenterId,
+                date
+              );
+              allUpdatedClosures.push(...dayClosures);
+            } catch (error) {
+              console.warn(
+                `Failed to load closures for ${date.toDateString()}:`,
+                error
+              );
+            }
+          }
+
+          const transformedShiftCards = allUpdatedClosures
+            .filter(
+              (closure) =>
+                closure.closureDate && typeof closure.closureDate === "string"
+            )
+            .map((closure) => {
+              // Parse the closure date to get day of week
+              const closureDate = new Date(closure.closureDate);
+              const dayOfWeek = closureDate.toLocaleDateString("en-US", {
+                weekday: "short",
+              });
+              // Format date as YYYY-MM-DD in UTC
+              const utcDateString = closureDate.toISOString().split("T")[0];
+
+              return {
+                day: dayOfWeek,
+                status: "Closed",
+                specificDate: utcDateString,
+              };
+            });
+          setShiftCards(transformedShiftCards);
+        } catch (error) {
+          console.error("Error reloading closures:", error);
+        }
+
+        // Provide appropriate user feedback based on success/failure
+        const dateStrings = dates.map((date) =>
+          date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+        );
+
+        if (failedServiceUpdates === 0 && failedDates.length === 0) {
+          // Complete success
+          alert(
+            `Successfully scheduled closure for ${dateStrings.join(", ")} in ${
+              selectedServiceCenter?.serviceCenterName
+            }. All services have been marked as unavailable.`
+          );
+        } else if (totalClosuresCreated > 0) {
+          // Partial success - closures created but some service updates failed
+          const successMessage = `Closures created for ${dateStrings.join(
+            ", "
+          )} in ${
+            selectedServiceCenter?.serviceCenterName
+          }, but ${failedServiceUpdates} service availability updates failed.`;
+
+          if (failedDates.length > 0) {
+            alert(
+              `${successMessage}\n\nWarning: Service availability may not be properly updated for dates: ${failedDates.join(
+                ", "
+              )}. Please check the service availability preview and manually update if needed.`
+            );
+          } else {
+            alert(
+              `${successMessage}\n\nWarning: Some services may still show as available. Please check the service availability preview and manually update if needed.`
+            );
+          }
+        } else {
+          // Complete failure
+          alert(
+            `Failed to create closures for ${dateStrings.join(
+              ", "
+            )}. Please try again.`
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error saving:", error);
+      alert("Failed to save changes. Please try again.");
     }
   };
-
-  // Transform service center services to table data
-  const tableData = serviceCenterServices.map((service) => ({
-    id: service.serviceCenterServiceId.toString(),
-    label: service.serviceName || "Unknown Service",
-    checked: service.isAvailable,
-    price: service.customPrice || service.serviceBasePrice || 0,
-    category: service.category || "General",
-    description: service.serviceDescription || "No description available",
-  }));
 
   if (isLoading) {
     return (
@@ -441,10 +972,10 @@ const ManageServices = () => {
         </p>
       </div> */}
 
-      {/* Service Center and Week Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      {/* Service Center Selection */}
+      <div className="grid grid-cols-1 gap-4 mb-4">
         {/* Service Center Selection (for super admin) */}
-        {getUserRole() === "super-admin" && serviceCenters.length > 0 && (
+        {getUserRole() === "SuperAdmin" && serviceCenters.length > 0 && (
           <div>
             <label className="block text-sm font-medium text-neutral-600 mb-2">
               Select Service Center
@@ -467,24 +998,6 @@ const ManageServices = () => {
             </select>
           </div>
         )}
-
-        {/* Week Selection */}
-        <div>
-          <label className="block text-sm font-medium text-neutral-600 mb-2">
-            Select Week to View Closures
-          </label>
-          <select
-            value={currentWeek}
-            onChange={(e) => handleWeekChange(parseInt(e.target.value))}
-            className="w-full p-2 border border-neutral-150 rounded-md text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-200"
-          >
-            {allWeeks.map((week, index) => (
-              <option key={index + 1} value={index + 1}>
-                {week}
-              </option>
-            ))}
-          </select>
-        </div>
       </div>
 
       {/* Current Service Center Info */}
@@ -532,7 +1045,11 @@ const ManageServices = () => {
             </div>
             <div>
               <span className="font-medium">Viewing Week:</span>{" "}
-              {allWeeks[currentWeek - 1] || `Week ${currentWeek}`}
+              {`Week ${currentWeek} (${new Date().toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })})`}
             </div>
           </div>
         </div>
@@ -544,19 +1061,25 @@ const ManageServices = () => {
         <div className="flex-1">
           <ScheduleShopClosures
             onSave={handleSave}
-            allWeeks={allWeeks}
-            currentWeek={currentWeek}
+            onDatesSelected={fetchDateServiceAvailabilities}
+            onServiceAvailabilityChange={handleServiceAvailabilityChange}
+            onModeChange={handleModeChange}
+            availableServices={serviceCenterServices.map((service) => ({
+              id: service.serviceId,
+              name: service.serviceName || "Unknown Service",
+              selected: false,
+              isAvailable: service.isAvailable,
+            }))}
           />
         </div>
 
         {/* Closure Schedule Section (Right) */}
         <div className="space-y-2">
           <div className="text-lg font-semibold text-neutral-600">
-            Scheduled Closures for{" "}
-            {allWeeks[currentWeek - 1] || `Week ${currentWeek}`}
+            Scheduled Closures for Current Week
           </div>
           <div className="text-sm text-neutral-500 mb-3">
-            These closures will be visible to customers
+            Individual dates closed this week
           </div>
           <div
             className="p-4 rounded-lg space-y-2"
@@ -566,7 +1089,12 @@ const ManageServices = () => {
           >
             {shiftCards.length > 0 ? (
               shiftCards.map((shift, index) => (
-                <ShiftCard key={index} day={shift.day} status={shift.status} />
+                <ShiftCard
+                  key={index}
+                  day={shift.day}
+                  status={shift.status}
+                  specificDate={shift.specificDate}
+                />
               ))
             ) : (
               <div className="text-center py-8">
@@ -589,13 +1117,118 @@ const ManageServices = () => {
                   No closures scheduled for this week
                 </p>
                 <p className="text-xs text-neutral-400 mt-1">
-                  Service center is open for all days
+                  Select dates in the calendar and click &quot;Save&quot; to
+                  close specific dates
                 </p>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Service Availability Table */}
+      {(dateServiceAvailabilities.length > 0 || isLoadingAvailabilities) && (
+        <div className="mt-8">
+          <h2 className="text-lg font-semibold text-neutral-600 mb-4">
+            Service Availability Data
+          </h2>
+          <p className="text-sm text-neutral-500 mb-6">
+            This table shows the service availability records from the database for the selected dates.
+          </p>
+          {isLoadingAvailabilities ? (
+            <div className="flex justify-center items-center h-32">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
+              <span className="ml-2 text-sm text-neutral-600">
+                Loading availability data...
+              </span>
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg border border-neutral-200 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-neutral-200">
+                  <thead className="bg-neutral-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                        Date
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                        Service ID
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                        Service Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                        Service Center ID
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-neutral-200">
+                    {dateServiceAvailabilities.flatMap((dateAvailability) =>
+                      dateAvailability.services.map((service) => (
+                        <tr key={`${dateAvailability.date.toISOString()}-${service.serviceId}`} className="hover:bg-neutral-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                            {dateAvailability.date.toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                            {service.serviceId}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                            {service.serviceName || "Unknown Service"}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              service.isAvailable
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}>
+                              {service.isAvailable ? "Available" : "Unavailable"}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                            {currentServiceCenterId}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Summary Footer */}
+              <div className="bg-neutral-50 px-6 py-4 border-t border-neutral-200">
+                <div className="flex justify-between items-center text-sm text-neutral-600">
+                  <span>
+                    Total Records: {dateServiceAvailabilities.reduce((total, dateAvailability) =>
+                      total + dateAvailability.services.length, 0
+                    )}
+                  </span>
+                  <div className="flex space-x-4">
+                    <span className="flex items-center">
+                      <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                      Available: {dateServiceAvailabilities.reduce((total, dateAvailability) =>
+                        total + dateAvailability.services.filter(s => s.isAvailable).length, 0
+                      )}
+                    </span>
+                    <span className="flex items-center">
+                      <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                      Unavailable: {dateServiceAvailabilities.reduce((total, dateAvailability) =>
+                        total + dateAvailability.services.filter(s => !s.isAvailable).length, 0
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Customer Impact Notice */}
       {/* <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
@@ -637,44 +1270,7 @@ const ManageServices = () => {
       </div> */}
 
       {/* Services Table */}
-      <div className="mt-8">
-        <h2 className="text-lg font-semibold text-neutral-600 mb-4">
-          Service Availability Management for{" "}
-          {selectedServiceCenter?.serviceCenterName}
-        </h2>
-        
-        {serviceCenterServices.length > 0 ? (
-          <ServiceAvailabilityTable
-            data={tableData}
-            onToggle={handleServiceAvailabilityToggle}
-          />
-        ) : (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
-            <div className="text-gray-400 mb-2">
-              <svg
-                className="w-12 h-12 mx-auto"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                />
-              </svg>
-            </div>
-            <p className="text-sm text-gray-500">
-              No services configured for this service center
-            </p>
-            <p className="text-xs text-gray-400 mt-1">
-              Services will appear here once they are added to the service
-              center
-            </p>
-          </div>
-        )}
-      </div>
+      {/* Removed - Service availability is now managed through the calendar */}
     </div>
   );
 };

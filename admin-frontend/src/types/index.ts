@@ -2,8 +2,7 @@ export interface ServiceAvailabilityDTO {
   id?: number;
   serviceCenterId: number;
   serviceId: number;
-  weekNumber: number;
-  day: string;
+  date: string; // ISO date string
   isAvailable: boolean;
 }
 
@@ -11,8 +10,7 @@ export interface UpdateServiceAvailabilityDTO {
   id?: number;
   serviceCenterId: number;
   serviceId: number;
-  weekNumber: number;
-  day: string;
+  date: string; // ISO date string
   isAvailable: boolean;
 }
 
@@ -235,6 +233,7 @@ export interface User {
 export interface ShiftCard {
   day: string;
   status: string;
+  specificDate?: string; // Optional specific date in YYYY-MM-DD format
 }
 
 export interface Service {
@@ -303,20 +302,17 @@ export interface DashboardStats {
 export interface ClosureSchedule {
   id: number;
   serviceCenterId: number;
-  weekNumber: number;
-  day: string;
+  closureDate: string; // ISO date string
 }
 
 export interface CreateClosureScheduleDTO {
   serviceCenterId: number;
-  weekNumber: number;
-  day: string;
+  closureDate: string; // ISO date string
 }
 
 export interface UpdateClosureScheduleDTO {
   serviceCenterId: number;
-  weekNumber: number;
-  day: string;
+  closureDate: string; // ISO date string
 }
 
 export {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import StatusCard from "@/components/atoms/status-cards/status-card";
 import Table from "@/components/organism/table/table";
@@ -10,6 +10,7 @@ import {
   fetchServiceCenterServices,
   fetchClients,
   fetchVehicles,
+  getServicesWithAvailability,
 } from "@/utils/api";
 import { ServiceCenter } from "@/types";
 // import Sidebar from "@/components/molecules/side-bar/side-bar";
@@ -23,7 +24,6 @@ const ServiceCenterDashboard = () => {
   // Authorization check for different user roles
   useEffect(() => {
     const userRole = localStorage.getItem("userRole");
-    const userRoleId = localStorage.getItem("userRoleId");
     const userStationId = localStorage.getItem("station_id");
 
     // Super Admin and Admin can access any service center
@@ -33,15 +33,23 @@ const ServiceCenterDashboard = () => {
     }
 
     // Service Center Admin, Cashier, and Data Operator can only access their assigned service center
-    if (userRole === "ServiceCenterAdmin" || userRole === "Cashier" || userRole === "DataOperator") {
+    if (
+      userRole === "ServiceCenterAdmin" ||
+      userRole === "Cashier" ||
+      userRole === "DataOperator"
+    ) {
       if (userStationId && userStationId !== serviceCenterId) {
-        console.warn("Unauthorized access: User trying to access different service center");
+        console.warn(
+          "Unauthorized access: User trying to access different service center"
+        );
         router.push(`/service-center-dashboard/${userStationId}`);
         return;
       }
     } else {
       // If not authorized, redirect to login
-      console.warn("Unauthorized access: User is not authorized to access service centers");
+      console.warn(
+        "Unauthorized access: User is not authorized to access service centers"
+      );
       router.push("/login");
       return;
     }
@@ -60,7 +68,7 @@ const ServiceCenterDashboard = () => {
   const [availableServicesCount, setAvailableServicesCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!serviceCenterId) return;
 
     setIsLoading(true);
@@ -69,8 +77,14 @@ const ServiceCenterDashboard = () => {
       const serviceCenterData = await fetchServiceCenterById(serviceCenterId);
       setServiceCenter(serviceCenterData);
 
-      // Fetch services for this service center
-      const servicesData = await fetchServiceCenterServices(serviceCenterId);
+      // Fetch all services for this service center
+      await fetchServiceCenterServices(serviceCenterId);
+
+      // Get services with their current availability status (considering day-specific overrides)
+      const servicesWithAvailability = await getServicesWithAvailability(
+        parseInt(serviceCenterId),
+        new Date()
+      );
 
       // Fetch all clients and vehicles to calculate counts
       const [clientsData, vehiclesData] = await Promise.all([
@@ -91,15 +105,15 @@ const ServiceCenterDashboard = () => {
         serviceCenters: serviceCenterCount,
       });
 
-      // Filter services to only show available ones
-      const availableServices = servicesData.filter(
-        (service) => service.isAvailable
+      // Filter services to only show currently available ones (considering day-specific overrides)
+      const availableServices = servicesWithAvailability.filter(
+        (item) => item.isAvailable
       );
 
-      // Transform services data to table format (only available services)
-      const servicesTableData = availableServices.map((service, index) => [
-        service.serviceName || "Unknown Service",
-        `${service.customPrice || 0} LKR`,
+      // Transform services data to table format (only currently available services)
+      const servicesTableData = availableServices.map((item, index) => [
+        item.service.serviceName || "Unknown Service",
+        `${item.service.customPrice || 0} LKR`,
         "Available", // Since we're only showing available services
         serviceCenterData?.serviceCenterName || "Unknown Center",
         (index + 1).toString(),
@@ -126,11 +140,11 @@ const ServiceCenterDashboard = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [serviceCenterId]);
 
   useEffect(() => {
     fetchData();
-  }, [serviceCenterId]);
+  }, [serviceCenterId, fetchData]);
 
   // Refresh data when the page becomes visible (e.g., when returning from closure schedule)
   useEffect(() => {
@@ -143,7 +157,7 @@ const ServiceCenterDashboard = () => {
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () =>
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [serviceCenterId]);
+  }, [serviceCenterId, fetchData]);
 
   const tableHeaders = [
     { title: "Service Name", sortable: false },

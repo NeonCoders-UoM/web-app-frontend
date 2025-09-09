@@ -6,7 +6,12 @@ import SidebarButton from "@/components/atoms/sidebar-button/sidebar-button";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 interface SidebarProps {
-  role: "super-admin" | "admin" | "service-center-admin" | "cashier" | "data-operator";
+  role:
+    | "super-admin"
+    | "admin"
+    | "service-center-admin"
+    | "cashier"
+    | "data-operator";
   serviceCenters?: { id: string; name: string }[];
   logo?: string;
   stationId?: string;
@@ -46,7 +51,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           label: "Dashboard",
           route: `/service-center-dashboard/${currentStationId}?stationId=${currentStationId}`,
         },
-        
+
         {
           label: "Appointments",
           route: `/appointment?stationId=${currentStationId}`,
@@ -71,8 +76,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           label: "Closure Schedule",
           route: `/closure-schedule?stationId=${currentStationId}`,
         },
-        
-        { label: "Back to Admin", route: "/admin-dashboard" },
+
+        { label: "Back to Home", route: "/super-admin" },
       ];
     }
 
@@ -93,14 +98,15 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const getAdminSidebarOptions = () => {
-    return [
-      { label: "Users", route: "/user-managment" },
-    ];
+    return [{ label: "Users", route: "/user-managment" }];
   };
 
   const getServiceCenterAdminOptions = () => {
     return [
-      { label: "Dashboard", route: `/service-center-dashboard/${currentStationId}` },
+      {
+        label: "Dashboard",
+        route: `/service-center-dashboard/${currentStationId}`,
+      },
       { label: "Clients", route: "/client" },
       { label: "Vehicles", route: "/vehicle" },
       { label: "Service Status", route: "/service-status" },
@@ -112,7 +118,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const getCashierOptions = () => {
     return [
-      { label: "Dashboard", route: `/service-center-dashboard/${currentStationId}` },
+      {
+        label: "Dashboard",
+        route: `/service-center-dashboard/${currentStationId}`,
+      },
       { label: "Clients", route: "/client" },
       { label: "Vehicles", route: "/vehicle" },
       { label: "Service Status", route: "/service-status" },
@@ -123,7 +132,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const getDataOperatorOptions = () => {
     return [
-      { label: "Dashboard", route: `/service-center-dashboard/${currentStationId}` },
+      {
+        label: "Dashboard",
+        route: `/service-center-dashboard/${currentStationId}`,
+      },
       { label: "Clients", route: "/client" },
       { label: "Vehicles", route: "/vehicle" },
       { label: "Service Status", route: "/service-status" },
@@ -135,9 +147,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const sidebarOptions: Record<string, { label: string; route: string }[]> = {
     "super-admin": getSidebarOptions(),
-    "admin": getAdminSidebarOptions(),
+    admin: getAdminSidebarOptions(),
     "service-center-admin": getServiceCenterAdminOptions(),
-    "cashier": getCashierOptions(),
+    cashier: getCashierOptions(),
     "data-operator": getDataOperatorOptions(),
   };
 
@@ -153,23 +165,26 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div className="w-72 min-h-screen flex flex-col bg-[#010134] bg-gradient-to-b from-[#010134] to-[#010134] backdrop-blur-lg shadow-[4px_0_30px_rgba(0,0,128,0.5)] fixed left-0 top-0 z-50 sidebar-scrollbar overflow-y-auto border-r border-[#0000A0]/30">
         {/* Logo Section */}
         <div className="px-6 py-6 flex items-center justify-center border-b border-white/10 relative">
-          <Image
-            src="/images/logo3.png"
-            alt="Logo"
-            width={120}
-            height={40}
-          />
+          <Image src="/images/logo3.png" alt="Logo" width={120} height={40} />
         </div>
         <div className="flex-1 px-4 py-4">
           <div className="space-y-1">
             <button
-              className={`w-full text-left px-4 py-3 rounded-lg font-medium text-white transition-colors ${selectedTab === "dashboard" ? "bg-blue-700/80" : "hover:bg-blue-900/40"}`}
+              className={`w-full text-left px-4 py-3 rounded-lg font-medium text-white transition-colors ${
+                selectedTab === "dashboard"
+                  ? "bg-blue-700/80"
+                  : "hover:bg-blue-900/40"
+              }`}
               onClick={() => setSelectedTab("dashboard")}
             >
               Dashboard
             </button>
             <button
-              className={`w-full text-left px-4 py-3 rounded-lg font-medium text-white transition-colors ${selectedTab === "users" ? "bg-blue-700/80" : "hover:bg-blue-900/40"}`}
+              className={`w-full text-left px-4 py-3 rounded-lg font-medium text-white transition-colors ${
+                selectedTab === "users"
+                  ? "bg-blue-700/80"
+                  : "hover:bg-blue-900/40"
+              }`}
               onClick={() => setSelectedTab("users")}
             >
               Users
@@ -190,12 +205,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     <div className="w-72 min-h-screen flex flex-col bg-[#010134] bg-gradient-to-b from-[#010134] to-[#010134] backdrop-blur-lg shadow-[4px_0_30px_rgba(0,0,128,0.5)] fixed left-0 top-0 z-50 sidebar-scrollbar overflow-y-auto border-r border-[#0000A0]/30">
       {/* Logo Section */}
       <div className="px-6 py-6 flex items-center justify-center border-b border-white/10 relative">
-        <Image
-          src="/images/logo3.png"
-          alt="Logo"
-          width={120}
-          height={40}
-        />
+        <Image src="/images/logo3.png" alt="Logo" width={120} height={40} />
       </div>
 
       {/* Service Centers Section for Super Admin only */}
@@ -213,7 +223,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                 key={center.id}
                 label={center.name}
                 isActive={
-                  pathname.startsWith(`/service-center-dashboard/${center.id}`) &&
+                  pathname.startsWith(
+                    `/service-center-dashboard/${center.id}`
+                  ) &&
                   (queryStationId === center.id ||
                     serviceCenterIdMatch?.[1] === center.id)
                 }

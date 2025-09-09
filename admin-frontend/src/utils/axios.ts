@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Ensure this matches your backend URL and port
-const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5039/api';
+const baseURL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 const instance = axios.create({
   baseURL,
