@@ -8,9 +8,12 @@ import Button from "@/components/atoms/button/button";
 import { fetchUsers } from "@/utils/api";
 import { User } from "@/types";
 import axiosInstance from "@/utils/axios";
+import Sidebar from "@/components/molecules/side-bar/side-bar";
 
 const UsersPage = () => {
   const router = useRouter();
+      const [selectedTab, setSelectedTab] = useState("dashboard");
+
   const [userFilter, setUserFilter] = useState("Admin/all-users");
   const [usersData, setUsersData] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -68,8 +71,13 @@ const UsersPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8 overflow-x-hidden">
-      {/* Main Content */}
-      <div className="max-w-full mx-auto w-full">
+      <Sidebar
+              role="super-admin"
+              serviceCenters={[]}
+              selectedTab={selectedTab}
+              setSelectedTab={setSelectedTab}
+            />
+      <div className="max-w-7xl mx-auto w-full ml-72">
         {/* Header with user profile */}
         <div className="flex justify-between items-center mb-10">
           <h1 className="text-xl font-bold text-neutral-600">User List</h1>
@@ -119,7 +127,7 @@ const UsersPage = () => {
           </Button>
         </div>
 
-        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 overflow-x-auto">
+        <div className="">
           {/* User Table */}
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
