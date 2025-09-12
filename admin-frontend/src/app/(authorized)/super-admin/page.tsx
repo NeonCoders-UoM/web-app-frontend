@@ -7,6 +7,7 @@ import UserProfileCard from "@/components/molecules/user-card/user-card";
 import Button from "@/components/atoms/button/button";
 import StatusCard from "@/components/atoms/status-cards/status-card";
 import Table from "@/components/organism/table/table";
+import Sidebar from "@/components/molecules/side-bar/side-bar";
 import {
   fetchDashboardStats,
   fetchServiceCenters,
@@ -17,6 +18,7 @@ import { ServiceCenter, DashboardStats } from "@/types";
 
 const SuperAdminDashboard: React.FC = () => {
   const router = useRouter();
+    const [selectedTab, setSelectedTab] = useState("dashboard");
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [serviceCenters, setServiceCenters] = useState<ServiceCenter[]>([]);
   const [availabilityMap, setAvailabilityMap] = useState<Map<string, { isAvailable: boolean; reason?: string }>>(new Map());
@@ -161,8 +163,14 @@ const SuperAdminDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8 overflow-x-hidden">
-      <div className="max-w-full mx-auto w-full">
-        <div className="flex justify-end items-center mb-10">
+      <Sidebar
+              role="super-admin"
+              serviceCenters={[]}
+              selectedTab={selectedTab}
+              setSelectedTab={setSelectedTab}
+            />
+      <div className="max-w-full mx-auto w-full ml-36">
+        <div className="flex justify-end items-center mb-10 mr-36">
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
             pictureAlt="User Profile"
@@ -173,7 +181,10 @@ const SuperAdminDashboard: React.FC = () => {
 
         <div className="px-6 md:px-12 lg:px-20 xl:px-32 2xl:px-40">
         <h1 className="text-4xl font-bold text-gray-800 mb-12 drop-shadow-sm">
-          Dashboard
+          Welcome to VApp Admin Dashboard
+          <p className="text-sm font-light text-gray-600 mt-2">
+            Manage your service centers and monitor key metrics
+          </p>
         </h1>
         
         
@@ -201,12 +212,9 @@ const SuperAdminDashboard: React.FC = () => {
           />
         </div>
 
-        <div className="bg-gradient-to-br from-white/90 via-blue-50/20 to-indigo-50/10 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/70 p-12">
+        <div className="">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 flex items-center">
-              <div className="w-2 h-12 bg-gradient-to-b from-blue-500 via-indigo-500 to-purple-600 rounded-full mr-6 shadow-lg"></div>
-              Service Centers
-            </h2>
+            
             <div className="flex flex-wrap items-center gap-4">
               <Button
                 variant="primary"
@@ -216,14 +224,14 @@ const SuperAdminDashboard: React.FC = () => {
                 Add Service Center
               </Button>
               <Button
-                variant="secondary"
+                variant="primary"
                 size="medium"
                 onClick={() => router.push("/services")}
               >
                 Manage Services
               </Button>
               <Button
-                variant="secondary"
+                variant="primary"
                 size="medium"
                 onClick={() => router.push("/packages")}
               >
@@ -232,7 +240,7 @@ const SuperAdminDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 overflow-hidden">
+          <div className="">
             <Table
               headers={headers}
               data={data}
