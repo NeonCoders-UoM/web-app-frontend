@@ -235,7 +235,7 @@ const AdminDashboard = () => {
                   </Button>
                 </div>
 
-                <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 overflow-x-auto">
+                <div className="">
                   {/* User Table */}
                   {isLoadingUsers ? (
                     <div className="flex justify-center items-center h-64">
