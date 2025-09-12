@@ -214,7 +214,7 @@ const ServiceCenterDashboard = () => {
         </div>
 
         {/* Table Section */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 overflow-x-auto p-6">
+        <div className=" p-6">
           <h2 className="text-xl font-semibold mb-4">
             Leading Services -{" "}
             {serviceCenter?.serviceCenterName || "Service Center"}
