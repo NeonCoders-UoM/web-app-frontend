@@ -37,14 +37,18 @@ const Sidebar: React.FC<SidebarProps> = ({
   // Also check for stationId in query parameters
   const queryStationId = searchParams.get("stationId");
   // Use prop if provided, else fallback to query or path
-  const currentStationId =
-    typeof stationId === "string" && stationId
-      ? stationId
-      : queryStationId ||
-        (serviceCenterIdMatch ? serviceCenterIdMatch[1] : undefined);
+ const isSuperAdminDashboard = pathname.startsWith("/super-admin-dashboard");
+
+const currentStationId =
+  isSuperAdminDashboard
+    ? undefined
+    : (stationId ||
+       queryStationId ||
+       (serviceCenterIdMatch ? serviceCenterIdMatch[1] : undefined));
+
 
   const getSidebarOptions = () => {
-    // If we're in a service center dashboard, show service center specific options
+     // If we're in a service center dashboard, show service center specific options
     if (currentStationId) {
       return [
         {
@@ -81,19 +85,11 @@ const Sidebar: React.FC<SidebarProps> = ({
       ];
     }
 
-    // Default admin options
+    // Default super-admin options
     return [
-      { label: "Dashboard", route: "/admin-dashboard" },
+      { label: "Dashboard", route: "/super-admin" },
       { label: "Users", route: "/user-managment" },
-      { label: "Appointments", route: "/appointment" },
-      { label: "Clients", route: "/client" },
-      { label: "Vehicles", route: "/vehicle" },
-      { label: "Feedback", route: "/feedback" },
-      { label: "Users", route: "/user-managment" },
-      { label: "Service Status", route: "/service-status" },
-      { label: "Closure Schedule", route: "/closure-schedule" },
-      // { label: "Loyalty Points", route: "/loyalty-points" },
-      { label: "Logout", route: "/login" },
+      
     ];
   };
 
@@ -160,49 +156,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   // For admin, render Dashboard and Users as tabs
-  if (role === "admin" && selectedTab && setSelectedTab) {
-    return (
-      <div className="w-72 min-h-screen flex flex-col bg-[#010134] bg-gradient-to-b from-[#010134] to-[#010134] backdrop-blur-lg shadow-[4px_0_30px_rgba(0,0,128,0.5)] fixed left-0 top-0 z-50 sidebar-scrollbar overflow-y-auto border-r border-[#0000A0]/30">
-        {/* Logo Section */}
-        <div className="px-6 py-6 flex items-center justify-center border-b border-white/10 relative">
-          <Image src="/images/logo3.png" alt="Logo" width={120} height={40} />
-        </div>
-        <div className="flex-1 px-4 py-4">
-          <div className="space-y-1">
-            <button
-              className={`w-full text-left px-4 py-3 rounded-lg font-medium text-white transition-colors ${
-                selectedTab === "dashboard"
-                  ? "bg-blue-700/80"
-                  : "hover:bg-blue-900/40"
-              }`}
-              onClick={() => setSelectedTab("dashboard")}
-            >
-              Dashboard
-            </button>
-            <button
-              className={`w-full text-left px-4 py-3 rounded-lg font-medium text-white transition-colors ${
-                selectedTab === "users"
-                  ? "bg-blue-700/80"
-                  : "hover:bg-blue-900/40"
-              }`}
-              onClick={() => setSelectedTab("users")}
-            >
-              Users
-            </button>
-          </div>
-        </div>
-        <div className="px-6 py-4 border-t border-[#0000A0]/30">
-          <div className="text-xs text-white/70 text-center">
-            <span className="block font-medium">VPass Admin</span>
-            <span className="text-white/50">v2.0.1</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  
 
   return (
-    <div className="w-72 min-h-screen flex flex-col bg-[#010134] bg-gradient-to-b from-[#010134] to-[#010134] backdrop-blur-lg shadow-[4px_0_30px_rgba(0,0,128,0.5)] fixed left-0 top-0 z-50 sidebar-scrollbar overflow-y-auto border-r border-[#0000A0]/30">
+    <div className="w-72 min-h-screen flex flex-col bg-indigo-500/20 bg-gradient-to-b from-[#010134] to-[#010134]  fixed left-0 top-0 z-50 sidebar-scrollbar overflow-y-auto border-r border-[#0000A0]/30">
       {/* Logo Section */}
       <div className="px-6 py-6 flex items-center justify-center border-b border-white/10 relative">
         <Image src="/images/logo3.png" alt="Logo" width={120} height={40} />
