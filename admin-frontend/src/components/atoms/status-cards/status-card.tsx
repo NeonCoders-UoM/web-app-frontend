@@ -19,24 +19,24 @@ const iconConfig = {
   },
   vehicles: { 
     icon: Package, 
-    bgColor: "bg-gradient-to-br from-teal-500 to-teal-600", 
-    lightBg: "bg-teal-50",
-    shadowColor: "shadow-teal-500/20",
-    cardBg: "bg-gradient-to-br from-teal-50/30 to-emerald-50/20"
+    bgColor: "bg-gradient-to-br from-indigo-500 to-indigo-600", 
+    lightBg: "bg-indigo-50",
+    shadowColor: "shadow-indigo-500/20",
+    cardBg: "bg-gradient-to-br from-indigo-50/30 to-blue-50/20"
   },
   serviceCenters: { 
     icon: LineChart, 
-    bgColor: "bg-gradient-to-br from-rose-500 to-rose-600", 
-    lightBg: "bg-rose-50",
-    shadowColor: "shadow-rose-500/20",
-    cardBg: "bg-gradient-to-br from-rose-50/30 to-pink-50/20"
+    bgColor: "bg-gradient-to-br from-indigo-500 to-indigo-600", 
+    lightBg: "bg-indigo-50",
+    shadowColor: "shadow-indigo-500/20",
+    cardBg: "bg-gradient-to-br from-indigo-50/30 to-blue-50/20"
   },
   availableCenters: { 
     icon: LineChart, 
-    bgColor: "bg-gradient-to-br from-[#010134] to-[#010134]/80", 
-    lightBg: "bg-[#010134]/10",
-    shadowColor: "shadow-[#010134]/20",
-    cardBg: "bg-gradient-to-br from-[#010134]/2 to-[#010134]/"
+    bgColor: "bg-gradient-to-br from-indigo-500 to-indigo-600", 
+    lightBg: "bg-indigo-50",
+    shadowColor: "shadow-indigo-500/20",
+    cardBg: "bg-gradient-to-br from-indigo-50/30 to-blue-50/20"
   },
 };
 
@@ -117,21 +117,12 @@ const StatusCard: React.FC<StatusCardProps> = ({
           `}>
             <IconComponent className={`w-7 h-7 text-white ${icon === 'availableCenters' ? '' : 'drop-shadow-md'}`} />
             
-            {/* Enhanced icon glow effect */}
-            {icon !== 'availableCenters' && (
-              <div className={`
-                absolute inset-0 ${config.bgColor} rounded-xl blur-lg opacity-30 
-                -z-10 scale-110
-              `}></div>
-            )}
+
+            
           </div>
 
-          {/* 3D icon shadow */}
-          {icon !== 'availableCenters' && (
-            <div className={`
-              absolute top-1 left-1 w-14 h-14 ${config.bgColor} rounded-xl opacity-20 -z-10
-            `}></div>
-          )}
+          
+          
 
           {/* Floating background shape with 3D effect */}
           <div className={`
