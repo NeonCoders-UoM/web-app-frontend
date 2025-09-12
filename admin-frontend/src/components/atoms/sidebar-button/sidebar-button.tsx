@@ -20,9 +20,9 @@ const SidebarButton: React.FC<SidebarButtonProps> = ({ label, isActive, onClick 
         relative w-full h-12 flex items-center px-4 mx-2 rounded-xl cursor-pointer
         transition-all duration-300 ease-in-out transform
         ${isActive 
-          ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white sidebar-active-glow translate-x-1 scale-[1.02]' 
+          ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white ' 
           : isHovered 
-            ? 'bg-gradient-to-r from-gray-700 to-gray-800 text-gray-100 sidebar-hover-effect shadow-lg shadow-gray-700/30' 
+            ? 'bg-gradient-to-r from-gray-700 to-gray-800 text-gray-100 shadow-lg shadow-gray-700/30' 
             : 'bg-transparent text-gray-300 hover:text-white'
         }
         group
