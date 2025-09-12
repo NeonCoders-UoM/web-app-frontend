@@ -120,31 +120,6 @@ const VehiclesPage = () => {
             }}
           />
         </div>
-
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div className="relative">
-            <select
-              aria-label="Filter Vehicles"
-              className="appearance-none bg-white border border-neutral-150 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-primary-100"
-              value={vehicleFilter}
-              onChange={(e) => setVehicleFilter(e.target.value)}
-            >
-              <option value="All Vehicles">All Vehicles</option>
-              <option value="By Customer">By Customer</option>
-              <option value="By Model">By Model</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-400">
-              <svg
-                className="fill-current h-4 w-4"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-              >
-                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
         {isLoading ? (
           <div>Loading vehicles...</div>
         ) : vehicles.length === 0 ? (
@@ -152,7 +127,7 @@ const VehiclesPage = () => {
             <p className="text-neutral-500">No vehicles found. Please check your connection or try again later.</p>
           </div>
         ) : (
-          <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 overflow-x-auto">
+          <div className="">
               <ClientTable
                 headers={tableHeaders}
                 data={vehicles.map((vehicle) => ({
