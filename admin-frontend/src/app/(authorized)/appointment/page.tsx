@@ -220,7 +220,7 @@ const AppointmentsPage = () => {
           />
         </div>
 
-        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl border border-white/80 overflow-x-auto p-6">
+        <div className=" p-6">
           <h1 className="h2 text-neutral-800 mb-[40px]">
             {stationId
               ? `Appointments - Service Center ${
