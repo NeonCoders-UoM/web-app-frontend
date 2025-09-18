@@ -3,85 +3,41 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import LoginForm from "@/components/organism/login-form/login-form";
+import colors from "@/styles/colors";
+import axiosInstance from "@/utils/axios";
 
 const LoginPage = () => {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const determineUserRole = (email: string): string => {
-    switch (true) {
-      case email.includes("admin"):
-        return "admin";
-      case email.includes("super"):
-        return "super-admin";
-      case email.includes("service"):
-        return "service-center-admin";
-      case email.includes("cashier"):
-        return "cashier";
-      case email.includes("data"):
-        return "data-operator";
-      default:
-        throw new Error("Invalid credentials");
-    }
-  };
-
-  const redirectToDashboard = (userRole: string) => {
-    switch (userRole) {
-      case "admin":
-        router.push("/admin/dashboard");
-        break;
-      case "super-admin":
-        router.push("/super-admin/dashboard");
-        break;
-      case "service-center-admin":
-        router.push("/service-center/dashboard");
-        break;
-      case "cashier":
-        router.push("/cashier/dashboard");
-        break;
-      case "data-operator":
-        router.push("/data-operator/dashboard");
-        break;
-      default:
-        throw new Error("Invalid role");
-    }
-  };
-
-  const handleLogin = async (data: { email: string; password: string; remember: boolean }) => {
-    setIsLoading(true);
-    setError("");
-
+  const handleLoginSuccess = async (data: { email: string; password: string; remember: boolean }) => {
     try {
-      console.log("Attempting login with:", data);
-      await new Promise((res) => setTimeout(res, 1000));
-      const userRole = determineUserRole(data.email);
-      redirectToDashboard(userRole);
+      // Optionally remember email
       if (data.remember) {
         localStorage.setItem("rememberedEmail", data.email);
-      }
-    } catch (err: unknown) {
-      console.error("Login failed:", err);
-      if (err instanceof Error) {
-        setError(err.message || "Invalid credentials");
       } else {
-        setError("Login failed. Please try again.");
+        localStorage.removeItem("rememberedEmail");
       }
-    } finally {
-      setIsLoading(false);
+
+      // Make API call to get user role (if needed)
+      // const response = await axiosInstance.get('/user/role');
+      // redirectToDashboard(response.data.role);
+    } catch (err) {
+      console.error("Failed to get user role:", err);
+      setError("Failed to determine user role");
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white">
+    
+    <div className="flex items-center shadow-md justify-center min-h-screen bg-white">
       <div
-        className="rounded-[10px] shadow-md p-12"
-        style={{ width: "600px", height: "548px", outline: '4px solid white' }}
+        className="rounded-[10px] shadow-lg p-12"
       >
-        <h2 className="text-2xl font-bold text-center text-neutral-600 mb-2">
+        <h2 className="text-2xl font-bold text-center mb-2" style={{ color: colors.primary[100] }}>
           Welcome to Vehicle Hub
         </h2>
-        <p className="text-sm text-center text-neutral-300 mb-6">
+        <p className="text-sm text-center text-neutral-500 mb-12">
           Please enter your email and password to continue
         </p>
 
@@ -91,7 +47,9 @@ const LoginPage = () => {
           </div>
         )}
 
-        <LoginForm onSubmit={handleLogin} isLoading={isLoading} />
+        <LoginForm 
+          onSuccess={handleLoginSuccess}
+        />
       </div>
     </div>
   );

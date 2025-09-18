@@ -42,8 +42,8 @@ const Dropdown: React.FC<DropdownProps> = ({
         <label
           className="block mb-1"
           style={{
-            color: colors.neutral[600],
-            fontSize: "var(--font-size-sm)",
+            color: colors.neutral[200],
+            fontSize: "var(--font-size-xsm)",
             fontWeight: "var(--font-weight-regular)",
             fontFamily: "var(--font-family-text)",
           }}
@@ -55,19 +55,19 @@ const Dropdown: React.FC<DropdownProps> = ({
         {/* Dropdown Button */}
         <button
           type="button"
-          className="w-full flex items-center justify-between px-4 py-2 bg-neutral-100 border border-neutral-400 rounded-md shadow-sm focus:ring-2 focus:ring-primary-100"
+          className="w-full flex items-center justify-between px-4 py-2 bg-neutral-100 border border-neutral-200 rounded-md focus:ring-1 focus:ring-neutral-200"
           onClick={() => setIsOpen(!isOpen)}
           suppressHydrationWarning
         >
-          <span className={`flex-1 text-left ${selected ? "" : "text-neutral-500"}`}>
+          <span className={`flex-1 text-left ${selected ? "" : "text-neutral-300" } text-sm`}>
             {selected || placeholder}
           </span>
-          <ChevronDown size={20} className="text-neutral-500 ml-2 shrink-0" />
+          <ChevronDown size={28} className="text-neutral-200 ml-2 shrink-0" />
         </button>
 
         {/* Dropdown Menu */}
         {isOpen && (
-          <ul className="absolute mt-1 w-full bg-neutral-100 border border-neutral-400 rounded-md shadow-md max-h-40 overflow-y-auto z-10">
+          <ul className="absolute mt-1 w-full bg-neutral-100 border border-neutral-200 rounded-md shadow-md max-h-40 overflow-y-auto z-10">
             {options.map((option, index) => (
               <li
                 key={index}

@@ -1,0 +1,57 @@
+/* InputField.module.css */
+.inputField {
+  width: 100%;
+}
+
+.input {
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  font-family: inherit;
+  padding: 20px;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Focus state */
+.inputContainer:focus-within {
+  box-shadow: 0 0 0 2px rgba(39, 95, 235, 0.1);
+  border-color: #5D87FF !important;
+}
+
+/* Status classes */
+.inputError {
+  border-color: #EF4444 !important;
+}
+
+.inputOk {
+  border-color: #10B981 !important;
+}
+
+.inputDefault {
+  border-color: #D1D5DB !important;
+}
+
+/* Placeholder */
+.input::placeholder {
+  color: #6B7280;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.input:focus::placeholder {
+  opacity: 0.5;
+}
+
+/* Icon */
+.inputIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9CA3AF;
+}

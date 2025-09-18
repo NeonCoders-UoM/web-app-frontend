@@ -1,4 +1,6 @@
 import { ServiceCenter, DashboardStats, Client, User, Vehicle } from "@/types";
+import axiosInstance from "./axios";
+
 
 // Mock data (as provided)
 const mockServiceCenters: ServiceCenter[] = [
@@ -543,48 +545,8 @@ const mockClients: Client[] = [
   },
 ];
 
-const mockUsers: User[] = [
-  {
-    id: "EMP-0001",
-    firstname: "Eleanor",
-    lastname: "Pena",
-    email: "eleanor.pena@gmail.com",
-    userrole: "Admin",
-    profilePicture: "/images/userpic.jpg",
-  },
-  {
-    id: "EMP-0002",
-    firstname: "Kathryn",
-    lastname: "Murphy",
-    email: "kathryn.murphy@gmail.com",
-    userrole: "Service Staff",
-    profilePicture: "/images/userpic.jpg",
-  },
-  {
-    id: "EMP-0003",
-    firstname: "Devon",
-    lastname: "Lane",
-    email: "devon.lane@gmail.com",
-    userrole: "Service Staff",
-    profilePicture: "/images/userpic.jpg",
-  },
-  {
-    id: "EMP-0004",
-    firstname: "Eleanor",
-    lastname: "Pena",
-    email: "eleanor.pena2@gmail.com",
-    userrole: "Service Staff",
-    profilePicture: "/images/userpic.jpg",
-  },
-  {
-    id: "EMP-0005",
-    firstname: "Devon",
-    lastname: "Lane",
-    email: "devon.lane2@gmail.com",
-    userrole: "Data Operator",
-    profilePicture: "/images/userpic.jpg",
-  },
-];
+
+
 
 const dashboardData: DashboardStats = {
   customers: 40689,
@@ -670,12 +632,14 @@ export const fetchClientById = async (id: string): Promise<Client | null> => {
 // Fetch all users
 export const fetchUsers = async (): Promise<User[]> => {
   try {
-    return mockUsers;
+    const response = await axiosInstance.get("Admin/all-users");
+    return response.data;
   } catch (error) {
     console.error("Error in fetchUsers:", error);
     throw error;
   }
 };
+// /utils/api.ts
 
 // Fetch a single service center by ID
 export const fetchServiceCenterById = async (id: string): Promise<ServiceCenter | null> => {

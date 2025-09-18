@@ -5,6 +5,7 @@ import TableHead from "@/components/molecules/table-head/table-head"
 import { TableRow } from "@/components/molecules/client-table-row/client-table-row"
 import Pagination from "@/components/molecules/pagination/pagination"
 import SearchBar from "@/components/atoms/search-bar/search-bar"
+import colors from "@/styles/colors";
 
 interface Header {
   title: string
@@ -95,7 +96,7 @@ const ClientTable: React.FC<TableProps> = ({
   }, [itemsPerPage])
 
   return (
-    <div className="overflow-x-auto">
+    <div >
       {showSearchBar && (
         <SearchBar
           value={searchTerm}
@@ -105,7 +106,7 @@ const ClientTable: React.FC<TableProps> = ({
         />
       )}
 
-      <table className="w-full border-collapse bg-white shadow-md rounded-lg mt-[80px]">
+      <table className="w-full border-collapse bg-white shadow-md rounded-lg mt-[20px]">
         <TableHead headers={headers} onSort={handleSort} />
         <tbody>
           {paginatedData.length > 0 ? (
@@ -132,7 +133,7 @@ const ClientTable: React.FC<TableProps> = ({
         </tbody>
       </table>
 
-      <div className="flex justify-end mt-[40px]">
+      <div className="flex justify-end mt-[20px]">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

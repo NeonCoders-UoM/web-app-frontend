@@ -3,8 +3,11 @@
 import { useState, useEffect } from "react"
 import UserProfileCard from "@/components/molecules/user-card/user-card"
 import RegistrationForm from "@/components/organism/registration-form/registration-form"
+import { useRouter } from "next/navigation";
+
 
 const AddUserPage = () => {
+  const router = useRouter();
   const [isClient, setIsClient] = useState(false)
 
   // Ensure rendering happens only on the client to avoid hydration mismatches
@@ -32,14 +35,17 @@ const AddUserPage = () => {
       {/* UserProfileCard at the top-right */}
       <div className="absolute top-0 right-0 mt-4 mr-4">
         <UserProfileCard
-          pictureSrc="/images/profipic.jpg"
-          pictureAlt="Moni Roy"
-          name="Moni Roy"
-          role="admin"
-          onLogout={() => console.log("Logout clicked")}
-          onProfileClick={() => console.log("Profile clicked")}
-          onSettingsClick={() => console.log("Settings clicked")}
-        />
+            pictureSrc="/images/profipic.jpg"
+            pictureAlt="Moni Roy"
+            name="Moni Roy"
+            role="admin"
+            onLogout={() => {
+              localStorage.removeItem("token");
+              router.push("/login");
+            }}
+            onProfileClick={() => console.log("Profile clicked")}
+            onSettingsClick={() => console.log("Settings clicked")}
+          />
       </div>
 
       {/* "NEW USER" heading and form */}

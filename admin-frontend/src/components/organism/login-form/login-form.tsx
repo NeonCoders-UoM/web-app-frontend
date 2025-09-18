@@ -4,13 +4,15 @@ import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, ArrowUpIcon } from "lucide-react";
 import Button from "@/components/atoms/button/button";
 import InputField from "@/components/atoms/input-fields/input-fields";
+import axiosInstance from "@/utils/axios";
+import { useRouter } from "next/navigation";
 
 interface LoginFormProps {
-  onSubmit: (data: { email: string; password: string; remember: boolean }) => void;
+  onSuccess?: (data: { email: string; password: string; remember: boolean }) => void;
   isLoading?: boolean;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -24,6 +26,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) =>
 
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
     const rememberedEmail = localStorage.getItem("rememberedEmail");
@@ -31,6 +36,62 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) =>
       setFormData((prev) => ({ ...prev, email: rememberedEmail, remember: true }));
     }
   }, []);
+
+   const redirectToDashboard = (role: string) => {
+    switch (role.toLowerCase()) {
+      case "admin":
+        router.push("/admin/dashboard");
+        break;
+      case "superadmin":
+        router.push("/super-admin/dashboard");
+        break;
+      case "service-center-admin":
+        router.push("/service-center/dashboard");
+        break;
+      case "cashier":
+        router.push("/cashier/dashboard");
+        break;
+      case "data-operator":
+        router.push("/data-operator/dashboard");
+        break;
+      default:
+        throw new Error("Invalid role");
+    }
+  };
+
+  const handleLogin = async (data: { email: string; password: string; remember: boolean }) => {
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await axiosInstance.post('auth/login', {
+        email: data.email,
+        password: data.password,
+      });
+
+      const { token } = response.data;
+
+      localStorage.setItem('token', token);
+
+      if (data.remember) {
+        localStorage.setItem("rememberedEmail", data.email);
+      } else {
+        localStorage.removeItem("rememberedEmail");
+      }
+
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const role = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || '';
+
+      console.log("Decoded role:", role);
+      redirectToDashboard(role);
+
+    } catch (err) {
+      console.error("Login failed:", err);
+      setError("Invalid credentials");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -71,7 +132,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) =>
     e.preventDefault();
     setIsSubmitted(true);
     if (validateForm()) {
-      onSubmit(formData);
+      handleLogin(formData);
     }
   };
 
@@ -81,6 +142,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) =>
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
+        <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
+          {error}
+        </div>
+      )}
       <div className="space-y-6">
         {/* Email Field */}
         <div>
@@ -149,7 +215,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading = false }) =>
       </div>
 
       {/* Submit Button */}
-      <div className="flex justify-center">
+      <div className="flex justify-center w-full">
         <Button variant="primary" size="large" type="submit" disabled={isLoading}>
           {isLoading ? (
             <span className="flex items-center gap-2">
