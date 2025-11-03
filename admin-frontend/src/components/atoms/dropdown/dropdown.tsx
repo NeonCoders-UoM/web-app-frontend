@@ -1,0 +1,87 @@
+// src/components/atoms/dropdown/dropdown.tsx
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { ChevronDown } from "lucide-react";
+import colors from "@/styles/colors"; // Import colors to match DocumentUploadForm styling
+
+interface DropdownProps {
+  label?: string; // Add label as an optional prop
+  options: string[];
+  placeholder?: string;
+  onSelect: (option: string) => void;
+  className?: string;
+  selectedOption?: string;
+}
+
+const Dropdown: React.FC<DropdownProps> = ({
+  label,
+  options,
+  placeholder = "Select an option",
+  onSelect,
+  className = "w-64",
+  selectedOption,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selected, setSelected] = useState<string | null>(selectedOption || null);
+
+  // Update selected state when selectedOption prop changes
+  useEffect(() => {
+    setSelected(selectedOption || null);
+  }, [selectedOption]);
+
+  const handleOptionClick = (option: string) => {
+    setSelected(option);
+    onSelect(option);
+    setIsOpen(false);
+  };
+
+  return (
+    <div className={`flex flex-col ${className}`}>
+      {label && (
+        <label
+          className="block mb-1"
+          style={{
+            color: colors.neutral[200],
+            fontSize: "var(--font-size-xsm)",
+            fontWeight: "var(--font-weight-regular)",
+            fontFamily: "var(--font-family-text)",
+          }}
+        >
+          {label}
+        </label>
+      )}
+      <div className="relative">
+        {/* Dropdown Button */}
+        <button
+          type="button"
+          className="w-full flex items-center justify-between px-4 py-2 bg-neutral-100 border border-neutral-200 rounded-md focus:ring-1 focus:ring-neutral-200"
+          onClick={() => setIsOpen(!isOpen)}
+          suppressHydrationWarning
+        >
+          <span className={`flex-1 text-left ${selected ? "" : "text-neutral-300" } text-sm`}>
+            {selected || placeholder}
+          </span>
+          <ChevronDown size={28} className="text-neutral-200 ml-2 shrink-0" />
+        </button>
+
+        {/* Dropdown Menu */}
+        {isOpen && (
+          <ul className="absolute mt-1 w-full bg-neutral-100 border border-neutral-200 rounded-md shadow-md max-h-40 overflow-y-auto z-10">
+            {options.map((option, index) => (
+              <li
+                key={index}
+                className="px-4 py-2 hover:bg-neutral-200 cursor-pointer"
+                onClick={() => handleOptionClick(option)}
+              >
+                {option}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Dropdown;
