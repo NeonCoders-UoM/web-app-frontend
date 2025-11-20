@@ -80,8 +80,6 @@ const currentStationId =
           label: "Closure Schedule",
           route: `/closure-schedule?stationId=${currentStationId}`,
         },
-
-        { label: "Back to Home", route: "/super-admin" },
       ];
     }
 

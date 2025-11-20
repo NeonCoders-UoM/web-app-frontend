@@ -1493,43 +1493,10 @@ export const deletePackage = async (id: number): Promise<void> => {
 // Add a new closure schedule
 export const addClosureSchedule = async (closureData: CreateClosureScheduleDTO): Promise<ClosureSchedule> => {
   try {
-    console.log("DEBUG: Sending closure data to API:", closureData);
-    console.log("DEBUG: Closure data details:");
-    console.log("  - serviceCenterId:", closureData.serviceCenterId);
-    console.log("  - closureDate:", closureData.closureDate);
-
-    // Try different endpoint variations for POST
-    const postEndpoints = [
-      '/ClosureSchedule',
-      '/api/ClosureSchedule'
-    ];
-
-    for (const endpoint of postEndpoints) {
-      try {
-        console.log(`DEBUG: Trying POST endpoint: ${endpoint}`);
-        const response = await axiosInstance.post(endpoint, closureData);
-        console.log(`DEBUG: Success with POST endpoint ${endpoint}:`, response.data);
-        console.log("DEBUG: Response status:", response.status);
-        return response.data;
-      } catch (endpointError) {
-        const axiosError = endpointError as { response?: { status?: number }, message?: string };
-        console.log(`DEBUG: POST endpoint ${endpoint} failed:`, axiosError.response?.status || axiosError.message || 'Unknown error');
-        continue;
-      }
-    }
-
-    // If all endpoints fail, throw the last error
-    throw new Error('All POST endpoints for closure schedule failed');
+    const response = await axiosInstance.post('/ClosureSchedule', closureData);
+    return response.data;
   } catch (error) {
     console.error("Error adding closure schedule:", error);
-    if (axios.isAxiosError(error)) {
-      console.error("Error response data:", error.response?.data);
-      console.error("Error response status:", error.response?.status);
-      console.error("Error response headers:", error.response?.headers);
-      console.error("Error request data that was sent:", error.config?.data);
-      console.error("Error request URL:", error.config?.url);
-      console.error("Error request method:", error.config?.method);
-    }
     throw error;
   }
 };
@@ -1537,38 +1504,15 @@ export const addClosureSchedule = async (closureData: CreateClosureScheduleDTO):
 // Get closures for a specific service center and date
 export const getClosures = async (serviceCenterId: number, date: Date): Promise<ClosureSchedule[]> => {
   try {
-    console.log(`DEBUG: Fetching closures for service center ${serviceCenterId}, date ${date.toISOString().split('T')[0]}`);
-
     // Format date for backend (YYYY-MM-DD)
     const dateString = date.toISOString().split('T')[0];
-
-    // Try different endpoint variations
-    const endpoints = [
-      `/ClosureSchedule/${serviceCenterId}?date=${dateString}`,
-      `/api/ClosureSchedule/${serviceCenterId}?date=${dateString}`,
-      `/ClosureSchedule/${serviceCenterId}/${dateString}`,
-      `/api/ClosureSchedule/${serviceCenterId}/${dateString}`
-    ];
-
-    for (const endpoint of endpoints) {
-      try {
-        console.log(`DEBUG: Trying endpoint: ${endpoint}`);
-        const response = await axiosInstance.get(endpoint);
-        console.log(`DEBUG: Success with endpoint ${endpoint}, retrieved ${response.data.length} closures:`, response.data);
-        return response.data;
-      } catch (endpointError) {
-        const axiosError = endpointError as { response?: { status?: number }, message?: string };
-        console.log(`DEBUG: Endpoint ${endpoint} failed:`, axiosError.response?.status || axiosError.message || 'Unknown error');
-        continue;
-      }
-    }
-
-    // If all endpoints fail, return empty array
-    console.log(`DEBUG: All endpoints failed, returning empty array`);
-    return [];
+    
+    const response = await axiosInstance.get(`/ClosureSchedule/${serviceCenterId}`, {
+      params: { date: dateString }
+    });
+    return response.data;
   } catch (error) {
     console.error("Error fetching closures:", error);
-    // Return empty array if no closures found or error occurs
     return [];
   }
 };

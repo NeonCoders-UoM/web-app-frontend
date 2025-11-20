@@ -145,7 +145,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8 overflow-x-hidden">
       {/* Sidebar */}
       <Sidebar
         role="admin"
@@ -155,113 +155,121 @@ const AdminDashboard = () => {
       />
 
       {/* Main Content */}
-      <div className="flex-1 p-[58px] ml-72">
-        <div className="max-w-7xl w-full mx-auto px-6">
-          {/* Header with user profile */}
-          <div className="flex justify-end mb-[32px]">
-            <UserProfileCard
-              pictureSrc="/images/profipic.jpg"
-              pictureAlt="User Profile"
-              useCurrentUser={true}
-              onLogout={() => {
-                localStorage.removeItem("token");
-                window.location.href = "/login";
-              }}
-            />
-          </div>
-
-          {selectedTab === "dashboard" && (
-            <>
-              <h1 className="text-4xl font-bold text-gray-800 mb-12 drop-shadow-sm">
-                Dashboard
-              </h1>
-              {/* Status Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-16 mb-16">
-                <StatusCard title="Customers" value={stats?.customers || 0} icon="customers" />
-                <StatusCard title="Vehicles" value={stats?.vehicles || 0} icon="vehicles" />
-                <StatusCard title="Service Centers" value={stats?.serviceCenters || 0} icon="serviceCenters" />
-              </div>
-              {/* Service Centers Section */}
-              <div className="bg-gradient-to-br from-white/90 via-blue-50/20 to-indigo-50/10 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/70 p-12">
-                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-12">
-                  <h2 className="text-3xl font-bold text-gray-800 flex items-center">
-                    <div className="w-2 h-12 bg-gradient-to-b from-blue-500 via-indigo-500 to-purple-600 rounded-full mr-6 shadow-lg"></div>
-                    Service Centers
-                  </h2>
-                  <div className="flex flex-wrap items-center gap-4">
-                    <Button variant="primary" size="medium" onClick={() => router.push("/service-centers/add")}>
-                      <span className="flex items-center"><Plus size={16} className="mr-2" />Add Service Center</span>
-                    </Button>
-                    <Button variant="secondary" size="medium" onClick={() => router.push("/services")}>Manage Services</Button>
-                    <Button variant="secondary" size="medium" onClick={() => router.push("/packages")}>Manage Packages</Button>
-                  </div>
-                </div>
-                {isLoading ? (
-                  <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-200"></div>
-                  </div>
-                ) : (
-                  <Table headers={headers} data={data} actions={actions} showSearchBar={false} onAction={handleAction} />
-                )}
-              </div>
-            </>
-          )}
-
-          {selectedTab === "users" && (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8 overflow-x-hidden">
-              {/* Main Content */}
-              <div className="max-w-full mx-auto w-full">
-                {/* Header with user profile */}
-                <div className="flex justify-between items-center mb-10">
-                  <h1 className="text-xl font-bold text-neutral-600">User List</h1>
-                </div>
-
-                {/* User Filter and Create Button */}
-                <div className="flex justify-between items-center mb-6">
-                  <div className="relative">
-                    <select className="appearance-none bg-white border border-neutral-150 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-primary-100" value={userFilter} onChange={(e) => setUserFilter(e.target.value)}>
-                      <option value="All Users">All Users</option>
-                      <option value="Admin">Admin</option>
-                      <option value="Service Staff">Service Staff</option>
-                      <option value="Data Operator">Data Operator</option>
-                      <option value="Cashier">Cashier</option>
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-400">
-                      <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
-                    </div>
-                  </div>
-                  <Button variant="primary" size="medium" onClick={() => router.push("/user-managment/add-user")} icon="PlusIcon" iconPosition="left">
-                    Create User
-                  </Button>
-                </div>
-
-                <div className="">
-                  {/* User Table */}
-                  {isLoadingUsers ? (
-                    <div className="flex justify-center items-center h-64">
-                      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-                    </div>
-                  ) : (
-                    <ClientTable
-                      headers={userTableHeaders}
-                      data={filteredUsers.map((u) => ({
-                        id: u.userId.toString(),
-                        firstname: u.firstName,
-                        lastname: u.lastName,
-                        email: u.email,
-                        userrole: u.role,
-                      }))}
-                      actions={["edit", "delete"]}
-                      showSearchBar={true}
-                      showClientCell={true}
-                      onActionSelect={handleUserActionSelect}
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
+      <div className="max-w-full mx-auto w-full">
+        {/* Header with user profile */}
+        <div className="flex justify-end items-center mb-10">
+          <UserProfileCard
+            pictureSrc="/images/profipic.jpg"
+            pictureAlt="User Profile"
+            useCurrentUser={true}
+            onLogout={() => {
+              localStorage.removeItem("token");
+              router.push("/login");
+            }}
+          />
         </div>
+
+        {selectedTab === "dashboard" && (
+          <>
+            {/* Status Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+              <StatusCard
+                title="Total Customers"
+                value={stats?.customers || 0}
+                icon="customers"
+              />
+              <StatusCard
+                title="Total Vehicles"
+                value={stats?.vehicles || 0}
+                icon="vehicles"
+              />
+              <StatusCard
+                title="Service Centers"
+                value={stats?.serviceCenters || 0}
+                icon="serviceCenters"
+              />
+            </div>
+
+            {/* Table Section */}
+            <div className="p-6">
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-4">
+                <h2 className="text-xl font-semibold">Service Centers</h2>
+                <div className="flex flex-wrap items-center gap-4">
+                  <Button variant="primary" size="medium" onClick={() => router.push("/service-centers/add")}>
+                    <span className="flex items-center"><Plus size={16} className="mr-2" />Add Service Center</span>
+                  </Button>
+                  <Button variant="secondary" size="medium" onClick={() => router.push("/services")}>Manage Services</Button>
+                  <Button variant="secondary" size="medium" onClick={() => router.push("/packages")}>Manage Packages</Button>
+                </div>
+              </div>
+              {isLoading ? (
+                <div className="flex justify-center items-center h-64">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-200"></div>
+                </div>
+              ) : (
+                <Table
+                  headers={headers}
+                  data={data}
+                  showSearchBar={false}
+                  actions={actions}
+                  onAction={handleAction}
+                />
+              )}
+            </div>
+          </>
+        )}
+
+        {selectedTab === "users" && (
+          <>
+            {/* Header with user profile */}
+            <div className="flex justify-between items-center mb-10">
+              <h1 className="text-xl font-bold text-neutral-600">User List</h1>
+            </div>
+
+            {/* User Filter and Create Button */}
+            <div className="flex justify-between items-center mb-6">
+              <div className="relative">
+                <select className="appearance-none bg-white border border-neutral-150 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-primary-100" value={userFilter} onChange={(e) => setUserFilter(e.target.value)}>
+                  <option value="All Users">All Users</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Service Staff">Service Staff</option>
+                  <option value="Data Operator">Data Operator</option>
+                  <option value="Cashier">Cashier</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-400">
+                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                </div>
+              </div>
+              <Button variant="primary" size="medium" onClick={() => router.push("/user-managment/add-user")} icon="PlusIcon" iconPosition="left">
+                Create User
+              </Button>
+            </div>
+
+            <div className="">
+              {/* User Table */}
+              {isLoadingUsers ? (
+                <div className="flex justify-center items-center h-64">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+              ) : (
+                <ClientTable
+                  headers={userTableHeaders}
+                  data={filteredUsers.map((u) => ({
+                    id: u.userId.toString(),
+                    firstname: u.firstName,
+                    lastname: u.lastName,
+                    email: u.email,
+                    userrole: u.role,
+                  }))}
+                  actions={["edit", "delete"]}
+                  showSearchBar={true}
+                  showClientCell={true}
+                  onActionSelect={handleUserActionSelect}
+                />
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

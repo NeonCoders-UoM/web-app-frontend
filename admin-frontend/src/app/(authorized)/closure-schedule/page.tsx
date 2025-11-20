@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import ScheduleShopClosures from "@/components/molecules/schedule-shop-closures/schedule-shop-closures";
 import ShiftCard from "@/components/atoms/shiftcard/shiftcard";
@@ -11,6 +11,7 @@ import {
   fetchServiceCenterServices,
   toggleServiceAvailabilityForDay,
   getServiceAvailabilities,
+  deleteClosureSchedule,
 } from "@/utils/api";
 import {
   ClosureSchedule,
@@ -41,7 +42,7 @@ const ManageServices = () => {
     searchParams.get("serviceCenterId") || searchParams.get("stationId");
 
   const [shiftCards, setShiftCards] = useState<
-    { date: string; status: string; day?: string }[]
+    { id: number; date: string; status: string; day?: string }[]
   >([]);
   const [serviceCenters, setServiceCenters] = useState<ServiceCenter[]>([]);
   const [currentServiceCenterId, setCurrentServiceCenterId] = useState<
@@ -63,21 +64,21 @@ const ManageServices = () => {
     Date[]
   >([]);
   const [isClosureMode, setIsClosureMode] = useState(true);
+  const [closedDatesSet, setClosedDatesSet] = useState<Set<string>>(new Set());
 
-  // Normalize date to YYYY-MM-DD in UTC
+  // Normalize date to YYYY-MM-DD using local timezone
   const normalizeDateString = (date: Date | string): string => {
     const d = typeof date === "string" ? new Date(date) : date;
-    return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   };
 
   // Format date for display (expects YYYY-MM-DD string)
   const formatDisplayDate = (date: string): string => {
     const [year, month, day] = date.split("-").map(Number);
-    return new Date(Date.UTC(year, month - 1, day)).toLocaleDateString("en-US", {
+    return new Date(year, month - 1, day).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
-      timeZone: "UTC",
     });
   };
 
@@ -96,10 +97,7 @@ const ManageServices = () => {
       // Fetch closures for selected dates
       const allClosures: ClosureSchedule[] = [];
       for (const date of dates) {
-        const utcDate = new Date(
-          Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
-        );
-        const closures = await getClosures(currentServiceCenterId, utcDate);
+        const closures = await getClosures(currentServiceCenterId, date);
         allClosures.push(...closures);
       }
 
@@ -111,6 +109,9 @@ const ManageServices = () => {
           )
           .map((closure) => normalizeDateString(closure.closureDate))
       );
+      
+      // Update closed dates state for child component
+      setClosedDatesSet(closedDates);
 
       // Fetch service availabilities
       const sortedDates = dates.sort((a, b) => a.getTime() - b.getTime());
@@ -155,7 +156,7 @@ const ManageServices = () => {
         });
 
         defaultAvailabilities.push({
-          date: new Date(dateString + "T00:00:00Z"),
+          date: new Date(date),
           services: defaultServices,
         });
       }
@@ -181,47 +182,37 @@ const ManageServices = () => {
   };
 
   // Handle service availability changes
-  const handleServiceAvailabilityChange = async (serviceAvailabilities: {
+  const handleServiceAvailabilityChange = useCallback((serviceAvailabilities: {
     [serviceId: number]: boolean;
   }) => {
-    if (isClosureMode) return;
+    // Check if any selected dates are closed using the state we already have
+    const closedSelectedDates = selectedDatesForPreview.filter(date => {
+      const dateKey = normalizeDateString(date);
+      return closedDatesSet.has(dateKey);
+    });
 
-    const closedDates = new Set(
-      (
-        await Promise.all(
-          selectedDatesForPreview.map(async (date) => {
-            const utcDate = new Date(
-              Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
-            );
-            const closures = await getClosures(currentServiceCenterId!, utcDate);
-            return closures.length > 0 ? normalizeDateString(date) : null;
-          })
-        )
-      ).filter((d): d is string => d !== null)
-    );
-
-    if (closedDates.size > 0) {
+    if (closedSelectedDates.length > 0) {
       alert(
-        `Cannot modify service availability for closed dates: ${Array.from(
-          closedDates
-        )
-          .map((d) => formatDisplayDate(d))
+        `Cannot modify service availability for closed dates: ${closedSelectedDates
+          .map((d) => formatDisplayDate(normalizeDateString(d)))
           .join(", ")}. Please remove closures first.`
       );
       return;
     }
 
-    const updatedAvailabilities = { ...modifiedServiceAvailabilities };
-    selectedDatesForPreview.forEach((date) => {
-      const dateKey = normalizeDateString(date);
-      updatedAvailabilities[dateKey] = { ...serviceAvailabilities };
+    setModifiedServiceAvailabilities(prev => {
+      const updatedAvailabilities = { ...prev };
+      selectedDatesForPreview.forEach((date) => {
+        const dateKey = normalizeDateString(date);
+        updatedAvailabilities[dateKey] = { ...serviceAvailabilities };
+      });
+      return updatedAvailabilities;
     });
-    setModifiedServiceAvailabilities(updatedAvailabilities);
 
-    const updatedPreview = dateServiceAvailabilities.map((dateAvailability) => {
-      const dateKey = normalizeDateString(dateAvailability.date);
-      const modifiedServices = updatedAvailabilities[dateKey];
-      if (modifiedServices) {
+    setDateServiceAvailabilities(prevAvailabilities => {
+      return prevAvailabilities.map((dateAvailability) => {
+        const dateKey = normalizeDateString(dateAvailability.date);
+        const modifiedServices = serviceAvailabilities;
         return {
           ...dateAvailability,
           services: dateAvailability.services.map((service) => ({
@@ -230,11 +221,9 @@ const ManageServices = () => {
               modifiedServices[service.serviceId] ?? service.isAvailable,
           })),
         };
-      }
-      return dateAvailability;
+      });
     });
-    setDateServiceAvailabilities(updatedPreview);
-  };
+  }, [selectedDatesForPreview, closedDatesSet]);
 
   // Calculate week number
   const getWeekNumber = (date: Date): number => {
@@ -335,11 +324,8 @@ const ManageServices = () => {
         for (let i = 0; i < 7; i++) {
           const date = new Date(today);
           date.setDate(today.getDate() + i);
-          const utcDate = new Date(
-            Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
-          );
           try {
-            const dayClosures = await getClosures(currentServiceCenterId, utcDate);
+            const dayClosures = await getClosures(currentServiceCenterId, date);
             allClosures.push(...dayClosures);
           } catch (error) {
             console.warn(
@@ -356,13 +342,14 @@ const ManageServices = () => {
           )
           .map((closure) => {
             const dateString = normalizeDateString(closure.closureDate);
-            const closureDate = new Date(dateString + "T00:00:00Z");
+            const [year, month, day] = dateString.split("-").map(Number);
+            const closureDate = new Date(year, month - 1, day);
             return {
+              id: closure.id,
               date: dateString,
               status: "Closed",
               day: closureDate.toLocaleDateString("en-US", {
                 weekday: "short",
-                timeZone: "UTC",
               }),
             };
           });
@@ -377,6 +364,29 @@ const ManageServices = () => {
 
     loadClosures();
   }, [currentServiceCenterId]);
+
+  const handleDeleteClosure = async (closureId: number, date: string) => {
+    if (!confirm(`Are you sure you want to delete the closure for ${formatDisplayDate(date)}?`)) {
+      return;
+    }
+
+    try {
+      await deleteClosureSchedule(closureId);
+      
+      // Remove the closure from local state
+      setShiftCards(prevCards => prevCards.filter(card => card.id !== closureId));
+      
+      // Refresh the availabilities if dates are selected
+      if (selectedDatesForPreview.length > 0) {
+        await fetchDateServiceAvailabilities(selectedDatesForPreview);
+      }
+      
+      alert("Closure deleted successfully");
+    } catch (error) {
+      console.error("Error deleting closure:", error);
+      alert("Failed to delete closure. Please try again.");
+    }
+  };
 
   const handleServiceCenterChange = (serviceCenterId: number) => {
     setCurrentServiceCenterId(serviceCenterId);
@@ -410,10 +420,7 @@ const ManageServices = () => {
           (
             await Promise.all(
               dates.map(async (date) => {
-                const utcDate = new Date(
-                  Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
-                );
-                const closures = await getClosures(currentServiceCenterId, utcDate);
+                const closures = await getClosures(currentServiceCenterId, date);
                 return closures.length > 0 ? normalizeDateString(date) : null;
               })
             )
@@ -434,13 +441,10 @@ const ManageServices = () => {
         for (const date of dates) {
           for (const service of serviceData) {
             try {
-              const utcDate = new Date(
-                Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
-              );
               await toggleServiceAvailabilityForDay(
                 currentServiceCenterId,
                 service.id,
-                utcDate,
+                date,
                 service.isAvailable
               );
             } catch (error) {
@@ -472,13 +476,10 @@ const ManageServices = () => {
 
         for (const date of dates) {
           try {
-            const utcDate = new Date(
-              Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
-            );
-            const utcDateString = normalizeDateString(utcDate);
+            const dateString = normalizeDateString(date);
             await addClosureSchedule({
               serviceCenterId: currentServiceCenterId,
-              closureDate: utcDateString,
+              closureDate: dateString,
             });
             totalClosuresCreated++;
           } catch (error) {
@@ -497,10 +498,7 @@ const ManageServices = () => {
           for (let i = 0; i < 7; i++) {
             const date = new Date(today);
             date.setDate(today.getDate() + i);
-            const utcDate = new Date(
-              Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
-            );
-            const dayClosures = await getClosures(currentServiceCenterId, utcDate);
+            const dayClosures = await getClosures(currentServiceCenterId, date);
             allUpdatedClosures.push(...dayClosures);
           }
 
@@ -511,13 +509,14 @@ const ManageServices = () => {
             )
             .map((closure) => {
               const dateString = normalizeDateString(closure.closureDate);
-              const closureDate = new Date(dateString + "T00:00:00Z");
+              const [year, month, day] = dateString.split("-").map(Number);
+              const closureDate = new Date(year, month - 1, day);
               return {
+                id: closure.id,
                 date: dateString,
                 status: "Closed",
                 day: closureDate.toLocaleDateString("en-US", {
                   weekday: "short",
-                  timeZone: "UTC",
                 }),
               };
             });
@@ -638,277 +637,301 @@ const ManageServices = () => {
   }
 
   return (
-    <div
-      className="p-6 space-y-6"
-      style={{
-        backgroundColor: "#FFFFFF",
-        minHeight: "100vh",
-      }}
-    >
-      <h1 className="h2 text-neutral-600">Service Center Closure Schedule</h1>
-
-      <div className="grid grid-cols-1 gap-4 mb-4">
-        {getUserRole() === "SuperAdmin" && serviceCenters.length > 0 && (
-          <div>
-            <label className="block text-sm font-medium text-neutral-600 mb-2">
-              Select Service Center
-            </label>
-            <select
-              value={currentServiceCenterId || ""}
-              onChange={(e) =>
-                handleServiceCenterChange(parseInt(e.target.value))
-              }
-              className="w-full p-2 border border-neutral-150 rounded-md text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-200"
-            >
-              {serviceCenters.map((center) => (
-                <option
-                  key={center.id}
-                  value={center.Station_id || parseInt(center.id)}
-                >
-                  {center.serviceCenterName}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8">
+      {/* Page Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">Closure Schedule Management</h1>
+        <p className="text-gray-600">Schedule service center closures and manage service availability</p>
       </div>
 
-      {selectedServiceCenter && (
-        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-          <h3 className="text-lg font-semibold text-green-800 mb-2">
-            Managing Closures for: {selectedServiceCenter.serviceCenterName}
-          </h3>
-          <div className="grid grid-cols-2 gap-4 text-sm text-green-700">
-            <div>
-              <span className="font-medium">Service Center ID:</span>{" "}
-              {currentServiceCenterId}
-            </div>
-            <div>
-              <span className="font-medium">Address:</span>{" "}
-              {selectedServiceCenter.address}
-            </div>
-            <div>
-              <span className="font-medium">Phone:</span>{" "}
-              {selectedServiceCenter.telephoneNumber}
-            </div>
-            <div>
-              <span className="font-medium">Email:</span>{" "}
-              {selectedServiceCenter.email}
-            </div>
-            <div>
-              <span className="font-medium">Status:</span>
-              <span
-                className={`ml-1 px-2 py-1 rounded text-xs ${
-                  selectedServiceCenter.Station_status === "Active"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
-                }`}
+      {/* Service Center Selection */}
+      {getUserRole() === "SuperAdmin" && serviceCenters.length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+          <label className="block text-sm font-semibold text-gray-700 mb-3">
+            Select Service Center
+          </label>
+          <select
+            value={currentServiceCenterId || ""}
+            onChange={(e) =>
+              handleServiceCenterChange(parseInt(e.target.value))
+            }
+            className="w-full p-3 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          >
+            {serviceCenters.map((center) => (
+              <option
+                key={center.id}
+                value={center.Station_id || parseInt(center.id)}
               >
-                {selectedServiceCenter.Station_status || "Active"}
-              </span>
-            </div>
+                {center.serviceCenterName}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {/* Service Center Info Card */}
+      {selectedServiceCenter && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl shadow-sm border border-blue-200 p-6 mb-6">
+          <div className="flex items-start justify-between mb-4">
             <div>
-              <span className="font-medium">Available Services:</span>{" "}
-              {
-                serviceCenterServices.filter((service) => service.isAvailable)
-                  .length
-              }{" "}
-              / {serviceCenterServices.length}
+              <h2 className="text-xl font-bold text-gray-800 mb-1">
+                {selectedServiceCenter.serviceCenterName}
+              </h2>
+              <p className="text-sm text-gray-600">Service Center ID: {currentServiceCenterId}</p>
             </div>
-            <div>
-              <span className="font-medium">Viewing Week:</span>{" "}
-              {`Week ${currentWeek} (${new Date().toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })})`}
+            <span
+              className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                selectedServiceCenter.Station_status === "Active"
+                  ? "bg-green-100 text-green-700 border border-green-300"
+                  : "bg-red-100 text-red-700 border border-red-300"
+              }`}
+            >
+              {selectedServiceCenter.Station_status || "Active"}
+            </span>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+            <div className="bg-white/60 rounded-lg p-3">
+              <p className="text-xs text-gray-500 mb-1">Address</p>
+              <p className="text-sm font-medium text-gray-800">{selectedServiceCenter.address}</p>
+            </div>
+            <div className="bg-white/60 rounded-lg p-3">
+              <p className="text-xs text-gray-500 mb-1">Phone</p>
+              <p className="text-sm font-medium text-gray-800">{selectedServiceCenter.telephoneNumber}</p>
+            </div>
+            <div className="bg-white/60 rounded-lg p-3">
+              <p className="text-xs text-gray-500 mb-1">Email</p>
+              <p className="text-sm font-medium text-gray-800">{selectedServiceCenter.email}</p>
+            </div>
+            <div className="bg-white/60 rounded-lg p-3">
+              <p className="text-xs text-gray-500 mb-1">Available Services</p>
+              <p className="text-sm font-medium text-gray-800">
+                {serviceCenterServices.filter((service) => service.isAvailable).length} / {serviceCenterServices.length}
+              </p>
+            </div>
+            <div className="bg-white/60 rounded-lg p-3">
+              <p className="text-xs text-gray-500 mb-1">Current Week</p>
+              <p className="text-sm font-medium text-gray-800">
+                Week {currentWeek} - {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+              </p>
             </div>
           </div>
         </div>
       )}
 
-      <div className="flex space-x-4">
-        <div className="flex-1">
-          <ScheduleShopClosures
-            onSave={handleSave}
-            onDatesSelected={fetchDateServiceAvailabilities}
-            onServiceAvailabilityChange={handleServiceAvailabilityChange}
-            onModeChange={handleModeChange}
-            availableServices={serviceCenterServices.map((service) => ({
-              id: service.serviceId,
-              name: service.serviceName || "Unknown Service",
-              selected: false,
-              isAvailable: service.isAvailable,
-            }))}
-          />
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Calendar and Controls */}
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <ScheduleShopClosures
+              onSave={handleSave}
+              onDatesSelected={fetchDateServiceAvailabilities}
+              onServiceAvailabilityChange={handleServiceAvailabilityChange}
+              onModeChange={handleModeChange}
+              closedDates={closedDatesSet}
+              availableServices={serviceCenterServices.map((service) => ({
+                id: service.serviceId,
+                name: service.serviceName || "Unknown Service",
+                selected: false,
+                isAvailable: service.isAvailable,
+              }))}
+            />
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <div className="text-lg font-semibold text-neutral-600">
-            Scheduled Closures for Current Week
-          </div>
-          <div className="text-sm text-neutral-500 mb-3">
-            Individual dates closed this week
-          </div>
-          <div
-            className="p-4 rounded-lg space-y-2"
-            style={{
-              backgroundColor: "#F3F7FF",
-            }}
-          >
-            {shiftCards.length > 0 ? (
-              shiftCards.map((shift, index) => (
-                <ShiftCard
-                  key={index}
-                  date={shift.date}
-                  status={shift.status}
-                  day={shift.day}
-                />
-              ))
-            ) : (
-              <div className="text-center py-8">
-                <div className="text-gray-400 mb-2">
-                  <svg
-                    className="w-12 h-12 mx-auto"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                </div>
-                <p className="text-sm text-neutral-500">
-                  No closures scheduled for this week
-                </p>
-                <p className="text-xs text-neutral-400 mt-1">
-                  Select dates in the calendar and click &quot;Save&quot; to
-                  close specific dates
-                </p>
+        {/* Scheduled Closures Sidebar */}
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-800">This Week's Closures</h3>
+              <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                <span className="text-red-600 font-bold text-sm">{shiftCards.length}</span>
               </div>
-            )}
+            </div>
+            <p className="text-sm text-gray-500 mb-4">Individual dates closed this week</p>
+            
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {shiftCards.length > 0 ? (
+                shiftCards.map((shift, index) => (
+                  <ShiftCard
+                    key={index}
+                    date={shift.date}
+                    status={shift.status}
+                    day={shift.day}
+                    onDelete={() => handleDeleteClosure(shift.id, shift.date)}
+                  />
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <svg
+                      className="w-8 h-8 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">No closures scheduled</p>
+                  <p className="text-xs text-gray-400">
+                    Select dates and click "Save" to schedule closures
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Service Availability Table */}
       {(dateServiceAvailabilities.length > 0 || isLoadingAvailabilities) && (
-        <div className="mt-8">
-          <h2 className="text-lg font-semibold text-neutral-600 mb-4">
-            Service Availability Data
-          </h2>
-          <p className="text-sm text-neutral-500 mb-6">
-            This table shows the service availability records from the database
-            for the selected dates.
-          </p>
+        <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-2">Service Availability Details</h2>
+            <p className="text-sm text-gray-600">
+              View and manage service availability for selected dates
+            </p>
+          </div>
+          
           {isLoadingAvailabilities ? (
-            <div className="flex justify-center items-center h-32">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
-              <span className="ml-2 text-sm text-neutral-600">
-                Loading availability data...
-              </span>
+            <div className="flex flex-col justify-center items-center h-32">
+              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-600 mb-3"></div>
+              <span className="text-sm text-gray-600 font-medium">Loading availability data...</span>
             </div>
           ) : (
-            <div className="bg-white rounded-lg border border-neutral-200 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-neutral-200">
-                  <thead className="bg-neutral-50">
+            <>
+              <div className="overflow-x-auto rounded-lg border border-gray-200">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Date
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Service ID
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Service Name
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Service Center ID
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-neutral-200">
-                    {dateServiceAvailabilities.flatMap((dateAvailability) =>
-                      dateAvailability.services.map((service) => (
+                  <tbody className="bg-white divide-y divide-gray-100">
+                    {dateServiceAvailabilities.flatMap((dateAvailability) => {
+                      const dateKey = normalizeDateString(dateAvailability.date);
+                      const isDateClosed = closedDatesSet.has(dateKey);
+                      return dateAvailability.services.map((service) => (
                         <tr
                           key={`${dateAvailability.date.toISOString()}-${service.serviceId}`}
-                          className="hover:bg-neutral-50"
+                          className={`hover:bg-blue-50/30 transition-colors ${isDateClosed ? 'bg-gray-50' : ''}`}
                         >
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
-                            {formatDisplayDate(normalizeDateString(dateAvailability.date))}
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            <div className="flex items-center">
+                              {formatDisplayDate(dateKey)}
+                              {isDateClosed && (
+                                <svg className="w-4 h-4 ml-2 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                </svg>
+                              )}
+                            </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                             {service.serviceId}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                             {service.serviceName || "Unknown Service"}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span
-                              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                service.isAvailable
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-red-100 text-red-800"
-                              }`}
-                            >
-                              {service.isAvailable
-                                ? "Available"
-                                : "Unavailable"}
-                            </span>
+                            {isDateClosed ? (
+                              <span className="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-700 border border-gray-400">
+                                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                </svg>
+                                Closed (Locked)
+                              </span>
+                            ) : (
+                              <span
+                                className={`inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full ${
+                                  service.isAvailable
+                                    ? "bg-green-100 text-green-700 border border-green-300"
+                                    : "bg-red-100 text-red-700 border border-red-300"
+                                }`}
+                              >
+                                <div className={`w-2 h-2 rounded-full mr-2 ${service.isAvailable ? "bg-green-500" : "bg-red-500"}`}></div>
+                                {service.isAvailable ? "Available" : "Unavailable"}
+                              </span>
+                            )}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-900">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                             {currentServiceCenterId}
                           </td>
                         </tr>
-                      ))
-                    )}
+                      ));
+                    })}
                   </tbody>
                 </table>
               </div>
-              <div className="bg-neutral-50 px-6 py-4 border-t border-neutral-200">
-                <div className="flex justify-between items-center text-sm text-neutral-600">
-                  <span>
+              
+              {/* Table Footer with Stats */}
+              <div className="bg-gray-50 px-6 py-4 mt-4 rounded-lg border border-gray-200">
+                <div className="flex flex-wrap justify-between items-center gap-4">
+                  <div className="text-sm font-medium text-gray-700">
                     Total Records:{" "}
-                    {dateServiceAvailabilities.reduce(
-                      (total, dateAvailability) =>
-                        total + dateAvailability.services.length,
-                      0
-                    )}
-                  </span>
-                  <div className="flex space-x-4">
-                    <span className="flex items-center">
-                      <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                      Available:{" "}
+                    <span className="text-blue-600 font-bold">
                       {dateServiceAvailabilities.reduce(
                         (total, dateAvailability) =>
-                          total +
-                          dateAvailability.services.filter((s) => s.isAvailable)
-                            .length,
-                        0
-                      )}
-                    </span>
-                    <span className="flex items-center">
-                      <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-                      Unavailable:{" "}
-                      {dateServiceAvailabilities.reduce(
-                        (total, dateAvailability) =>
-                          total +
-                          dateAvailability.services.filter((s) => !s.isAvailable)
-                            .length,
+                          total + dateAvailability.services.length,
                         0
                       )}
                     </span>
                   </div>
+                  <div className="flex flex-wrap gap-6">
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                      <span className="text-sm text-gray-700">
+                        Available:{" "}
+                        <span className="font-semibold text-green-600">
+                          {dateServiceAvailabilities.reduce(
+                            (total, dateAvailability) =>
+                              total +
+                              dateAvailability.services.filter((s) => s.isAvailable)
+                                .length,
+                            0
+                          )}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                      <span className="text-sm text-gray-700">
+                        Unavailable:{" "}
+                        <span className="font-semibold text-red-600">
+                          {dateServiceAvailabilities.reduce(
+                            (total, dateAvailability) =>
+                              total +
+                              dateAvailability.services.filter((s) => !s.isAvailable)
+                                .length,
+                            0
+                          )}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            </>
           )}
         </div>
       )}

@@ -143,14 +143,18 @@ const ServiceCenterDashboard = () => {
   }, [serviceCenterId]);
 
   useEffect(() => {
-    fetchData();
+    fetchData().catch((error) => {
+      console.error("Error in fetchData useEffect:", error);
+    });
   }, [serviceCenterId, fetchData]);
 
   // Refresh data when the page becomes visible (e.g., when returning from closure schedule)
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden && serviceCenterId) {
-        fetchData();
+        fetchData().catch((error) => {
+          console.error("Error in visibility change handler:", error);
+        });
       }
     };
 
