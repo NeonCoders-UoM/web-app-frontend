@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import colors from "@/styles/colors";
-import Button from "@/components/atoms/button/button";
+import "@/styles/closure-calendar.css";
+import { Calendar as CalendarIcon, Clock, Check, X, AlertCircle, Lock, Unlock } from "lucide-react";
 
 interface ServiceOption {
   id: number;
@@ -35,11 +35,13 @@ const ScheduleShopClosures: React.FC<ScheduleShopClosuresProps> = ({
   onModeChange,
   closedDates = new Set(),
 }) => {
+  const [step, setStep] = useState(1);
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [serviceAvailabilities, setServiceAvailabilities] = useState<{
     [serviceId: number]: boolean;
   }>({});
   const [isServiceMode, setIsServiceMode] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Reset service availabilities when switching to service mode
   useEffect(() => {
@@ -67,6 +69,7 @@ const ScheduleShopClosures: React.FC<ScheduleShopClosuresProps> = ({
     }
 
     try {
+      setIsSubmitting(true);
       if (isServiceMode) {
         // In service mode, pass the service availabilities
         const serviceAvailabilityData = availableServices.map((service) => ({
@@ -78,9 +81,14 @@ const ScheduleShopClosures: React.FC<ScheduleShopClosuresProps> = ({
         // In closure mode, pass empty array to indicate full closure
         await onSave(selectedDates, []);
       }
+      // Reset form after successful save
+      setSelectedDates([]);
+      setStep(1);
     } catch (error) {
       console.error("Error saving changes:", error);
       alert("An error occurred while saving. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -134,180 +142,179 @@ const ScheduleShopClosures: React.FC<ScheduleShopClosuresProps> = ({
     );
   };
 
+  const formatDisplayDate = (date: Date) => {
+    return date.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const canProceedToNextStep = () => {
+    if (step === 1) return true; // Can always proceed from mode selection
+    if (step === 2) return selectedDates.length > 0;
+    if (step === 3 && isServiceMode) return true;
+    return false;
+  };
+
+  const hasClosedDatesInSelection = selectedDates.some(date => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateKey = `${year}-${month}-${day}`;
+    return closedDates.has(dateKey);
+  });
+
   return (
-    <div
-      className="p-6 rounded-lg space-y-6"
-      style={{
-        backgroundColor: "#F3F7FF",
-        fontFamily: "var(--font-family-text)",
-      }}
-    >
-      <div
-        className="text-lg font-semibold"
-        style={{ color: colors.neutral[600] }}
-      >
-        Schedule Service Availability
+    <div className="space-y-6">
+      {/* Progress Steps */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between max-w-2xl mx-auto">
+          {[1, 2, 3].map((num) => (
+            <div key={num} className="flex items-center flex-1">
+              <div className="flex flex-col items-center flex-1">
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300 ${
+                    step >= num
+                      ? "bg-blue-600 text-white shadow-lg"
+                      : "bg-gray-200 text-gray-600"
+                  }`}
+                >
+                  {step > num ? <Check className="w-5 h-5" /> : num}
+                </div>
+                <span className="text-xs mt-2 text-gray-600 text-center">
+                  {num === 1 && "Select Mode"}
+                  {num === 2 && "Choose Dates"}
+                  {num === 3 && isServiceMode ? "Configure Services" : "Review"}
+                </span>
+              </div>
+              {num < 3 && (
+                <div
+                  className={`h-1 flex-1 transition-all duration-300 ${
+                    step > num ? "bg-blue-600" : "bg-gray-200"
+                  }`}
+                />
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Mode Selection */}
-      <div className="space-y-2">
-        <div className="flex items-center space-x-4">
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="mode"
-              checked={!isServiceMode}
-              onChange={() => {
+      {/* Step 1: Mode Selection */}
+      {step === 1 && (
+        <div className="space-y-6 animate-fadeIn">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Choose Your Action</h2>
+            <p className="text-gray-600">Select how you want to manage service availability</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Closure Mode Card */}
+            <div
+              onClick={() => {
                 setIsServiceMode(false);
-                onModeChange?.(true); // true for closure mode
+                onModeChange?.(true);
               }}
-              className="mr-2"
-            />
-            <span className="text-sm text-neutral-600">
-              Close Entire Service Center (Only Selected Dates)
-            </span>
-          </label>
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="mode"
-              checked={isServiceMode}
-              onChange={() => {
+              className={`p-6 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
+                !isServiceMode
+                  ? "border-red-500 bg-red-50 shadow-lg scale-105"
+                  : "border-gray-200 hover:border-gray-300 hover:shadow-md"
+              }`}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                  !isServiceMode ? "bg-red-100" : "bg-gray-100"
+                }`}>
+                  <Lock className={`w-6 h-6 ${
+                    !isServiceMode ? "text-red-600" : "text-gray-600"
+                  }`} />
+                </div>
+                {!isServiceMode && (
+                  <Check className="w-6 h-6 text-red-600" />
+                )}
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Complete Closure</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Close the entire service center for selected dates. All services will be unavailable.
+              </p>
+              <div className="flex items-center text-xs text-gray-500">
+                <AlertCircle className="w-4 h-4 mr-1" />
+                Best for holidays or facility maintenance
+              </div>
+            </div>
+
+            {/* Service Mode Card */}
+            <div
+              onClick={() => {
                 setIsServiceMode(true);
-                onModeChange?.(false); // false for service mode
+                onModeChange?.(false);
               }}
-              className="mr-2"
-            />
-            <span className="text-sm text-neutral-600">
-              Set Individual Service Availability (For Selected Dates)
-            </span>
-          </label>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <div className="p-3 bg-white rounded-md border border-neutral-150">
-            <div className="text-sm font-medium text-neutral-600">
-              Select Dates to Modify
-            </div>
-            <div className="text-xs text-neutral-500 mt-1">
-              Today:{" "}
-              {new Date().toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
+              className={`p-6 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
+                isServiceMode
+                  ? "border-blue-500 bg-blue-50 shadow-lg scale-105"
+                  : "border-gray-200 hover:border-gray-300 hover:shadow-md"
+              }`}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                  isServiceMode ? "bg-blue-100" : "bg-gray-100"
+                }`}>
+                  <Unlock className={`w-6 h-6 ${
+                    isServiceMode ? "text-blue-600" : "text-gray-600"
+                  }`} />
+                </div>
+                {isServiceMode && (
+                  <Check className="w-6 h-6 text-blue-600" />
+                )}
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Custom Availability</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Set availability for individual services. Keep some services open while others are unavailable.
+              </p>
+              <div className="flex items-center text-xs text-gray-500">
+                <AlertCircle className="w-4 h-4 mr-1" />
+                Flexible control over service offerings
+              </div>
             </div>
           </div>
-          <p className="text-xs text-neutral-500">
-            Click on dates in the calendar to select/deselect dates. Only
-            selected dates will be affected by your changes.
-          </p>
         </div>
+      )}
 
-        {/* Service Selection (only show in service mode) */}
-        {isServiceMode && availableServices.length > 0 && (
-          <div className="space-y-2">
-            {selectedDates.some(date => {
-              const year = date.getFullYear();
-              const month = String(date.getMonth() + 1).padStart(2, '0');
-              const day = String(date.getDate()).padStart(2, '0');
-              const dateKey = `${year}-${month}-${day}`;
-              return closedDates.has(dateKey);
-            }) ? (
-              <div className="p-4 bg-red-50 rounded-md border-2 border-red-300">
-                <div className="flex items-start text-red-700 mb-3">
-                  <svg className="w-6 h-6 mr-3 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-                  </svg>
-                  <div>
-                    <p className="text-sm font-semibold mb-1">Service Availability Locked</p>
-                    <p className="text-xs">Some selected dates have closure schedules. You must remove the closures first before modifying individual service availability.</p>
-                  </div>
-                </div>
-                <div className="p-3 bg-white rounded-md border border-gray-300 opacity-60">
-                  <div className="text-sm font-medium text-gray-500 mb-2">
-                    Set Service Availability for Selected Dates
-                  </div>
-                  <div className="text-xs text-gray-400 mb-3">
-                    Service toggles are disabled for dates with closures.
-                  </div>
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {availableServices.map((service) => (
-                      <div
-                        key={service.id}
-                        className="flex items-center justify-between opacity-50"
-                      >
-                        <span className="text-sm text-gray-500 flex-1">
-                          {service.name}
-                        </span>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-xs text-gray-400">
-                            Unavailable
-                          </span>
-                          <label className="relative inline-flex items-center cursor-not-allowed">
-                            <input
-                              type="checkbox"
-                              checked={false}
-                              disabled
-                              className="sr-only peer"
-                            />
-                            <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-                          </label>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="p-3 bg-white rounded-md border border-neutral-150">
-                <div className="text-sm font-medium text-neutral-600 mb-2">
-                  Set Service Availability for Selected Dates
-                </div>
-                <div className="text-xs text-neutral-500 mb-3">
-                  All services are available by default. Toggle switches to make
-                  services unavailable for selected dates.
-                </div>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {availableServices.map((service) => (
-                    <div
-                      key={service.id}
-                      className="flex items-center justify-between"
-                    >
-                      <span className="text-sm text-neutral-600 flex-1">
-                        {service.name}
-                      </span>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xs text-neutral-500">
-                          {serviceAvailabilities[service.id] ?? true
-                            ? "Available"
-                            : "Unavailable"}
-                        </span>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={serviceAvailabilities[service.id] ?? true}
-                            onChange={() =>
-                              handleServiceAvailabilityToggle(service.id)
-                            }
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                        </label>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+      {/* Step 2: Date Selection */}
+      {step === 2 && (
+        <div className="space-y-6 animate-fadeIn">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Select Dates</h2>
+            <p className="text-gray-600">
+              {isServiceMode
+                ? "Choose dates to modify service availability"
+                : "Choose dates to close the service center"}
+            </p>
           </div>
-        )}
 
-        {/* Date Selection Calendar */}
-        <div className="space-y-2">
-          <div className="bg-white p-4 rounded-md border border-neutral-150">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700">Calendar</h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  Click dates to select/deselect • Today: {new Date().toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </p>
+              </div>
+              {selectedDates.length > 0 && (
+                <div className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg">
+                  <CalendarIcon className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-semibold text-blue-600">
+                    {selectedDates.length} date{selectedDates.length > 1 ? "s" : ""} selected
+                  </span>
+                </div>
+              )}
+            </div>
+
             <Calendar
               onChange={handleDateSelect}
               value={null}
@@ -319,43 +326,316 @@ const ScheduleShopClosures: React.FC<ScheduleShopClosuresProps> = ({
               }}
               minDate={new Date()}
             />
-          </div>
-          {selectedDates.length > 0 && (
-            <div className="p-3 bg-blue-50 rounded-md border border-blue-200">
-              <p className="text-xs text-blue-700 mb-2 font-medium">
-                Selected dates ({selectedDates.length}):
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {selectedDates.map((date, index) => (
-                  <span
-                    key={index}
-                    className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded font-medium"
-                  >
-                    {date.toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </span>
-                ))}
+
+            {selectedDates.length > 0 && (
+              <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Check className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-blue-900 mb-2">
+                      Selected Dates ({selectedDates.length})
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedDates.map((date, index) => (
+                        <div
+                          key={index}
+                          className="group relative px-3 py-1.5 bg-white rounded-lg border border-blue-200 shadow-sm hover:shadow-md transition-all"
+                        >
+                          <div className="flex items-center gap-2">
+                            <CalendarIcon className="w-3 h-3 text-blue-600" />
+                            <span className="text-xs font-medium text-gray-800">
+                              {date.toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                              })}
+                            </span>
+                            <button
+                              onClick={() => handleDateSelect(date)}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="w-3 h-3 text-red-500 hover:text-red-700" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-blue-700 mt-3">
+                      {isServiceMode
+                        ? "✨ These dates will have custom service availability"
+                        : "🔒 These dates will be completely closed"}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-blue-600 mt-2">
-                {isServiceMode
-                  ? "These dates will have their service availability modified."
-                  : "These dates will be closed (all services unavailable)."}
-              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Step 3: Service Configuration (only in service mode) */}
+      {step === 3 && isServiceMode && (
+        <div className="space-y-6 animate-fadeIn">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Configure Service Availability</h2>
+            <p className="text-gray-600">
+              Set which services will be available on the selected dates
+            </p>
+          </div>
+
+          {hasClosedDatesInSelection ? (
+            <div className="bg-red-50 border-2 border-red-300 rounded-xl p-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Lock className="w-6 h-6 text-red-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-red-900 mb-2">Services Locked</h3>
+                  <p className="text-sm text-red-800 mb-4">
+                    Some selected dates have closure schedules. You must remove the closures first before modifying individual service availability.
+                  </p>
+                  <div className="bg-white/60 rounded-lg p-4 border border-red-200">
+                    <p className="text-xs font-semibold text-red-700 mb-3">Services (Locked)</p>
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {availableServices.map((service) => (
+                        <div
+                          key={service.id}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg opacity-50"
+                        >
+                          <span className="text-sm font-medium text-gray-600">
+                            {service.name}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-500 px-2 py-1 bg-gray-200 rounded">
+                              Unavailable
+                            </span>
+                            <div className="w-11 h-6 bg-gray-300 rounded-full relative">
+                              <div className="absolute top-[2px] left-[2px] bg-white rounded-full h-5 w-5"></div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-semibold text-gray-700">Available Services</h3>
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span>Available</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      <span>Unavailable</span>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500">
+                  Toggle services to set availability. Green = Available, Red = Unavailable
+                </p>
+              </div>
+
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {availableServices.map((service) => {
+                  const isAvailable = serviceAvailabilities[service.id] ?? true;
+                  return (
+                    <div
+                      key={service.id}
+                      className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
+                        isAvailable
+                          ? "border-green-200 bg-green-50"
+                          : "border-red-200 bg-red-50"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                          isAvailable ? "bg-green-100" : "bg-red-100"
+                        }`}>
+                          {isAvailable ? (
+                            <Check className="w-5 h-5 text-green-600" />
+                          ) : (
+                            <X className="w-5 h-5 text-red-600" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">
+                            {service.name}
+                          </p>
+                          <p className={`text-xs font-medium ${
+                            isAvailable ? "text-green-600" : "text-red-600"
+                          }`}>
+                            {isAvailable ? "Available for booking" : "Not available"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={isAvailable}
+                          onChange={() => handleServiceAvailabilityToggle(service.id)}
+                          className="sr-only peer"
+                        />
+                        <div className={`w-14 h-7 rounded-full peer transition-all duration-300 ${
+                          isAvailable ? "bg-green-500" : "bg-red-500"
+                        } peer-focus:ring-4 peer-focus:ring-${isAvailable ? "green" : "red"}-300`}>
+                          <div className={`absolute top-0.5 left-0.5 bg-white border-2 border-gray-200 rounded-full h-6 w-6 transition-all duration-300 ${
+                            isAvailable ? "translate-x-7" : "translate-x-0"
+                          }`}></div>
+                        </div>
+                      </label>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
+      )}
+
+      {/* Step 3: Review (closure mode) */}
+      {step === 3 && !isServiceMode && (
+        <div className="space-y-6 animate-fadeIn">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Review Closure</h2>
+            <p className="text-gray-600">Confirm the dates you want to close</p>
+          </div>
+
+          <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-300 rounded-xl p-6">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Lock className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-red-900 mb-2">Complete Closure Scheduled</h3>
+                <p className="text-sm text-red-800">
+                  The service center will be completely closed on the following dates. All services will be unavailable.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg p-4 border border-red-200">
+              <p className="text-xs font-semibold text-gray-700 mb-3">Affected Dates:</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {selectedDates.map((date, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-2 p-3 bg-red-50 rounded-lg border border-red-200"
+                  >
+                    <CalendarIcon className="w-4 h-4 text-red-600" />
+                    <span className="text-sm font-medium text-gray-800">
+                      {formatDisplayDate(date)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Navigation Buttons */}
+      <div className="flex justify-between items-center pt-6 border-t border-gray-200">
+        <button
+          onClick={() => {
+            if (step === 1) {
+              setSelectedDates([]);
+              setServiceAvailabilities({});
+            } else {
+              setStep(step - 1);
+            }
+          }}
+          disabled={isSubmitting}
+          className="px-6 py-2.5 border-2 border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {step === 1 ? "Reset" : "Previous"}
+        </button>
+
+        {step < 3 ? (
+          <button
+            onClick={() => setStep(step + 1)}
+            disabled={!canProceedToNextStep()}
+            className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+          >
+            Next Step
+          </button>
+        ) : (
+          <button
+            onClick={handleSave}
+            disabled={isSubmitting || (isServiceMode && hasClosedDatesInSelection)}
+            className="px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-md hover:shadow-lg flex items-center gap-2"
+          >
+            {isSubmitting ? (
+              <>
+                <Clock className="w-4 h-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Check className="w-5 h-5" />
+                {isServiceMode ? "Update Availability" : "Confirm Closure"}
+              </>
+            )}
+          </button>
+        )}
       </div>
 
-      <div className="flex justify-end">
-        <Button variant="primary" size="small" onClick={handleSave}>
-          {isServiceMode
-            ? "Update Service Availability"
-            : "Close Service Center"}
-        </Button>
-      </div>
+      {/* Summary Panel */}
+      {(selectedDates.length > 0 || !isServiceMode) && step > 1 && (
+        <div className="mt-6 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 border border-gray-200">
+          <h3 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4" />
+            Summary
+          </h3>
+          <div className="space-y-3 text-sm">
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Mode:</span>
+              <span className={`font-semibold px-3 py-1 rounded-full text-xs ${
+                isServiceMode
+                  ? "bg-blue-100 text-blue-700"
+                  : "bg-red-100 text-red-700"
+              }`}>
+                {isServiceMode ? "Custom Availability" : "Complete Closure"}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Dates Selected:</span>
+              <span className="font-semibold text-gray-900">{selectedDates.length}</span>
+            </div>
+            {isServiceMode && step === 3 && (
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Available Services:</span>
+                <span className="font-semibold text-green-600">
+                  {Object.values(serviceAvailabilities).filter(v => v).length} / {availableServices.length}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 };

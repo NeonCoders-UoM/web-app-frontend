@@ -556,12 +556,10 @@ const ManageServices = () => {
 
   if (isLoading) {
     return (
-      <div
-        className="p-6 space-y-6"
-        style={{ backgroundColor: "#FFFFFF", minHeight: "100vh" }}
-      >
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8">
+        <div className="flex flex-col justify-center items-center h-96">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-blue-600 mb-4"></div>
+          <p className="text-gray-600 font-medium">Loading closure schedule...</p>
         </div>
       </div>
     );
@@ -569,15 +567,12 @@ const ManageServices = () => {
 
   if (serviceCenters.length === 0) {
     return (
-      <div
-        className="p-6 space-y-6"
-        style={{ backgroundColor: "#FFFFFF", minHeight: "100vh" }}
-      >
-        <h1 className="h2 text-neutral-600">Service Center Closure Schedule</h1>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-          <div className="text-red-400 mb-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-8">Service Center Closure Schedule</h1>
+        <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border border-red-200 p-8 text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
-              className="w-16 h-16 mx-auto"
+              className="w-8 h-8 text-red-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -590,10 +585,10 @@ const ManageServices = () => {
               />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-red-800 mb-2">
+          <h3 className="text-xl font-bold text-red-900 mb-2">
             No Service Centers Available
           </h3>
-          <p className="text-red-700 text-sm">
+          <p className="text-gray-600 text-sm">
             No service centers were found. Please ensure service centers are
             properly configured in the system.
           </p>
@@ -604,15 +599,12 @@ const ManageServices = () => {
 
   if (currentServiceCenterId === null) {
     return (
-      <div
-        className="p-6 space-y-6"
-        style={{ backgroundColor: "#FFFFFF", minHeight: "100vh" }}
-      >
-        <h1 className="h2 text-neutral-600">Service Center Closure Schedule</h1>
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-          <div className="text-yellow-400 mb-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-8">Service Center Closure Schedule</h1>
+        <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border border-yellow-200 p-8 text-center">
+          <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
-              className="w-16 h-16 mx-auto"
+              className="w-8 h-8 text-yellow-500"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -625,10 +617,10 @@ const ManageServices = () => {
               />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-yellow-800 mb-2">
+          <h3 className="text-xl font-bold text-yellow-900 mb-2">
             No Service Center Selected
           </h3>
-          <p className="text-yellow-700 text-sm">
+          <p className="text-gray-600 text-sm">
             Please select a service center to manage closure schedules.
           </p>
         </div>
