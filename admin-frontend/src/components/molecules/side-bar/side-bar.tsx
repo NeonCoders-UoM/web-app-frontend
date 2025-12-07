@@ -99,14 +99,14 @@ const currentStationId =
     return [
       {
         label: "Dashboard",
-        route: `/service-center-dashboard/${currentStationId}`,
+        route: `/service-center-dashboard/${currentStationId}?stationId=${currentStationId}`,
       },
-      { label: "Clients", route: "/client" },
-      { label: "Vehicles", route: "/vehicle" },
-      { label: "Service Status", route: "/service-status" },
-      { label: "Appointments", route: "/appointment" },
-      { label: "Feedback", route: "/feedback" },
-      { label: "Closure Schedule", route: "/closure-schedule" },
+      { label: "Appointments", route: `/appointment?stationId=${currentStationId}` },
+      { label: "Clients", route: `/client?stationId=${currentStationId}` },
+      { label: "Vehicles", route: `/vehicle?stationId=${currentStationId}` },
+      { label: "Feedback", route: `/feedback?stationId=${currentStationId}` },
+      { label: "Service Status", route: `/service-status?stationId=${currentStationId}` },
+      { label: "Closure Schedule", route: `/closure-schedule?stationId=${currentStationId}` },
     ];
   };
 
@@ -114,13 +114,13 @@ const currentStationId =
     return [
       {
         label: "Dashboard",
-        route: `/service-center-dashboard/${currentStationId}`,
+        route: `/service-center-dashboard/${currentStationId}?stationId=${currentStationId}`,
       },
-      { label: "Clients", route: "/client" },
-      { label: "Vehicles", route: "/vehicle" },
-      { label: "Service Status", route: "/service-status" },
-      { label: "Appointments", route: "/appointment" },
-      { label: "Feedback", route: "/feedback" },
+      { label: "Appointments", route: `/appointment?stationId=${currentStationId}` },
+      { label: "Clients", route: `/client?stationId=${currentStationId}` },
+      { label: "Vehicles", route: `/vehicle?stationId=${currentStationId}` },
+      { label: "Feedback", route: `/feedback?stationId=${currentStationId}` },
+      { label: "Service Status", route: `/service-status?stationId=${currentStationId}` },
     ];
   };
 
@@ -128,14 +128,14 @@ const currentStationId =
     return [
       {
         label: "Dashboard",
-        route: `/service-center-dashboard/${currentStationId}`,
+        route: `/service-center-dashboard/${currentStationId}?stationId=${currentStationId}`,
       },
-      { label: "Clients", route: "/client" },
-      { label: "Vehicles", route: "/vehicle" },
-      { label: "Service Status", route: "/service-status" },
-      { label: "Appointments", route: "/appointment" },
-      { label: "Feedback", route: "/feedback" },
-      { label: "Closure Schedule", route: "/closure-schedule" },
+      { label: "Appointments", route: `/appointment?stationId=${currentStationId}` },
+      { label: "Clients", route: `/client?stationId=${currentStationId}` },
+      { label: "Vehicles", route: `/vehicle?stationId=${currentStationId}` },
+      { label: "Feedback", route: `/feedback?stationId=${currentStationId}` },
+      { label: "Service Status", route: `/service-status?stationId=${currentStationId}` },
+      { label: "Closure Schedule", route: `/closure-schedule?stationId=${currentStationId}` },
     ];
   };
 
