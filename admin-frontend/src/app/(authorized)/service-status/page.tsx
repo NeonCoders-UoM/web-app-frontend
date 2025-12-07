@@ -11,6 +11,7 @@ import {
   completeAppointment,
   fetchAppointmentDetail,
   fetchServiceCenterServices,
+  addServicesToAppointment,
 } from "@/utils/api";
 
 // Use the AppointmentDetail type from api.ts
@@ -217,7 +218,22 @@ export default function Page() {
         return;
       }
 
-      // Step 1: Create service history records for completed services
+      // Step 1: Add selected services to AppointmentServices table
+      const serviceNames = selectedServices.map((s) => s.service);
+      try {
+        await addServicesToAppointment(
+          appointmentDetails.appointmentId,
+          serviceNames
+        );
+      } catch (appointmentServiceError) {
+        console.error(
+          "Error adding services to appointment:",
+          appointmentServiceError
+        );
+        // Continue even if this fails - we still want to create service history
+      }
+
+      // Step 2: Create service history records for completed services
       for (const service of selectedServices) {
         try {
           await addServiceHistory(vehicleId, {
@@ -244,7 +260,7 @@ export default function Page() {
         }
       }
 
-      // Step 2: Mark appointment as "Completed" using the backend endpoint
+      // Step 3: Mark appointment as "Completed" using the backend endpoint
       await completeAppointment(appointmentDetails.appointmentId);
 
       setFeedback(

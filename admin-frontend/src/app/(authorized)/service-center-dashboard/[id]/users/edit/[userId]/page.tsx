@@ -1,0 +1,305 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import UserProfileCard from "@/components/molecules/user-card/user-card";
+import { fetchServiceCenterById, getUserById } from "@/utils/api";
+import { ServiceCenter, ServiceCenterUser } from "@/types";
+import axiosInstance from "@/utils/axios";
+
+const roleMap: { [key: string]: number } = {
+  Cashier: 4,
+  "Data Operator": 5,
+};
+
+const EditServiceCenterUser = () => {
+  const params = useParams();
+  const router = useRouter();
+  const serviceCenterId = params.id as string;
+  const userId = params.userId as string;
+
+  const [serviceCenter, setServiceCenter] = useState<ServiceCenter | null>(null);
+  const [user, setUser] = useState<ServiceCenterUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    newPassword: "",
+    userRole: "Cashier",
+  });
+
+  useEffect(() => {
+    const userRole = localStorage.getItem("userRole");
+    const userStationId = localStorage.getItem("station_id");
+
+    if (userRole !== "ServiceCenterAdmin") {
+      router.push(`/service-center-dashboard/${serviceCenterId}`);
+      return;
+    }
+
+    if (userStationId && userStationId !== serviceCenterId) {
+      router.push(`/service-center-dashboard/${userStationId}`);
+      return;
+    }
+
+    fetchData();
+  }, [serviceCenterId, userId]);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const [centerData, userData] = await Promise.all([
+        fetchServiceCenterById(serviceCenterId),
+        getUserById(userId),
+      ]);
+
+      setServiceCenter(centerData);
+      setUser(userData);
+      setFormData({
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        newPassword: "",
+        userRole: userData.userRole === "DataOperator" ? "Data Operator" : userData.userRole,
+      });
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      alert("Failed to load user data");
+      router.push(`/service-center-dashboard/${serviceCenterId}/users`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validation
+    if (!formData.firstName.trim()) {
+      alert("Please enter first name");
+      return;
+    }
+    if (!formData.lastName.trim()) {
+      alert("Please enter last name");
+      return;
+    }
+    if (formData.newPassword && formData.newPassword.length < 8) {
+      alert("Password must be at least 8 characters long");
+      return;
+    }
+
+    const userRoleId = roleMap[formData.userRole];
+
+    try {
+      setIsSubmitting(true);
+      await axiosInstance.put(`/Admin/${userId}`, {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        userRoleId,
+        password: formData.newPassword || undefined,
+        Station_id: serviceCenterId,
+      });
+
+      alert("User updated successfully!");
+      router.push(`/service-center-dashboard/${serviceCenterId}/users`);
+    } catch (error: any) {
+      console.error("Error updating user:", error);
+      const errorMessage = error.response?.data || "Failed to update user. Please try again.";
+      alert(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8">
+        <div className="flex flex-col justify-center items-center h-96">
+          <Loader2 className="w-16 h-16 animate-spin text-blue-600 mb-4" />
+          <p className="text-gray-600 font-medium">Loading user data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8">
+      {/* Header */}
+      <div className="mb-8 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => router.push(`/service-center-dashboard/${serviceCenterId}/users`)}
+            className="p-2 hover:bg-white rounded-lg transition-colors"
+          >
+            <ArrowLeft className="w-6 h-6 text-gray-600" />
+          </button>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">Edit User</h1>
+            <p className="text-gray-600 mt-1">
+              {serviceCenter?.serviceCenterName || "Service Center"}
+            </p>
+          </div>
+        </div>
+        <UserProfileCard
+          pictureSrc="/images/profipic.jpg"
+          pictureAlt="User Profile"
+          useCurrentUser={true}
+          onLogout={() => {
+            localStorage.removeItem("token");
+            router.push("/login");
+          }}
+        />
+      </div>
+
+      {/* Form */}
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+          <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-200">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+              {user?.firstName[0]}
+              {user?.lastName[0]}
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">
+                {user?.firstName} {user?.lastName}
+              </h2>
+              <p className="text-sm text-gray-500">{user?.email}</p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* First Name */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                First Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder="Enter first name"
+              />
+            </div>
+
+            {/* Last Name */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Last Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder="Enter last name"
+              />
+            </div>
+
+            {/* Email (Read-only) */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                disabled
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+              />
+              <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+            </div>
+
+            {/* New Password */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                New Password (Optional)
+              </label>
+              <input
+                type="password"
+                name="newPassword"
+                value={formData.newPassword}
+                onChange={handleChange}
+                minLength={8}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder="Leave blank to keep current password"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Minimum 8 characters. Leave blank to keep current password
+              </p>
+            </div>
+
+            {/* User Role */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                User Role <span className="text-red-500">*</span>
+              </label>
+              <select
+                name="userRole"
+                value={formData.userRole}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
+              >
+                <option value="Cashier">Cashier</option>
+                <option value="Data Operator">Data Operator</option>
+              </select>
+            </div>
+
+            {/* Service Center Info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm font-medium text-blue-900 mb-1">Service Center Assignment</p>
+              <p className="text-sm text-blue-700">
+                Assigned to: <span className="font-semibold">{serviceCenter?.serviceCenterName || serviceCenterId}</span>
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-4 pt-6 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={() => router.push(`/service-center-dashboard/${serviceCenterId}/users`)}
+                disabled={isSubmitting}
+                className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-5 h-5" />
+                    Save Changes
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EditServiceCenterUser;

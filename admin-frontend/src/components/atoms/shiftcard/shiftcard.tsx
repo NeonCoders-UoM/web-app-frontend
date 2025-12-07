@@ -7,9 +7,10 @@ type ShiftCardProps = {
   date: string; // ISO date string, e.g., "2025-09-13" or "2025-09-13T00:00:00Z"
   status: string; // e.g., "Closed"
   day?: string; // Optional weekday, e.g., "Sat"
+  onDelete?: () => void; // Optional delete handler
 };
 
-const ShiftCard: React.FC<ShiftCardProps> = ({ date, status, day }) => {
+const ShiftCard: React.FC<ShiftCardProps> = ({ date, status, day, onDelete }) => {
   // Determine status color based on the status value
   const statusColor =
     status.toLowerCase() === "locked" ? colors.neutral[600] : colors.states.ok;
@@ -68,9 +69,32 @@ const ShiftCard: React.FC<ShiftCardProps> = ({ date, status, day }) => {
       >
         {displayText}
       </span>
-      <span className="text-md font-semibold" style={{ color: statusColor }}>
-        {status.toUpperCase()}
-      </span>
+      <div className="flex items-center gap-3">
+        <span className="text-md font-semibold" style={{ color: statusColor }}>
+          {status.toUpperCase()}
+        </span>
+        {onDelete && (
+          <button
+            onClick={onDelete}
+            className="p-1 hover:bg-red-100 rounded-md transition-colors"
+            title="Delete closure"
+          >
+            <svg
+              className="w-5 h-5 text-red-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
+          </button>
+        )}
+      </div>
     </div>
   );
 };

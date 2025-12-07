@@ -105,6 +105,8 @@ const UserProfileCard = ({
 
   // Format role for display
   const formatRole = (role: string): string => {
+    if (!role) return "User";
+    
     switch (role.toLowerCase()) {
       case "admin":
         return "Admin"
@@ -127,6 +129,8 @@ const UserProfileCard = ({
 
   // Get role icon based on user role with modern colors
   const getRoleIcon = (role: string) => {
+    if (!role) return <User className="w-4 h-4" />;
+    
     const roleLower = role.toLowerCase()
     switch (roleLower) {
       case "admin":

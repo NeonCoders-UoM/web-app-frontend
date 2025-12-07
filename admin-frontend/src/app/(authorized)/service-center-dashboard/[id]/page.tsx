@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { Users } from "lucide-react";
 import StatusCard from "@/components/atoms/status-cards/status-card";
 import Table from "@/components/organism/table/table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
@@ -67,6 +68,13 @@ const ServiceCenterDashboard = () => {
   const [leadingServices, setLeadingServices] = useState<string[][]>([]);
   const [availableServicesCount, setAvailableServicesCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isServiceCenterAdmin, setIsServiceCenterAdmin] = useState(false);
+
+  // Check user role on client side only
+  useEffect(() => {
+    const userRole = localStorage.getItem("userRole");
+    setIsServiceCenterAdmin(userRole === "ServiceCenterAdmin");
+  }, []);
 
   const fetchData = useCallback(async () => {
     if (!serviceCenterId) return;
@@ -143,14 +151,18 @@ const ServiceCenterDashboard = () => {
   }, [serviceCenterId]);
 
   useEffect(() => {
-    fetchData();
+    fetchData().catch((error) => {
+      console.error("Error in fetchData useEffect:", error);
+    });
   }, [serviceCenterId, fetchData]);
 
   // Refresh data when the page becomes visible (e.g., when returning from closure schedule)
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden && serviceCenterId) {
-        fetchData();
+        fetchData().catch((error) => {
+          console.error("Error in visibility change handler:", error);
+        });
       }
     };
 
@@ -182,7 +194,13 @@ const ServiceCenterDashboard = () => {
       {/* Main Content */}
       <div className="max-w-full mx-auto w-full">
         {/* Header with user profile */}
-        <div className="flex justify-end items-center mb-10">
+        <div className="flex justify-between items-center mb-10">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard</h1>
+            <p className="text-gray-600">
+              {serviceCenter?.serviceCenterName || "Service Center"}
+            </p>
+          </div>
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
             pictureAlt="User Profile"
@@ -193,6 +211,19 @@ const ServiceCenterDashboard = () => {
             }}
           />
         </div>
+
+        {/* User Management Link (Only for Service Center Admin) */}
+        {isServiceCenterAdmin && (
+          <div className="mb-6">
+            <button
+              onClick={() => router.push(`/service-center-dashboard/${serviceCenterId}/users`)}
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2 font-medium"
+            >
+              <Users className="w-5 h-5" />
+              Manage Users
+            </button>
+          </div>
+        )}
 
         {/* Status Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">

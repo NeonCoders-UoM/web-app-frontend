@@ -77,6 +77,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         localStorage.setItem("serviceCenterName", serviceCenterName || "");
       }
 
+      // Dispatch custom event to notify components of role change
+      window.dispatchEvent(new Event("roleChanged"));
+
       if (data.remember) {
         localStorage.setItem("rememberedEmail", data.email);
       } else {

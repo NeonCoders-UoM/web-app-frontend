@@ -3,6 +3,7 @@ import {
   DashboardStats, 
   Client, 
   User, 
+  ServiceCenterUser,
   Vehicle,
   ServiceCenterDTO,
   CreateServiceCenterDTO,
@@ -1493,43 +1494,22 @@ export const deletePackage = async (id: number): Promise<void> => {
 // Add a new closure schedule
 export const addClosureSchedule = async (closureData: CreateClosureScheduleDTO): Promise<ClosureSchedule> => {
   try {
-    console.log("DEBUG: Sending closure data to API:", closureData);
-    console.log("DEBUG: Closure data details:");
-    console.log("  - serviceCenterId:", closureData.serviceCenterId);
-    console.log("  - closureDate:", closureData.closureDate);
-
-    // Try different endpoint variations for POST
-    const postEndpoints = [
-      '/ClosureSchedule',
-      '/api/ClosureSchedule'
-    ];
-
-    for (const endpoint of postEndpoints) {
-      try {
-        console.log(`DEBUG: Trying POST endpoint: ${endpoint}`);
-        const response = await axiosInstance.post(endpoint, closureData);
-        console.log(`DEBUG: Success with POST endpoint ${endpoint}:`, response.data);
-        console.log("DEBUG: Response status:", response.status);
-        return response.data;
-      } catch (endpointError) {
-        const axiosError = endpointError as { response?: { status?: number }, message?: string };
-        console.log(`DEBUG: POST endpoint ${endpoint} failed:`, axiosError.response?.status || axiosError.message || 'Unknown error');
-        continue;
-      }
-    }
-
-    // If all endpoints fail, throw the last error
-    throw new Error('All POST endpoints for closure schedule failed');
+    // Backend expects ClosureSchedule model with Id, ServiceCenterId, and ClosureDate
+    // C# DateTime can parse ISO 8601 format: YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss
+    // We'll send YYYY-MM-DDTHH:mm:ss.000Z format for better compatibility
+    const closureDateObj = new Date(closureData.closureDate + 'T00:00:00.000Z');
+    
+    const payload = {
+      id: 0, // Backend will reset this anyway
+      serviceCenterId: closureData.serviceCenterId,
+      closureDate: closureDateObj.toISOString() // ISO 8601 format: YYYY-MM-DDTHH:mm:ss.sssZ
+    };
+    
+    console.log('Sending closure schedule payload:', payload);
+    const response = await axiosInstance.post('/ClosureSchedule', payload);
+    return response.data;
   } catch (error) {
     console.error("Error adding closure schedule:", error);
-    if (axios.isAxiosError(error)) {
-      console.error("Error response data:", error.response?.data);
-      console.error("Error response status:", error.response?.status);
-      console.error("Error response headers:", error.response?.headers);
-      console.error("Error request data that was sent:", error.config?.data);
-      console.error("Error request URL:", error.config?.url);
-      console.error("Error request method:", error.config?.method);
-    }
     throw error;
   }
 };
@@ -1537,38 +1517,15 @@ export const addClosureSchedule = async (closureData: CreateClosureScheduleDTO):
 // Get closures for a specific service center and date
 export const getClosures = async (serviceCenterId: number, date: Date): Promise<ClosureSchedule[]> => {
   try {
-    console.log(`DEBUG: Fetching closures for service center ${serviceCenterId}, date ${date.toISOString().split('T')[0]}`);
-
     // Format date for backend (YYYY-MM-DD)
     const dateString = date.toISOString().split('T')[0];
-
-    // Try different endpoint variations
-    const endpoints = [
-      `/ClosureSchedule/${serviceCenterId}?date=${dateString}`,
-      `/api/ClosureSchedule/${serviceCenterId}?date=${dateString}`,
-      `/ClosureSchedule/${serviceCenterId}/${dateString}`,
-      `/api/ClosureSchedule/${serviceCenterId}/${dateString}`
-    ];
-
-    for (const endpoint of endpoints) {
-      try {
-        console.log(`DEBUG: Trying endpoint: ${endpoint}`);
-        const response = await axiosInstance.get(endpoint);
-        console.log(`DEBUG: Success with endpoint ${endpoint}, retrieved ${response.data.length} closures:`, response.data);
-        return response.data;
-      } catch (endpointError) {
-        const axiosError = endpointError as { response?: { status?: number }, message?: string };
-        console.log(`DEBUG: Endpoint ${endpoint} failed:`, axiosError.response?.status || axiosError.message || 'Unknown error');
-        continue;
-      }
-    }
-
-    // If all endpoints fail, return empty array
-    console.log(`DEBUG: All endpoints failed, returning empty array`);
-    return [];
+    
+    const response = await axiosInstance.get(`/ClosureSchedule/${serviceCenterId}`, {
+      params: { date: dateString }
+    });
+    return response.data;
   } catch (error) {
     console.error("Error fetching closures:", error);
-    // Return empty array if no closures found or error occurs
     return [];
   }
 };
@@ -1917,3 +1874,49 @@ export const completeAppointment = async (appointmentId: number): Promise<void> 
   }
 };
 
+// Add services to an existing appointment
+export const addServicesToAppointment = async (
+  appointmentId: number,
+  serviceNames: string[]
+): Promise<void> => {
+  try {
+    await axiosInstance.post(`/Appointment/${appointmentId}/add-services`, serviceNames);
+  } catch (error) {
+    console.error("Error adding services to appointment:", error);
+    throw error;
+  }
+};
+
+// ========== User Management API Functions for Service Centers ==========
+
+// Get users for a specific service center
+export const getServiceCenterUsers = async (serviceCenterId: string): Promise<ServiceCenterUser[]> => {
+  try {
+    const response = await axiosInstance.get(`/Admin/service-center/${serviceCenterId}/users`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching service center users:", error);
+    throw error;
+  }
+};
+
+// Get user by ID
+export const getUserById = async (userId: string): Promise<ServiceCenterUser> => {
+  try {
+    const response = await axiosInstance.get(`/Admin/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    throw error;
+  }
+};
+
+// Delete user
+export const deleteUser = async (userId: string): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/Admin/${userId}`);
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    throw error;
+  }
+};
