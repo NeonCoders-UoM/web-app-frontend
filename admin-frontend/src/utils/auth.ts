@@ -9,6 +9,20 @@ export interface AuthUser {
   serviceCenterName?: string;
 }
 
+export const logout = () => {
+  if (typeof window === "undefined") return;
+  
+  localStorage.removeItem("token");
+  localStorage.removeItem("userId");
+  localStorage.removeItem("userRole");
+  localStorage.removeItem("userRoleId");
+  localStorage.removeItem("station_id");
+  localStorage.removeItem("serviceCenterName");
+  
+  // Dispatch custom event to notify components of role change
+  window.dispatchEvent(new Event("roleChanged"));
+};
+
 export const getAuthUser = (): AuthUser | null => {
   if (typeof window === "undefined") return null;
   

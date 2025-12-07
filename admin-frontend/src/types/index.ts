@@ -228,6 +228,16 @@ export interface User {
   role: string;       // ✅ not UserRoleName
 }
 
+// Service Center User interface for user management
+export interface ServiceCenterUser {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  userRole: string;
+  station_id?: number;
+}
+
 
 
 export interface ShiftCard {
@@ -306,8 +316,9 @@ export interface ClosureSchedule {
 }
 
 export interface CreateClosureScheduleDTO {
+  id?: number; // Optional, backend will set to 0
   serviceCenterId: number;
-  closureDate: string; // ISO date string
+  closureDate: string; // ISO date string (YYYY-MM-DD format)
 }
 
 export interface UpdateClosureScheduleDTO {
