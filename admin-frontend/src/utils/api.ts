@@ -3,6 +3,7 @@ import {
   DashboardStats, 
   Client, 
   User, 
+  ServiceCenterUser,
   Vehicle,
   ServiceCenterDTO,
   CreateServiceCenterDTO,
@@ -1493,7 +1494,19 @@ export const deletePackage = async (id: number): Promise<void> => {
 // Add a new closure schedule
 export const addClosureSchedule = async (closureData: CreateClosureScheduleDTO): Promise<ClosureSchedule> => {
   try {
-    const response = await axiosInstance.post('/ClosureSchedule', closureData);
+    // Backend expects ClosureSchedule model with Id, ServiceCenterId, and ClosureDate
+    // C# DateTime can parse ISO 8601 format: YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss
+    // We'll send YYYY-MM-DDTHH:mm:ss.000Z format for better compatibility
+    const closureDateObj = new Date(closureData.closureDate + 'T00:00:00.000Z');
+    
+    const payload = {
+      id: 0, // Backend will reset this anyway
+      serviceCenterId: closureData.serviceCenterId,
+      closureDate: closureDateObj.toISOString() // ISO 8601 format: YYYY-MM-DDTHH:mm:ss.sssZ
+    };
+    
+    console.log('Sending closure schedule payload:', payload);
+    const response = await axiosInstance.post('/ClosureSchedule', payload);
     return response.data;
   } catch (error) {
     console.error("Error adding closure schedule:", error);
@@ -1861,3 +1874,49 @@ export const completeAppointment = async (appointmentId: number): Promise<void> 
   }
 };
 
+// Add services to an existing appointment
+export const addServicesToAppointment = async (
+  appointmentId: number,
+  serviceNames: string[]
+): Promise<void> => {
+  try {
+    await axiosInstance.post(`/Appointment/${appointmentId}/add-services`, serviceNames);
+  } catch (error) {
+    console.error("Error adding services to appointment:", error);
+    throw error;
+  }
+};
+
+// ========== User Management API Functions for Service Centers ==========
+
+// Get users for a specific service center
+export const getServiceCenterUsers = async (serviceCenterId: string): Promise<ServiceCenterUser[]> => {
+  try {
+    const response = await axiosInstance.get(`/Admin/service-center/${serviceCenterId}/users`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching service center users:", error);
+    throw error;
+  }
+};
+
+// Get user by ID
+export const getUserById = async (userId: string): Promise<ServiceCenterUser> => {
+  try {
+    const response = await axiosInstance.get(`/Admin/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    throw error;
+  }
+};
+
+// Delete user
+export const deleteUser = async (userId: string): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/Admin/${userId}`);
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    throw error;
+  }
+};
