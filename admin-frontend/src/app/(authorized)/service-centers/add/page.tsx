@@ -3,6 +3,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import EnhancedServiceCenterForm from "@/components/organism/enhanced-service-center-form/enhanced-service-center-form";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import { createServiceCenterWithServices } from "@/utils/api";
@@ -32,27 +33,45 @@ const AddServiceCenter: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white p-6 flex flex-col">
-      {/* Header with title and user profile card */}
-      <div className="flex justify-end items-center">
-      <UserProfileCard
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-6">
+      {/* Header Section */}
+      <div className="max-w-7xl mx-auto mb-8">
+        <div className="flex justify-between items-center relative">
+          {/* Back Button */}
+          <button
+            onClick={() => {
+              const userRole = localStorage.getItem("userRole");
+              if (userRole === "SuperAdmin") {
+                router.push("/super-admin");
+              } else if (userRole === "Admin") {
+                router.push("/admin-dashboard");
+              } else {
+                router.push("/super-admin");
+              }
+            }}
+            className="group flex items-center gap-2 px-6 py-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200"
+          >
+            <ArrowLeft className="w-5 h-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
+            <span className="text-gray-700 font-medium group-hover:text-blue-600 transition-colors">
+              Back to Service-Centers
+            </span>
+          </button>
+
+          
+
+          {/* User Profile */}
+          <UserProfileCard
             pictureSrc="/images/profipic.jpg"
             pictureAlt="User Profile"
             useCurrentUser={true}
             onLogout={() => router.push("/login")}
           />
+        </div>
       </div>
 
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          <h1 className="text-xl font-bold text-neutral-600 mb-[40px]">
-            Service Center Registration
-          </h1>
-          {/* Centered form */}
-          <div>
-            <EnhancedServiceCenterForm initialData={undefined} onSubmit={handleSubmit} />
-          </div>
-        </div>
+      {/* Form Section */}
+      <div className="max-w-5xl mx-auto">
+        <EnhancedServiceCenterForm initialData={undefined} onSubmit={handleSubmit} />
       </div>
     </div>
   );
