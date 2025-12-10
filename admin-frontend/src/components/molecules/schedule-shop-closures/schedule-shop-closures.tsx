@@ -129,8 +129,10 @@ const ScheduleShopClosures: React.FC<ScheduleShopClosuresProps> = ({
       console.log(`Service ${serviceId}: ${currentValue} -> ${newValue}`);
       console.log("New availabilities:", newAvailabilities);
 
-      // Notify parent component of the change
-      onServiceAvailabilityChange?.(newAvailabilities);
+      // Defer the callback to avoid updating parent during render
+      setTimeout(() => {
+        onServiceAvailabilityChange?.(newAvailabilities);
+      }, 0);
 
       return newAvailabilities;
     });
@@ -205,7 +207,7 @@ const ScheduleShopClosures: React.FC<ScheduleShopClosuresProps> = ({
       {step === 1 && (
         <div className="space-y-6 animate-fadeIn">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Choose Your Action</h2>
+            <h2 className="text-xl font-bold text-blue-600">Choose Your Action</h2>
             <p className="text-gray-600">Select how you want to manage service availability</p>
           </div>
 
@@ -216,25 +218,25 @@ const ScheduleShopClosures: React.FC<ScheduleShopClosuresProps> = ({
                 setIsServiceMode(false);
                 onModeChange?.(true);
               }}
-              className={`p-6 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
+              className={`p-6 border-2 rounded-md cursor-pointer transition-all duration-300 ${
                 !isServiceMode
-                  ? "border-red-500 bg-red-50 shadow-lg scale-105"
+                  ? "border-blue-600 bg-blue-50 shadow-lg scale-105"
                   : "border-gray-200 hover:border-gray-300 hover:shadow-md"
               }`}
             >
               <div className="flex items-start justify-between mb-4">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  !isServiceMode ? "bg-red-100" : "bg-gray-100"
+                  !isServiceMode ? "bg-blue-600" : "bg-gray-100"
                 }`}>
                   <Lock className={`w-6 h-6 ${
-                    !isServiceMode ? "text-red-600" : "text-gray-600"
+                    !isServiceMode ? "text-white" : "text-gray-600"
                   }`} />
                 </div>
                 {!isServiceMode && (
-                  <Check className="w-6 h-6 text-red-600" />
+                  <Check className="w-6 h-6 text-blue-600" />
                 )}
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Complete Closure</h3>
+              <h3 className="text-lg font-bold text-blue-600 mb-2">Complete Closure</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Close the entire service center for selected dates. All services will be unavailable.
               </p>
@@ -250,25 +252,25 @@ const ScheduleShopClosures: React.FC<ScheduleShopClosuresProps> = ({
                 setIsServiceMode(true);
                 onModeChange?.(false);
               }}
-              className={`p-6 border-2 rounded-xl cursor-pointer transition-all duration-300 ${
+              className={`p-6 border-2 rounded-md cursor-pointer transition-all duration-300 ${
                 isServiceMode
-                  ? "border-blue-500 bg-blue-50 shadow-lg scale-105"
+                  ? "border-blue-600 bg-blue-50 shadow-lg scale-105"
                   : "border-gray-200 hover:border-gray-300 hover:shadow-md"
               }`}
             >
               <div className="flex items-start justify-between mb-4">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  isServiceMode ? "bg-blue-100" : "bg-gray-100"
+                  isServiceMode ? "bg-blue-600" : "bg-gray-100"
                 }`}>
                   <Unlock className={`w-6 h-6 ${
-                    isServiceMode ? "text-blue-600" : "text-gray-600"
+                    isServiceMode ? "text-white" : "text-gray-600"
                   }`} />
                 </div>
                 {isServiceMode && (
                   <Check className="w-6 h-6 text-blue-600" />
                 )}
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Custom Availability</h3>
+              <h3 className="text-lg font-bold text-blue-600 mb-2">Custom Availability</h3>
               <p className="text-sm text-gray-600 mb-4">
                 Set availability for individual services. Keep some services open while others are unavailable.
               </p>
@@ -285,7 +287,7 @@ const ScheduleShopClosures: React.FC<ScheduleShopClosuresProps> = ({
       {step === 2 && (
         <div className="space-y-6 animate-fadeIn">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Select Dates</h2>
+            <h2 className="text-xl font-bold text-blue-600">Select Dates</h2>
             <p className="text-gray-600">
               {isServiceMode
                 ? "Choose dates to modify service availability"
@@ -293,7 +295,7 @@ const ScheduleShopClosures: React.FC<ScheduleShopClosuresProps> = ({
             </p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6">
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-semibold text-gray-700">Calendar</h3>
@@ -385,7 +387,7 @@ const ScheduleShopClosures: React.FC<ScheduleShopClosuresProps> = ({
           </div>
 
           {hasClosedDatesInSelection ? (
-            <div className="bg-red-50 border-2 border-red-300 rounded-xl p-6">
+            <div className="bg-red-50 border-2 border-red-300 rounded-md p-6">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
                   <Lock className="w-6 h-6 text-red-600" />
@@ -422,7 +424,7 @@ const ScheduleShopClosures: React.FC<ScheduleShopClosuresProps> = ({
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6">
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-sm font-semibold text-gray-700">Available Services</h3>
@@ -508,29 +510,29 @@ const ScheduleShopClosures: React.FC<ScheduleShopClosuresProps> = ({
             <p className="text-gray-600">Confirm the dates you want to close</p>
           </div>
 
-          <div className="bg-gradient-to-br from-red-50 to-orange-50 border-2 border-red-300 rounded-xl p-6">
+          <div className="bg-white border-2 border-blue-600 rounded-md p-6">
             <div className="flex items-start gap-4 mb-6">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <Lock className="w-6 h-6 text-red-600" />
+              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <Lock className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-red-900 mb-2">Complete Closure Scheduled</h3>
-                <p className="text-sm text-red-800">
+                <h3 className="text-lg font-bold text-blue-600 mb-2">Complete Closure Scheduled</h3>
+                <p className="text-sm text-gray-800">
                   The service center will be completely closed on the following dates. All services will be unavailable.
                 </p>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg p-4 border border-red-200">
+            <div className="bg-white rounded-lg p-4 border border-blue-200">
               <p className="text-xs font-semibold text-gray-700 mb-3">Affected Dates:</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {selectedDates.map((date, index) => (
                   <div
                     key={index}
-                    className="flex items-center gap-2 p-3 bg-red-50 rounded-lg border border-red-200"
+                    className="flex items-center gap-2 p-3 bg-blue-600 rounded-lg border border-blue-200"
                   >
-                    <CalendarIcon className="w-4 h-4 text-red-600" />
-                    <span className="text-sm font-medium text-gray-800">
+                    <CalendarIcon className="w-4 h-4 text-white" />
+                    <span className="text-sm font-medium text-white">
                       {formatDisplayDate(date)}
                     </span>
                   </div>
@@ -570,7 +572,7 @@ const ScheduleShopClosures: React.FC<ScheduleShopClosuresProps> = ({
           <button
             onClick={handleSave}
             disabled={isSubmitting || (isServiceMode && hasClosedDatesInSelection)}
-            className="px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-md hover:shadow-lg flex items-center gap-2"
+            className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all disabled:bg-gray-300 disabled:cursor-not-allowed shadow-md hover:shadow-lg flex items-center gap-2"
           >
             {isSubmitting ? (
               <>
@@ -587,39 +589,7 @@ const ScheduleShopClosures: React.FC<ScheduleShopClosuresProps> = ({
         )}
       </div>
 
-      {/* Summary Panel */}
-      {(selectedDates.length > 0 || !isServiceMode) && step > 1 && (
-        <div className="mt-6 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 border border-gray-200">
-          <h3 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4" />
-            Summary
-          </h3>
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Mode:</span>
-              <span className={`font-semibold px-3 py-1 rounded-full text-xs ${
-                isServiceMode
-                  ? "bg-blue-100 text-blue-700"
-                  : "bg-red-100 text-red-700"
-              }`}>
-                {isServiceMode ? "Custom Availability" : "Complete Closure"}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Dates Selected:</span>
-              <span className="font-semibold text-gray-900">{selectedDates.length}</span>
-            </div>
-            {isServiceMode && step === 3 && (
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Available Services:</span>
-                <span className="font-semibold text-green-600">
-                  {Object.values(serviceAvailabilities).filter(v => v).length} / {availableServices.length}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      
 
       <style jsx>{`
         @keyframes fadeIn {
