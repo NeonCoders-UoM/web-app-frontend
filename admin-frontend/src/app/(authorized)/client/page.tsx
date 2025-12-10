@@ -118,7 +118,7 @@ const ClientsPage = () => {
       <div className="w-full">
         {/* Header with user profile */}
         <div className="flex justify-between items-center mb-10">
-          <h1 className="text-xl font-bold text-neutral-600">
+          <h1 className="text-2xl font-bold text-gray-800">
             {serviceCenterId
               ? `Clients - Service Center ${serviceCenterId}`
               : "All Clients"}
