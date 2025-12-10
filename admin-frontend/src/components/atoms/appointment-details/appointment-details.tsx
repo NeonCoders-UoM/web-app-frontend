@@ -1,5 +1,5 @@
 import Image from "next/image"
-import "@/styles/fonts.css"
+
 
 type AppointmentCardProps = {
   appointmentNo: string
@@ -55,7 +55,7 @@ export const AppointmentCard = ({
   fee,
 }: AppointmentCardProps) => {
   return (
-    <div className="w-[500px] h-[500px] bg-neutral-100 rounded-xl shadow p-6">
+    <div className="w-[500px] h-[500px] bg-neutral-100 rounded-md shadow p-6">
       <div className="mb-4">
         <p className="text-sm text-gray-600">
           Appointment No:{" "}
