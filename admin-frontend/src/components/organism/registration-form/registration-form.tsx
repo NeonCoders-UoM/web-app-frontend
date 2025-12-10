@@ -3,10 +3,8 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import Button from "@/components/atoms/button/button"
-import InputField from "@/components/atoms/input-fields/input-fields"
+import { UserPlus, Loader2 } from "lucide-react"
 import Dropdown from "@/components/atoms/dropdown/dropdown"
-import colors from "@/styles/colors"
 import axiosInstance from "@/utils/axios"
 import { fetchServiceCenters } from "@/utils/api"
 import { ServiceCenter } from "@/types"
@@ -44,6 +42,7 @@ const roleMap: { [key: string]: number } = {
 
 const RegistrationForm: React.FC<RegistrationFormProps> = ({ user, isEditMode = false }) => {
   const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState<FormData>({
     firstName: isEditMode ? (user?.firstName || "") : "",
     lastName: isEditMode ? (user?.lastName || "") : "",
@@ -100,6 +99,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ user, isEditMode = 
       return
     }
 
+    setIsSubmitting(true)
     try {
       if (isEditMode && user?.id) {
         // ✅ UPDATE user (PUT)
@@ -134,6 +134,8 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ user, isEditMode = 
       } else {
         alert("An unexpected error occurred.")
       }
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -150,76 +152,88 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ user, isEditMode = 
   })();
 
   return (
-    <div
-      className="w-full max-w-[700px] p-8 bg-white rounded-lg shadow-md mx-auto"
-      style={{ fontFamily: "var(--font-family-text)" }}
-    >
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <h2 className="text-lg font-semibold mb-6 text-center" style={{ color: colors.primary[100] }}>
-          {isEditMode ? "Edit User" : "Create New User"}
-        </h2>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+      <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-200">
+        <div>
+          <h2 className="text-xl font-bold text-blue-600">User Information</h2>
+          <p className="text-sm text-gray-500">
+            {isEditMode ? "Update user account details" : "Fill in the details below to create a new user"}
+          </p>
+        </div>
+      </div>
 
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label htmlFor="firstName" className="block text-sm font-medium" style={{ color: colors.neutral[200] }}>
-              First Name
+          <div>
+            <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 mb-2">
+              First Name <span className="text-red-500">*</span>
             </label>
-            <InputField
+            <input
               id="firstName"
               name="firstName"
-              placeholder="First Name"
+              type="text"
+              placeholder="Enter first name"
               value={formData.firstName}
               onChange={handleChange}
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
-          <div className="space-y-2">
-            <label htmlFor="lastName" className="block text-sm font-medium" style={{ color: colors.neutral[200] }}>
-              Last Name
+          <div>
+            <label htmlFor="lastName" className="block text-sm font-semibold text-gray-700 mb-2">
+              Last Name <span className="text-red-500">*</span>
             </label>
-            <InputField
+            <input
               id="lastName"
               name="lastName"
-              placeholder="Last Name"
+              type="text"
+              placeholder="Enter last name"
               value={formData.lastName}
               onChange={handleChange}
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-medium" style={{ color: colors.neutral[200] }}>
-              Email
+          <div>
+            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+              Email <span className="text-red-500">*</span>
             </label>
-            <InputField
+            <input
               id="email"
               name="email"
               type="email"
-              placeholder="Email"
+              placeholder="Enter email address"
               value={formData.email}
               onChange={handleChange}
-              disabled={isEditMode} // disable email editing if needed
+              disabled={isEditMode}
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
             />
           </div>
-          <div className="space-y-2">
-            <label htmlFor="newPassword" className="block text-sm font-medium" style={{ color: colors.neutral[200] }}>
-              Password
+          <div>
+            <label htmlFor="newPassword" className="block text-sm font-semibold text-gray-700 mb-2">
+              Password {!isEditMode && <span className="text-red-500">*</span>}
             </label>
-            <InputField
+            <input
               id="newPassword"
               name="newPassword"
               type="password"
-              placeholder="Password"
+              placeholder={isEditMode ? "Leave blank to keep current password" : "Enter password"}
               value={formData.newPassword}
               onChange={handleChange}
               disabled={isEditMode}
+              required={!isEditMode}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
             />
           </div>
         </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium" style={{ color: colors.neutral[200] }}>
-            User Role
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            User Role <span className="text-red-500">*</span>
           </label>
           <Dropdown
             options={userRoleOptions}
@@ -231,9 +245,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ user, isEditMode = 
         </div>
 
         {["Service Center Admin", "Cashier", "Data Operator"].includes(formData.userRole) && (
-          <div className="space-y-2">
-            <label className="block text-sm font-medium" style={{ color: colors.neutral[200] }}>
-              Service Center
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Service Center <span className="text-red-500">*</span>
             </label>
             <Dropdown
               options={serviceCenters.map(center => center.serviceCenterName)}
@@ -245,13 +259,38 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ user, isEditMode = 
               className="w-full"
               selectedOption={serviceCenters.find(c => c.id === formData.stationId)?.serviceCenterName || ""}
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Select the service center this user will be assigned to
+            </p>
           </div>
         )}
 
-        <div className="pt-4 flex justify-center ">
-          <Button type="submit" variant="primary" size="medium" className="px-8 py-2.5 font-medium">
-            {isEditMode ? "SAVE CHANGES" : "CREATE USER"}
-          </Button>
+        <div className="flex gap-4 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            onClick={() => router.push("/user-managment")}
+            disabled={isSubmitting}
+            className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                {isEditMode ? "Updating..." : "Creating..."}
+              </>
+            ) : (
+              <>
+                <UserPlus className="w-5 h-5" />
+                {isEditMode ? "Save Changes" : "Create User"}
+              </>
+            )}
+          </button>
         </div>
       </form>
     </div>

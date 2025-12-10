@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Button from "@/components/atoms/button/button";
-import InputField from "@/components/atoms/input-fields/input-fields";
+import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useLoadScript, StandaloneSearchBox } from "@react-google-maps/api";
+import type { Libraries } from "@react-google-maps/api";
+import { Loader2, Building2 } from "lucide-react";
 import MapPicker from "@/components/organism/map-picker/mappicker";
-import colors from "@/styles/colors";
 import {
   CreateServiceCenterWithServicesDTO,
   ServiceCenterServiceSelection,
@@ -12,6 +13,8 @@ import {
   SystemService,
 } from "@/types";
 import { fetchPackages, fetchSystemServices } from "@/utils/api";
+
+const libraries: Libraries = ["places"];
 
 interface EnhancedServiceCenterFormProps {
   initialData?: CreateServiceCenterWithServicesDTO;
@@ -22,6 +25,15 @@ export default function EnhancedServiceCenterForm({
   initialData,
   onSubmit,
 }: EnhancedServiceCenterFormProps) {
+  const router = useRouter();
+  const searchBoxRef = useRef<google.maps.places.SearchBox | null>(null);
+  
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+    libraries,
+  });
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<CreateServiceCenterWithServicesDTO>({
     ownerName: initialData?.ownerName || "",
     vatNumber: initialData?.vatNumber || "",
@@ -35,7 +47,7 @@ export default function EnhancedServiceCenterForm({
     services: initialData?.services || [],
     lat: initialData?.lat || 0,
     lng: initialData?.lng || 0,
-    defaultDailyAppointmentLimit: initialData?.defaultDailyAppointmentLimit || 20, // Default appointment limit
+    defaultDailyAppointmentLimit: initialData?.defaultDailyAppointmentLimit || 20,
   });
 
   const [packages, setPackages] = useState<Package[]>([]);
@@ -60,7 +72,8 @@ export default function EnhancedServiceCenterForm({
           servicesData.map((service) => ({
             serviceId: service.serviceId,
             serviceName: service.serviceName,
-            basePrice: 0,
+            systemBasePrice: service.basePrice || 0,
+            customPrice: service.basePrice || 0,
             isSelected: false,
           }));
 
@@ -87,6 +100,24 @@ export default function EnhancedServiceCenterForm({
     setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
+  const handlePlacesChanged = () => {
+    const places = searchBoxRef.current?.getPlaces();
+    if (places && places.length > 0) {
+      const place = places[0];
+      const lat = place.geometry?.location?.lat() || 0;
+      const lng = place.geometry?.location?.lng() || 0;
+      
+      setFormData((prev) => ({
+        ...prev,
+        address: place.formatted_address || "",
+        lat,
+        lng,
+      }));
+      
+      setErrors((prev) => ({ ...prev, address: undefined, lat: undefined, lng: undefined }));
+    }
+  };
+
   const handlePackageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const packageId = parseInt(e.target.value);
     setFormData((prev) => ({
@@ -101,7 +132,7 @@ export default function EnhancedServiceCenterForm({
       ...prev,
       services: prev.services.map((service) =>
         service.serviceId === serviceId
-          ? { ...service, basePrice: price }
+          ? { ...service, customPrice: price }
           : service
       ),
     }));
@@ -153,11 +184,11 @@ export default function EnhancedServiceCenterForm({
       newErrors.services = "Please select at least one service";
     } else {
       const invalidServices = selectedServices.filter(
-        (service) => service.basePrice <= 0
+        (service) => service.customPrice <= 0
       );
       if (invalidServices.length > 0) {
         newErrors.services =
-          "All selected services must have a valid base price";
+          "All selected services must have a valid custom price";
       }
     }
 
@@ -167,58 +198,65 @@ export default function EnhancedServiceCenterForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submitting formData:", formData); // Debug log
+    console.log("Submitting formData:", formData);
     if (validateForm()) {
-      onSubmit(formData);
+      setIsSubmitting(true);
+      try {
+        onSubmit(formData);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
-  if (isLoading) {
+  if (isLoading || !isLoaded) {
     return (
       <div className="flex justify-center items-center p-8">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
+          <p className="text-gray-600">Loading form...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ width: "800px", padding: "20px" }}>
-      <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+      <form onSubmit={handleSubmit} className="space-y-8">
         {/* Basic Information */}
         <div>
-          <h2 className="text-lg font-semibold text-neutral-900 mb-4">
-            Basic Information
-          </h2>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+          <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-200">
+            <div>
+              <h2 className="text-xl font-bold text-blue-600">Basic Information</h2>
+              <p className="text-sm text-gray-500">Enter the service center's basic details</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-6">
             {[
-              { id: "station_name", label: "Service Center Name" },
-              { id: "ownerName", label: "Owner Name" },
+              { id: "station_name", label: "Service Center Name", type: "text" },
+              { id: "ownerName", label: "Owner Name", type: "text" },
               { id: "email", label: "Email", type: "email" },
-              { id: "telephone", label: "Telephone" },
-              { id: "address", label: "Address" },
-              { id: "vatNumber", label: "VAT Number" },
-              { id: "registerationNumber", label: "Registration Number" },
+              { id: "telephone", label: "Telephone", type: "text" },
+              { id: "vatNumber", label: "VAT Number", type: "text" },
+              { id: "registerationNumber", label: "Registration Number", type: "text" },
               { id: "defaultDailyAppointmentLimit", label: "Daily Appointment Limit", type: "number" },
-            ].map(({ id, label, type = "text" }) => (
+            ].map(({ id, label, type }) => (
               <div key={id}>
-                <label
-                  htmlFor={id}
-                  className="block mb-1"
-                  style={{ color: colors.neutral[600] }}
-                >
-                  {label}
+                <label htmlFor={id} className="block text-sm font-semibold text-gray-700 mb-2">
+                  {label} 
                 </label>
-                <InputField
+                <input
                   id={id}
                   name={id}
                   type={type}
-                  placeholder={label}
+                  placeholder={`Enter ${label.toLowerCase()}`}
                   value={
-                    formData[
-                      id as keyof CreateServiceCenterWithServicesDTO
-                    ] as string
+                    formData[id as keyof CreateServiceCenterWithServicesDTO] as string
                   }
                   onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
                 {errors[id as keyof typeof errors] && (
                   <p className="text-red-500 text-sm mt-1">
@@ -227,26 +265,55 @@ export default function EnhancedServiceCenterForm({
                 )}
               </div>
             ))}
+            
+            {/* Address field with Google Maps Autocomplete */}
+            <div className="col-span-2">
+              <label htmlFor="address" className="block text-sm font-semibold text-gray-700 mb-2">
+                Address 
+              </label>
+              <StandaloneSearchBox
+                onLoad={(ref) => (searchBoxRef.current = ref)}
+                onPlacesChanged={handlePlacesChanged}
+              >
+                <input
+                  id="address"
+                  name="address"
+                  type="text"
+                  placeholder="Enter address or search location"
+                  value={formData.address}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+              </StandaloneSearchBox>
+              {errors.address && (
+                <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+              )}
+            </div>
           </div>
+          
           {/* MapPicker for Location Selection */}
           <div className="mt-6">
-            <h3 className="text-md font-semibold text-neutral-900 mb-2">
-              Select Location
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+              Select Location on Map 
             </h3>
-            <MapPicker
-              onLocationSelect={(location) => {
-                console.log("Location selected:", location); // Debug log
-                setFormData((prev) => {
-                  const newState = {
-                    ...prev,
-                    lat: location.lat,
-                    lng: location.lng,
-                  };
-                  console.log("Updated formData:", newState); // Debug log
-                  return newState;
-                });
-              }}
-            />
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <MapPicker
+                selectedLocation={{ lat: formData.lat, lng: formData.lng }}
+                onLocationSelect={(location) => {
+                  console.log("Location selected:", location);
+                  setFormData((prev) => {
+                    const newState = {
+                      ...prev,
+                      lat: location.lat,
+                      lng: location.lng,
+                    };
+                    console.log("Updated formData:", newState);
+                    return newState;
+                  });
+                }}
+              />
+            </div>
             {(errors.lat || errors.lng) && (
               <p className="text-red-500 text-sm mt-1">
                 {errors.lat || errors.lng}
@@ -254,7 +321,7 @@ export default function EnhancedServiceCenterForm({
             )}
             {/* Display selected coordinates */}
             {formData.lat !== 0 || formData.lng !== 0 ? (
-              <p className="text-sm text-neutral-600 mt-2">
+              <p className="text-sm text-gray-600 mt-2">
                 Selected: {formData.lat.toFixed(6)}, {formData.lng.toFixed(6)}
               </p>
             ) : null}
@@ -263,23 +330,24 @@ export default function EnhancedServiceCenterForm({
 
         {/* Package Selection */}
         <div>
-          <h2 className="text-lg font-semibold text-neutral-900 mb-4">
-            Package Selection
-          </h2>
+          <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-200">
+            <div>
+              <h2 className="text-xl font-bold text-blue-600">Package Selection</h2>
+              <p className="text-sm text-gray-500">Choose a loyalty package for this service center</p>
+            </div>
+          </div>
+          
           <div>
-            <label
-              htmlFor="packageId"
-              className="block mb-1"
-              style={{ color: colors.neutral[600] }}
-            >
-              Select Package *
+            <label htmlFor="packageId" className="block text-sm font-semibold text-gray-700 mb-2">
+              Select Package 
             </label>
             <select
               id="packageId"
               name="packageId"
               value={formData.packageId}
               onChange={handlePackageChange}
-              className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
             >
               <option value={0}>Select a package</option>
               {packages.map((pkg) => (
@@ -288,6 +356,9 @@ export default function EnhancedServiceCenterForm({
                 </option>
               ))}
             </select>
+            <p className="text-xs text-gray-500 mt-1">
+              Select the loyalty package that best fits this service center
+            </p>
             {errors.packageId && (
               <p className="text-red-500 text-sm mt-1">{errors.packageId}</p>
             )}
@@ -296,105 +367,105 @@ export default function EnhancedServiceCenterForm({
 
         {/* Services Selection */}
         <div>
-          <h2 className="text-lg font-semibold text-neutral-900 mb-4">
-            Services & Pricing
-          </h2>
+          <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-200">
+            <div>
+              <h2 className="text-xl font-bold text-blue-600">Services & Pricing</h2>
+              <p className="text-sm text-gray-500">Select services and set custom pricing if needed</p>
+            </div>
+          </div>
+          
           <div className="space-y-4">
             <div>
-              <label
-                className="block mb-3"
-                style={{ color: colors.neutral[600] }}
-              >
-                Select Services *
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Select Services 
               </label>
-              <div className="grid grid-cols-1 gap-3 max-h-64 overflow-y-auto border border-neutral-200 rounded-lg p-4">
+              <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto border border-gray-200 rounded-lg p-4 bg-gray-50">
                 {formData.services.map((service) => (
                   <div
                     key={service.serviceId}
-                    className="flex items-center space-x-3"
+                    className="bg-white border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors"
                   >
-                    <input
-                      type="checkbox"
-                      id={`service-${service.serviceId}`}
-                      checked={service.isSelected}
-                      onChange={() => {
-                        setFormData((prev) => ({
-                          ...prev,
-                          services: prev.services.map((s) =>
-                            s.serviceId === service.serviceId
-                              ? { ...s, isSelected: !s.isSelected }
-                              : s
-                          ),
-                        }));
-                      }}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-neutral-300 rounded"
-                    />
-                    <label
-                      htmlFor={`service-${service.serviceId}`}
-                      className="text-sm font-medium text-neutral-900 cursor-pointer flex-1"
-                    >
-                      {service.serviceName}
-                    </label>
-                    {service.isSelected && (
-                      <div className="flex items-center space-x-2">
-                        <label className="text-sm text-neutral-600">
-                          Base Price:
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="checkbox"
+                        id={`service-${service.serviceId}`}
+                        checked={service.isSelected}
+                        onChange={() => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            services: prev.services.map((s) =>
+                              s.serviceId === service.serviceId
+                                ? { ...s, isSelected: !s.isSelected }
+                                : s
+                            ),
+                          }));
+                        }}
+                        className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-0.5"
+                      />
+                      <div className="flex-1">
+                        <label
+                          htmlFor={`service-${service.serviceId}`}
+                          className="text-sm font-medium text-gray-900 cursor-pointer block"
+                        >
+                          {service.serviceName}
                         </label>
-                        <InputField
-                          type="number"
-                          placeholder="0"
-                          value={service.basePrice.toString()}
-                          onChange={(e) =>
-                            updateServicePrice(
-                              service.serviceId,
-                              parseInt(e.target.value) || 0
-                            )
-                          }
-                          min="0"
-                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          Base Price: ${service.systemBasePrice.toFixed(2)}
+                        </p>
+                        {service.isSelected && (
+                          <div className="mt-3">
+                            <label className="block text-xs font-semibold text-gray-700 mb-1">
+                              Custom Price (optional)
+                            </label>
+                            <input
+                              type="number"
+                              placeholder="Enter custom price"
+                              value={service.customPrice}
+                              onChange={(e) =>
+                                updateServicePrice(
+                                  service.serviceId,
+                                  parseFloat(e.target.value) || 0
+                                )
+                              }
+                              min="0"
+                              step="0.01"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              Leave at base price or set a custom price
+                            </p>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Selected Services Details */}
+            {/* Selected Services Summary */}
             {formData.services.filter((s) => s.isSelected).length > 0 && (
-              <div>
-                <h3 className="text-md font-medium text-neutral-900 mb-3">
-                  Selected Services Details
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="text-sm font-semibold text-blue-900 mb-2">
+                  Selected Services Summary
                 </h3>
-                <div className="space-y-3">
+                <p className="text-xs text-blue-700 mb-3">
+                  {formData.services.filter((s) => s.isSelected).length} service(s) selected
+                </p>
+                <div className="space-y-2">
                   {formData.services
                     .filter((s) => s.isSelected)
                     .map((service) => (
                       <div
                         key={service.serviceId}
-                        className="border border-neutral-200 rounded-lg p-4 bg-neutral-50"
+                        className="flex items-center justify-between py-2 border-b border-blue-100 last:border-0"
                       >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <label className="text-sm font-medium text-neutral-900">
-                              {service.serviceName}
-                            </label>
-                            <p className="text-xs text-neutral-500 mt-1">
-                              {
-                                systemServices.find(
-                                  (s) => s.serviceId === service.serviceId
-                                )?.description
-                              }
-                            </p>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm text-neutral-600">
-                              Base Price:
-                            </span>
-                            <span className="text-sm font-medium text-neutral-900">
-                              ${service.basePrice}
-                            </span>
-                          </div>
-                        </div>
+                        <span className="text-sm font-medium text-blue-900">
+                          {service.serviceName}
+                        </span>
+                        <span className="text-sm font-semibold text-blue-700">
+                          ${service.customPrice > 0 ? service.customPrice.toFixed(2) : service.systemBasePrice.toFixed(2)}
+                        </span>
                       </div>
                     ))}
                 </div>
@@ -406,10 +477,33 @@ export default function EnhancedServiceCenterForm({
           </div>
         </div>
 
-        <div className="mt-6 text-right">
-          <Button type="submit" size="medium">
-            Create Service Center
-          </Button>
+        {/* Action Buttons */}
+        <div className="flex gap-4 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            disabled={isSubmitting}
+            className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              <>
+                <Building2 className="w-5 h-5" />
+                Create Service Center
+              </>
+            )}
+          </button>
         </div>
       </form>
     </div>
