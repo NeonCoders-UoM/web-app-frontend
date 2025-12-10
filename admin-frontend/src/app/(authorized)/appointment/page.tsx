@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import AppointmentTable from "@/components/organism/appointment-table/appointment-table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import AppointmentCard from "@/components/molecules/appoinment-cards/appoinment-cards";
+import StatusCard from "@/components/atoms/status-cards/status-card";
 import {
   fetchServiceCenterById,
   updateAppointmentStatus,
@@ -16,7 +17,7 @@ import {
   fetchServiceCenterServices,
   fetchAppointmentDetail,
 } from "@/utils/api";
-import "@/styles/fonts.css";
+
 
 // Types matching backend DTOs
 // Appointment summary for admin
@@ -219,6 +220,29 @@ const AppointmentsPage = () => {
             }}
           />
         </div>
+        {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+        <StatusCard
+          title="Totaly Appointments"
+          value={0}
+          icon="customers"
+        />
+        <StatusCard
+          title="Pending Appointments"
+          value={0}
+          icon="customers"
+        />
+        <StatusCard
+          title="Completed Appointments"
+          value={0}
+          icon="customers"
+        />
+        <StatusCard
+          title="Completed Appointments"
+          value={0}
+          icon="customers"
+        />
+      </div>
 
         <div className=" p-6">
           <h1 className="h2 text-neutral-800 mb-[40px]">
@@ -267,6 +291,7 @@ const AppointmentsPage = () => {
             </>
           )}
         </div>
+        
 
         {/* Appointment Modal Popup */}
         {isModalOpen && (
@@ -335,6 +360,7 @@ const AppointmentsPage = () => {
           </div>
         )}
       </div>
+      
     </div>
   );
 };
