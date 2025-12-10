@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import Button from "@/components/atoms/button/button";
 import Table from "@/components/organism/table/table";
+import Sidebar from "@/components/molecules/side-bar/side-bar";
 import {
   fetchSystemServices,
   deleteSystemService,
@@ -81,22 +82,24 @@ const ServicesPage: React.FC = () => {
       if (isServiceCenterView) {
         // Handle ServiceCenterServiceDTO
         const centerService = service as ServiceCenterServiceDTO;
+        const basePrice = centerService.serviceBasePrice || 0;
         return [
           centerService.serviceCenterServiceId?.toString() || "0",
           centerService.serviceName || "",
           centerService.serviceDescription || "",
           centerService.category || "",
-          centerService.isAvailable ? "Available" : "Not Available",
+          `${basePrice.toFixed(2)} LKR`,
         ];
       } else {
         // Handle SystemService
         const systemService = service as SystemService;
+        const basePrice = systemService.basePrice || 0;
         return [
           systemService.serviceId?.toString() || "0",
           systemService.serviceName || "",
           systemService.description || "",
           systemService.category || "",
-          systemService.isActive ? "Active" : "Inactive",
+          `${basePrice.toFixed(2)} LKR`,
         ];
       }
     } catch (error) {
@@ -111,7 +114,7 @@ const ServicesPage: React.FC = () => {
         "Error loading service",
         "Service data could not be processed",
         "Unknown",
-        "Inactive",
+        "0.00 LKR",
       ];
     }
   });
@@ -121,7 +124,7 @@ const ServicesPage: React.FC = () => {
     { title: "Service Name", sortable: false },
     { title: "Description", sortable: false },
     { title: "Category", sortable: false },
-    { title: isServiceCenterView ? "Availability" : "Status", sortable: false },
+    { title: "Base Price", sortable: false },
   ];
 
   const actions: ("edit" | "delete" | "view")[] = ["edit", "delete", "view"];
@@ -192,49 +195,55 @@ const ServicesPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white p-6">
-      <div className="flex justify-end items-center mb-6">
-        <UserProfileCard
-          pictureSrc="/images/profipic.jpg"
-          pictureAlt="User Profile"
-          useCurrentUser={true}
-          onLogout={() => {
-            localStorage.removeItem("token");
-            router.push("/login");
-          }}
-        />
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8 overflow-x-hidden">
+      <Sidebar role="super-admin" serviceCenters={[]} />
+      <div className="max-w-full mx-auto ml-80">
+        <div className="flex justify-end items-center mb-10">
+          <UserProfileCard
+            pictureSrc="/images/profipic.jpg"
+            pictureAlt="User Profile"
+            useCurrentUser={true}
+            onLogout={() => {
+              localStorage.removeItem("token");
+              router.push("/login");
+            }}
+          />
+        </div>
 
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-2xl font-semibold text-neutral-900 mb-6">
-          {serviceCenterId
-            ? `Service Center Services - ${
-                serviceCenter?.serviceCenterName || serviceCenterId
-              }`
-            : "System Services Management"}
-        </h1>
-
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-neutral-900">
-              {serviceCenterId ? "Service Center Services" : "System Services"}
-            </h2>
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="primary"
-                size="medium"
-                onClick={() => {
-                  if (serviceCenterId) {
-                    router.push(`/service-centers/${serviceCenterId}/view/services/add`);
-                  } else {
-                    router.push("/services/add");
-                  }
-                }}
-              >
-                {serviceCenterId ? "Add Service to Center" : "Add System Service"}
-              </Button>
+        <div className="">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-800 drop-shadow-sm">
+                {serviceCenterId
+                  ? `Service Center Services - ${
+                      serviceCenter?.serviceCenterName || serviceCenterId
+                    }`
+                  : "System Services Management"}
+                <p className="text-sm font-light text-gray-600 mt-2">
+                  {serviceCenterId ? "Manage service center services" : "Manage all system services"}
+                </p>
+              </h1>
             </div>
+            <Button
+              variant="primary"
+              size="medium"
+              onClick={() => {
+                if (serviceCenterId) {
+                  router.push(`/service-centers/${serviceCenterId}/view/services/add`);
+                } else {
+                  router.push("/services/add");
+                }
+              }}
+            >
+              {serviceCenterId ? "Add Service to Center" : "Add System Service"}
+            </Button>
           </div>
+
+          <div>
+            
+              
+            
 
           {services.length > 0 ? (
             <Table
@@ -249,6 +258,7 @@ const ServicesPage: React.FC = () => {
               <p className="text-neutral-600">No services found.</p>
             </div>
           )}
+        </div>
         </div>
       </div>
     </div>
