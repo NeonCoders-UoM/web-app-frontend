@@ -133,20 +133,20 @@ const EditServiceCenterUser = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8">
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => router.push(`/service-center-dashboard/${serviceCenterId}/users`)}
-            className="p-2 hover:bg-white rounded-lg transition-colors"
-          >
-            <ArrowLeft className="w-6 h-6 text-gray-600" />
-          </button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">Edit User</h1>
-            <p className="text-gray-600 mt-1">
-              {serviceCenter?.serviceCenterName || "Service Center"}
-            </p>
-          </div>
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => router.push(`/service-center-dashboard/${serviceCenterId}/users`)}
+          className="group flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all shadow-sm hover:shadow-md"
+        >
+          <ArrowLeft className="w-5 h-5 text-gray-600 group-hover:text-gray-800 transition-colors" />
+          <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">Back to Users</span>
+        </button>
+        
+        <div className="absolute left-[800px] transform -translate-x-1/2">
+          <h1 className="text-2xl font-bold text-gray-800 text-center">Edit User</h1>
+          <p className="text-gray-600 text-center">
+            {serviceCenter?.serviceCenterName || "Service Center"}
+          </p>
         </div>
         <UserProfileCard
           pictureSrc="/images/profipic.jpg"
@@ -161,14 +161,11 @@ const EditServiceCenterUser = () => {
 
       {/* Form */}
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+        <div className="bg-white rounded-md shadow-sm border border-gray-200 p-8">
           <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-200">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-              {user?.firstName[0]}
-              {user?.lastName[0]}
-            </div>
+            
             <div>
-              <h2 className="text-xl font-bold text-gray-900">
+              <h2 className="text-xl font-bold text-blue-600">
                 {user?.firstName} {user?.lastName}
               </h2>
               <p className="text-sm text-gray-500">{user?.email}</p>
@@ -179,7 +176,7 @@ const EditServiceCenterUser = () => {
             {/* First Name */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                First Name <span className="text-red-500">*</span>
+                First Name 
               </label>
               <input
                 type="text"
@@ -187,7 +184,7 @@ const EditServiceCenterUser = () => {
                 value={formData.firstName}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 placeholder="Enter first name"
               />
             </div>
@@ -195,7 +192,7 @@ const EditServiceCenterUser = () => {
             {/* Last Name */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Last Name <span className="text-red-500">*</span>
+                Last Name 
               </label>
               <input
                 type="text"
@@ -203,7 +200,7 @@ const EditServiceCenterUser = () => {
                 value={formData.lastName}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 placeholder="Enter last name"
               />
             </div>
@@ -234,7 +231,7 @@ const EditServiceCenterUser = () => {
                 value={formData.newPassword}
                 onChange={handleChange}
                 minLength={8}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 placeholder="Leave blank to keep current password"
               />
               <p className="text-xs text-gray-500 mt-1">
@@ -245,14 +242,14 @@ const EditServiceCenterUser = () => {
             {/* User Role */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                User Role <span className="text-red-500">*</span>
+                User Role 
               </label>
               <select
                 name="userRole"
                 value={formData.userRole}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
               >
                 <option value="Cashier">Cashier</option>
                 <option value="Data Operator">Data Operator</option>
@@ -260,12 +257,12 @@ const EditServiceCenterUser = () => {
             </div>
 
             {/* Service Center Info */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            {/* <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-sm font-medium text-blue-900 mb-1">Service Center Assignment</p>
               <p className="text-sm text-blue-700">
                 Assigned to: <span className="font-semibold">{serviceCenter?.serviceCenterName || serviceCenterId}</span>
               </p>
-            </div>
+            </div> */}
 
             {/* Action Buttons */}
             <div className="flex gap-4 pt-6 border-t border-gray-200">
@@ -273,14 +270,14 @@ const EditServiceCenterUser = () => {
                 type="button"
                 onClick={() => router.push(`/service-center-dashboard/${serviceCenterId}/users`)}
                 disabled={isSubmitting}
-                className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
                   <>
