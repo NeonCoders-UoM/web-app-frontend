@@ -1,7 +1,7 @@
 // src/app/service-centers/[id]/view/services/page.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import TabNavigation from "@/components/atoms/tab-navigation/tab-navigation";
@@ -12,59 +12,6 @@ import {
   removeServiceFromServiceCenter,
 } from "@/utils/api";
 import { ServiceCenter, ServiceCenterServiceDTO } from "@/types";
-
-// Mock service data
-const mockServices = [
-  {
-    id: "#SC-0001",
-    name: "Engine Check",
-    price: "60000LKR",
-    effectiveTo: "12-05-2025",
-    addAnother: "DGFHR3 Enterprises",
-  },
-  {
-    id: "#SC-0002",
-    name: "Engine Check",
-    price: "60000LKR",
-    effectiveTo: "12-05-2025",
-    addAnother: "DGFHR3 Enterprises",
-  },
-  {
-    id: "#SC-0003",
-    name: "Engine Check",
-    price: "60000LKR",
-    effectiveTo: "12-05-2025",
-    addAnother: "DGFHR3 Enterprises",
-  },
-  {
-    id: "#SC-0004",
-    name: "Engine Check",
-    price: "60000LKR",
-    effectiveTo: "12-05-2025",
-    addAnother: "DGFHR3 Enterprises",
-  },
-  {
-    id: "#SC-0005",
-    name: "Engine Check",
-    price: "60000LKR",
-    effectiveTo: "12-05-2025",
-    addAnother: "DGFHR3 Enterprises",
-  },
-  {
-    id: "#SC-0006",
-    name: "Engine Check",
-    price: "60000LKR",
-    effectiveTo: "12-05-2025",
-    addAnother: "DGFHR3 Enterprises",
-  },
-  {
-    id: "#SC-0007",
-    name: "Engine Check",
-    price: "60000LKR",
-    effectiveTo: "12-05-2025",
-    addAnother: "DGFHR3 Enterprises",
-  },
-];
 
 const ServicesTab: React.FC = () => {
   const router = useRouter();
@@ -77,51 +24,36 @@ const ServicesTab: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [services, setServices] = useState<ServiceCenterServiceDTO[]>([]);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (typeof id === "string") {
       try {
+        setIsLoading(true);
+        console.log("Loading services for service center ID:", id);
+        
+        // Extract numeric ID if it's in format like "#SC-0001"
+        const numericId = id.includes('#') || id.includes('SC-') 
+          ? id.replace('#SC-', '').replace('SC-', '') 
+          : id;
+        
+        console.log("Converted ID:", numericId);
+        
         const [serviceCenterData, servicesData] = await Promise.all([
-          fetchServiceCenterById(id),
-          fetchServiceCenterServices(id),
+          fetchServiceCenterById(numericId),
+          fetchServiceCenterServices(numericId),
         ]);
 
-        console.log(
-          "Fetched service center in ServicesTab:",
-          serviceCenterData
-        );
-        console.log("Fetched services:", servicesData);
+        console.log("Fetched service center in ServicesTab:", serviceCenterData);
+        console.log("Fetched services data:", servicesData);
+        console.log("Number of services fetched:", servicesData?.length || 0);
 
         setServiceCenter(serviceCenterData);
-        setServices(servicesData);
+        setServices(servicesData || []);
       } catch (error) {
         console.error("Error fetching data:", error);
-        // Fallback to mock data if API fails
-        const fallbackServices = mockServices.map((service) => {
-          const price = parseFloat(
-            service.price.replace("LKR", "").replace(",", "")
-          );
-          return {
-            serviceCenterServiceId: parseInt(service.id.replace("#SC-", "")),
-            station_id: parseInt(id),
-            serviceId: parseInt(service.id.replace("#SC-", "")),
-            packageId: 1,
-            customPrice: price,
-            serviceCenterBasePrice: price,
-            serviceCenterLoyaltyPoints: Math.round((price * 10) / 100), // 10% for basic package
-            isAvailable: true,
-            notes: "",
-            serviceName: service.name,
-            serviceDescription: service.name,
-            serviceBasePrice: price,
-            category: "General",
-            stationName: "Unknown",
-            packageName: "Basic Package",
-            packagePercentage: 10, // 10% for basic package
-            packageDescription:
-              "Basic service package with 10% loyalty percentage",
-          };
-        });
-        setServices(fallbackServices);
+        if (error instanceof Error) {
+          console.error("Error message:", error.message);
+        }
+        setServices([]);
       } finally {
         setIsLoading(false);
       }
@@ -129,11 +61,11 @@ const ServicesTab: React.FC = () => {
       console.error("ID is not a string:", id);
       setIsLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     loadData();
-  }, [id]);
+  }, [loadData]);
 
   const tabs = [
     {
@@ -186,19 +118,22 @@ const ServicesTab: React.FC = () => {
     { title: "SERVICE ID", sortable: false },
     { title: "SERVICE NAME", sortable: false },
     { title: "DESCRIPTION", sortable: false },
+    { title: "BASE PRICE", sortable: false },
     { title: "CUSTOM PRICE", sortable: false },
-    { title: "LOYALTY POINTS", sortable: false },
-    { title: "STATUS", sortable: false },
   ];
 
-  // Filter services to only show available ones
-  const availableServices = services.filter(service => service.isAvailable);
-  
-  const tableData = availableServices.map((service) => {
-    // Calculate loyalty points based on custom price and package percentage
-    const customPrice = service.customPrice || service.serviceBasePrice || 0;
-    const packagePercentage = service.packagePercentage || 0;
-    const loyaltyPoints = Math.round((customPrice * packagePercentage) / 100);
+  // Display all services that the service center provides
+  console.log("Services state for table mapping:", services);
+  const tableData = services.map((service) => {
+    const basePrice = service.serviceBasePrice || 0;
+    const customPrice = service.customPrice || 0;
+    
+    console.log("Mapping service:", {
+      id: service.serviceCenterServiceId,
+      name: service.serviceName,
+      basePrice,
+      customPrice
+    });
 
     return [
       `#SC-${(service.serviceCenterServiceId || 0)
@@ -206,10 +141,8 @@ const ServicesTab: React.FC = () => {
         .padStart(4, "0")}`,
       service.serviceName || "Unknown Service",
       service.serviceDescription || "No description available",
-      `${customPrice} LKR`,
-      `${loyaltyPoints} points`,
-      "Available", // Since we're only showing available services
-      "", // Placeholder for the actions column
+      `${basePrice.toFixed(2)} LKR`,
+      customPrice > 0 ? `${customPrice.toFixed(2)} LKR` : "N/A",
     ];
   });
 
@@ -250,14 +183,16 @@ const ServicesTab: React.FC = () => {
   // Refresh services when the page becomes visible (e.g., when returning from closure schedule)
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (!document.hidden && typeof id === "string") {
+      if (typeof document !== 'undefined' && !document.hidden && typeof id === "string") {
         loadData();
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, [id]);
+    if (typeof document !== 'undefined') {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+      return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    }
+  }, [id, loadData]);
 
   if (isLoading) {
     return (
@@ -283,29 +218,11 @@ const ServicesTab: React.FC = () => {
         <div className="flex justify-end items-center mb-[80px]">
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
-            pictureAlt="Moni Roy"
-            name="Moni Roy"
-            role="super-admin"
+            pictureAlt="User Profile"
+            useCurrentUser={true}
             onLogout={() => router.push("/login")}
-            onProfileClick={() => router.push("/profile")}
-            onSettingsClick={() => router.push("/settings")}
           />
         </div>
-
-        {/* Service Availability Notice */}
-        {services.length > availableServices.length && (
-          <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 text-yellow-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-              <span className="text-yellow-800 text-sm">
-                {services.length - availableServices.length} service(s) are currently unavailable and hidden from this list. 
-                Use the closure schedule page to manage service availability.
-              </span>
-            </div>
-          </div>
-        )}
 
         <h1 className="text-xl font-semibold text-neutral-800 mb-[40px]">
           Service Center Details
