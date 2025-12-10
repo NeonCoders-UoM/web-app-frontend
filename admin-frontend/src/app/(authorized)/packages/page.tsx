@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import Button from "@/components/atoms/button/button";
 import Table from "@/components/organism/table/table";
+import Sidebar from "@/components/molecules/side-bar/side-bar";
 import { fetchPackages, deletePackage } from "@/utils/api";
 import { Package } from "@/types";
 
@@ -97,41 +98,49 @@ const PackagesPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white p-6">
-      <div className="flex justify-end items-center mb-6">
-        <UserProfileCard
-          pictureSrc="/images/profipic.jpg"
-          pictureAlt="User Profile"
-          useCurrentUser={true}
-          onLogout={() => {
-            localStorage.removeItem("token");
-            router.push("/login");
-          }}
-        />
-      </div>
-
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-semibold text-neutral-900">Packages</h1>
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="primary"
-              size="medium"
-              onClick={() => router.push("/packages/add")}
-            >
-              Add Package
-            </Button>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8 overflow-x-hidden">
+      <Sidebar role="super-admin" serviceCenters={[]} />
+      <div className="max-w-full mx-auto ml-72">
+        <div className="flex justify-end items-center mb-10">
+          <UserProfileCard
+            pictureSrc="/images/profipic.jpg"
+            pictureAlt="User Profile"
+            useCurrentUser={true}
+            onLogout={() => {
+              localStorage.removeItem("token");
+              router.push("/login");
+            }}
+          />
         </div>
 
-        <div>
-          <Table
-            headers={headers}
-            data={data}
-            actions={actions}
-            showSearchBar={true}
-            onAction={handleAction}
-          />
+        <div className="">
+          <div className="flex justify-between items-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-800 drop-shadow-sm">
+              Packages
+              <p className="text-sm font-light text-gray-600 mt-2">
+                Manage service packages and loyalty programs
+              </p>
+            </h1>
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="primary"
+                size="medium"
+                onClick={() => router.push("/packages/add")}
+              >
+                Add Package
+              </Button>
+            </div>
+          </div>
+
+          <div>
+            <Table
+              headers={headers}
+              data={data}
+              actions={actions}
+              showSearchBar={true}
+              onAction={handleAction}
+            />
+          </div>
         </div>
       </div>
     </div>
