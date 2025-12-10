@@ -87,6 +87,10 @@ const currentStationId =
     return [
       { label: "Dashboard", route: "/super-admin" },
       { label: "Users", route: "/user-managment" },
+      { label: "Service Centers", route: "/service-centers" },
+      { label: "Manage Services", route: "/services" },
+      { label: "Manage Packages", route: "/packages" },
+      { label: "Emergency Centers", route: "/emergency-centers" },
       
     ];
   };
@@ -150,7 +154,11 @@ const currentStationId =
   const sections = sidebarOptions[role] || [];
 
   const handleServiceCenterClick = (centerId: string) => {
-    router.push(`/service-center-dashboard/${centerId}?stationId=${centerId}`);
+    try {
+      router.push(`/service-center-dashboard/${centerId}?stationId=${centerId}`);
+    } catch (error) {
+      console.error("Error navigating to service center:", error);
+    }
   };
 
   // For admin, render Dashboard and Users as tabs
@@ -207,7 +215,13 @@ const currentStationId =
                 key={section.label}
                 label={section.label}
                 isActive={isActive}
-                onClick={() => router.push(section.route)}
+                onClick={() => {
+                  try {
+                    router.push(section.route);
+                  } catch (error) {
+                    console.error("Error navigating:", error);
+                  }
+                }}
               />
             );
           })}
