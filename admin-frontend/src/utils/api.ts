@@ -26,7 +26,10 @@ import {
   CreateFeedbackDTO,
   UpdateFeedbackDTO,
   FeedbackStatsDTO,
-  FeedbackFilters
+  FeedbackFilters,
+  EmergencyCallCenter,
+  CreateEmergencyCallCenterDTO,
+  UpdateEmergencyCallCenterDTO
 } from "@/types";
 import axiosInstance from "./axios";
 import axios from 'axios';
@@ -542,6 +545,9 @@ export const fetchServiceCenterById = async (id: string): Promise<ServiceCenter 
       registrationNumber: sc.registerationNumber || "",
       RegisterationNumber: sc.registerationNumber,
       Station_status: sc.station_status,
+      Latitude: sc.Latitude || 0,
+      Longitude: sc.Longitude || 0,
+      DefaultDailyAppointmentLimit: sc.DefaultDailyAppointmentLimit || 20,
       commissionRate: "",
       availableServices: [],
       photoUrl: "",
@@ -609,6 +615,9 @@ export const updateServiceCenter = async (id: string, data: Omit<ServiceCenter, 
       telephone: data.telephoneNumber || data.Telephone,
       address: data.address || data.Address,
       station_status: data.Station_status || "Active",
+      Latitude: data.Latitude || 0,
+      Longitude: data.Longitude || 0,
+      DefaultDailyAppointmentLimit: data.DefaultDailyAppointmentLimit || 20,
     };
     
     await axiosInstance.put(`/ServiceCenters/${id}`, updateData);
@@ -690,19 +699,18 @@ export const createServiceCenterWithServices = async (data: CreateServiceCenterW
     const serviceCenter = response.data;
     const stationId = serviceCenter.station_id;
     
-    // Then add the selected services with pricing
+    // Then add the selected services with custom pricing
+    // Backend will automatically get base price from the system service
     const selectedServices = data.services.filter(service => service.isSelected);
     
     for (const service of selectedServices) {
       await axiosInstance.post(`/ServiceCenters/${stationId}/Services`, {
-        station_id: stationId,
-        serviceId: service.serviceId,
-        packageId: data.packageId,
-        customPrice: service.basePrice,
-        serviceCenterBasePrice: service.basePrice,
-        serviceCenterLoyaltyPoints: 10,
-        isAvailable: true,
-        notes: `Base price: ${service.basePrice}`
+        Station_id: stationId,
+        ServiceId: service.serviceId,
+        PackageId: data.packageId,
+        CustomPrice: service.customPrice > 0 ? service.customPrice : null,
+        IsAvailable: true,
+        Notes: service.customPrice > 0 ? `Custom price: $${service.customPrice}` : 'Using system base price'
       });
     }
     
@@ -1917,6 +1925,72 @@ export const deleteUser = async (userId: string): Promise<void> => {
     await axiosInstance.delete(`/Admin/${userId}`);
   } catch (error) {
     console.error("Error deleting user:", error);
+    throw error;
+  }
+};
+
+// ========== Emergency Call Center API Functions ==========
+
+// Fetch all emergency call centers
+export const fetchEmergencyCallCenters = async (): Promise<EmergencyCallCenter[]> => {
+  try {
+    console.log("Fetching emergency call centers from backend");
+    const response = await axiosInstance.get('/EmergencyCallCenter');
+    console.log("Successfully fetched emergency call centers:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching emergency call centers:", error);
+    throw error;
+  }
+};
+
+// Fetch emergency call center by ID
+export const fetchEmergencyCallCenterById = async (id: number): Promise<EmergencyCallCenter> => {
+  try {
+    console.log(`Fetching emergency call center with ID ${id}`);
+    const response = await axiosInstance.get(`/EmergencyCallCenter/${id}`);
+    console.log("Successfully fetched emergency call center:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching emergency call center ${id}:`, error);
+    throw error;
+  }
+};
+
+// Create emergency call center
+export const createEmergencyCallCenter = async (data: CreateEmergencyCallCenterDTO): Promise<EmergencyCallCenter> => {
+  try {
+    console.log("Creating emergency call center:", data);
+    const response = await axiosInstance.post('/EmergencyCallCenter', data);
+    console.log("Successfully created emergency call center:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating emergency call center:", error);
+    throw error;
+  }
+};
+
+// Update emergency call center
+export const updateEmergencyCallCenter = async (id: number, data: UpdateEmergencyCallCenterDTO): Promise<EmergencyCallCenter> => {
+  try {
+    console.log(`Updating emergency call center ${id}:`, data);
+    const response = await axiosInstance.put(`/EmergencyCallCenter/${id}`, data);
+    console.log("Successfully updated emergency call center:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating emergency call center ${id}:`, error);
+    throw error;
+  }
+};
+
+// Delete emergency call center
+export const deleteEmergencyCallCenter = async (id: number): Promise<void> => {
+  try {
+    console.log(`Deleting emergency call center ${id}`);
+    await axiosInstance.delete(`/EmergencyCallCenter/${id}`);
+    console.log("Successfully deleted emergency call center");
+  } catch (error) {
+    console.error(`Error deleting emergency call center ${id}:`, error);
     throw error;
   }
 };

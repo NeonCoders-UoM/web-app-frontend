@@ -87,12 +87,9 @@ const AddServicePage: React.FC = () => {
       <div className="w-full flex justify-end items-center mb-[80px]">
         <UserProfileCard
           pictureSrc="/images/profipic.jpg"
-          pictureAlt="Moni Roy"
-          name="Moni Roy"
-          role="super-admin"
+          pictureAlt="User Profile"
+          useCurrentUser={true}
           onLogout={() => router.push("/login")}
-          onProfileClick={() => router.push("/profile")}
-          onSettingsClick={() => router.push("/settings")}
         />
       </div>
 
@@ -100,7 +97,7 @@ const AddServicePage: React.FC = () => {
       <div className="flex-1 flex flex-col p-4 w-[1074px] h-[760]">
         <TabNavigation tabs={tabs} activeTab="Services" onTabChange={handleTabChange} />
 
-        <div className="flex-1 flex justify-center items-center p-[28px] bg-neutral-100 rounded-xl">
+        <div className="flex-1 flex justify-center items-center p-[28px] bg-neutral-100 rounded-md">
           <div
             className="rounded-lg shadow-md p-6 w-full max-w-2xl"
             style={{

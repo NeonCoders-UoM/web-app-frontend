@@ -27,6 +27,7 @@ const SuperAdminDashboard: React.FC = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
+        setIsLoading(true);
         const [statsData, serviceCentersData, availabilityData] = await Promise.all([
           fetchDashboardStats(),
           fetchServiceCenters(),
@@ -42,7 +43,7 @@ const SuperAdminDashboard: React.FC = () => {
         setAvailabilityMap(availabilityData);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
-        alert("Failed to load dashboard data.");
+        // Don't show alert, just log the error
       } finally {
         setIsLoading(false);
       }
@@ -53,7 +54,7 @@ const SuperAdminDashboard: React.FC = () => {
   // Refresh availability when page becomes visible
   useEffect(() => {
     const handleVisibilityChange = async () => {
-      if (!document.hidden) {
+      if (typeof document !== 'undefined' && !document.hidden) {
         try {
           const availabilityData = await checkAllServiceCentersAvailability();
           setAvailabilityMap(availabilityData);
@@ -63,8 +64,10 @@ const SuperAdminDashboard: React.FC = () => {
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    if (typeof document !== 'undefined') {
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+      return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    }
   }, []);
 
   const data = serviceCenters.map((sc) => {
@@ -170,7 +173,15 @@ const SuperAdminDashboard: React.FC = () => {
               setSelectedTab={setSelectedTab}
             />
       <div className="max-w-full mx-auto w-full ml-36">
-        <div className="flex justify-end items-center mb-10 mr-36">
+        <div className="flex justify-between items-center mb-10 mr-36">
+          <div className="px-6 md:px-12 lg:px-20 xl:px-32 2xl:px-40">
+            <h1 className="text-4xl font-bold text-gray-800 drop-shadow-sm">
+              Welcome to VApp Admin Dashboard
+              <p className="text-sm font-light text-gray-600 mt-2">
+                Manage your service centers and monitor key metrics
+              </p>
+            </h1>
+          </div>
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
             pictureAlt="User Profile"
@@ -180,16 +191,10 @@ const SuperAdminDashboard: React.FC = () => {
         </div>
 
         <div className="px-6 md:px-12 lg:px-20 xl:px-32 2xl:px-40">
-        <h1 className="text-4xl font-bold text-gray-800 mb-12 drop-shadow-sm">
-          Welcome to VApp Admin Dashboard
-          <p className="text-sm font-light text-gray-600 mt-2">
-            Manage your service centers and monitor key metrics
-          </p>
-        </h1>
         
         
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-16 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-8 mb-16">
           <StatusCard
             title="Customers"
             value={stats?.customers || 0}
@@ -213,33 +218,6 @@ const SuperAdminDashboard: React.FC = () => {
         </div>
 
         <div className="">
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-12">
-            
-            <div className="flex flex-wrap items-center gap-4">
-              <Button
-                variant="primary"
-                size="medium"
-                onClick={() => router.push("/service-centers/add")}
-              >
-                Add Service Center
-              </Button>
-              <Button
-                variant="primary"
-                size="medium"
-                onClick={() => router.push("/services")}
-              >
-                Manage Services
-              </Button>
-              <Button
-                variant="primary"
-                size="medium"
-                onClick={() => router.push("/packages")}
-              >
-                Manage Packages
-              </Button>
-            </div>
-          </div>
-
           <div className="">
             <Table
               headers={headers}

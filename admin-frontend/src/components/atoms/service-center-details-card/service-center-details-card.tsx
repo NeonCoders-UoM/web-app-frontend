@@ -1,5 +1,4 @@
 import Image from "next/image";
-import "@/styles/fonts.css"
 
 type Props = {
   name: string;
@@ -23,7 +22,7 @@ export const ServiceCenterDetailsCard = ({
   hours,
 }: Props) => {
   return (
-    <div className="bg-white shadow-md rounded-xl p-6 flex flex-col md:flex-row justify-between items-center gap-6 w-1/2 h-96">
+    <div className="bg-white shadow-md rounded-md p-6 flex flex-col md:flex-row justify-between items-center gap-6 w-1/2 h-96">
       {/* Left Side */}
       <div className="flex-1 space-y-4">
         <h2 className="text-xl font-semibold text-blue-600">Service Center Details</h2>

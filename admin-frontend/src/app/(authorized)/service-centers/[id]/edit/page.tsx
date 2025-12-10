@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import EnhancedServiceCenterForm from "@/components/organism/enhanced-service-center-form/enhanced-service-center-form";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import { fetchServiceCenterById, updateServiceCenter } from "@/utils/api";
@@ -51,9 +52,12 @@ const EditServiceCenter: React.FC = () => {
           VATNumber: data.vatNumber,
           registrationNumber: data.registerationNumber,
           RegisterationNumber: data.registerationNumber,
+          Station_status: data.station_status,
+          Latitude: data.lat,
+          Longitude: data.lng,
+          DefaultDailyAppointmentLimit: data.defaultDailyAppointmentLimit,
           commissionRate: "",
           availableServices: [],
-          Station_status: data.station_status,
         };
         
         await updateServiceCenter(id, updateData);
@@ -77,15 +81,18 @@ const EditServiceCenter: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex justify-center items-center ">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 flex justify-center items-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
+          <p className="text-gray-600">Loading service center...</p>
+        </div>
       </div>
     );
   }
 
   if (!serviceCenter) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex justify-center items-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 flex justify-center items-center p-6">
         <p className="text-neutral-900 text-lg">Service Center not found.</p>
       </div>
     );
@@ -109,27 +116,43 @@ const EditServiceCenter: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white p-6 flex flex-col">
-      {/* Header with title and user profile card */}
-      <div className="flex justify-end items-center">
-        <UserProfileCard
-          pictureSrc="/images/profipic.jpg"
-          pictureAlt="User Profile"
-          useCurrentUser={true}
-          onLogout={() => router.push("/login")}
-        />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-6">
+      {/* Header Section */}
+      <div className="max-w-7xl mx-auto mb-8">
+        <div className="flex justify-between items-center relative">
+          {/* Back Button */}
+          <button
+            onClick={() => {
+              const userRole = localStorage.getItem("userRole");
+              if (userRole === "SuperAdmin") {
+                router.push("/super-admin");
+              } else if (userRole === "Admin") {
+                router.push("/admin-dashboard");
+              } else {
+                router.push("/super-admin");
+              }
+            }}
+            className="group flex items-center gap-2 px-6 py-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200"
+          >
+            <ArrowLeft className="w-5 h-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
+            <span className="text-gray-700 font-medium group-hover:text-blue-600 transition-colors">
+              Back to Dashboard
+            </span>
+          </button>
+
+          {/* User Profile */}
+          <UserProfileCard
+            pictureSrc="/images/profipic.jpg"
+            pictureAlt="User Profile"
+            useCurrentUser={true}
+            onLogout={() => router.push("/login")}
+          />
+        </div>
       </div>
 
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          <h1 className="text-xl font-bold text-neutral-600 mb-[40px]">
-            Service Center Edit
-          </h1>
-          {/* Centered form */}
-          <div>
-            <EnhancedServiceCenterForm initialData={initialFormData} onSubmit={handleSubmit} />
-          </div>
-        </div>
+      {/* Form Section */}
+      <div className="max-w-5xl mx-auto">
+        <EnhancedServiceCenterForm initialData={initialFormData} onSubmit={handleSubmit} />
       </div>
     </div>
   );

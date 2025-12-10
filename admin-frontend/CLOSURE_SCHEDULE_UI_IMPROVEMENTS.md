@@ -1,11 +1,13 @@
 # Closure Schedule UI/UX Improvements
 
 ## Overview
+
 The closure schedule management interface has been completely redesigned with a modern, smooth UI/UX inspired by the booking appointment page. The new design provides a better user experience with improved visual hierarchy, smooth transitions, and clearer feedback.
 
 ## Key Improvements
 
-### 1. **Step-Based Flow** 
+### 1. **Step-Based Flow**
+
 - **Before**: Single-page form with all options visible at once
 - **After**: 3-step wizard with progress indicators
   - Step 1: Mode Selection (Complete Closure vs Custom Availability)
@@ -15,12 +17,14 @@ The closure schedule management interface has been completely redesigned with a 
 ### 2. **Modern Visual Design**
 
 #### Mode Selection Cards
+
 - Large, interactive cards with icons
 - Visual feedback with scale animations
 - Clear descriptions and use case guidance
 - Color-coded: Red for closure, Blue for custom availability
 
 #### Enhanced Calendar
+
 - Custom styling with smooth hover effects
 - Selected dates highlighted in gradient blue
 - Today's date in amber highlight
@@ -28,6 +32,7 @@ The closure schedule management interface has been completely redesigned with a 
 - Smooth scale transitions on hover
 
 #### Service Availability Toggle
+
 - Visual cards showing each service
 - Green for available, Red for unavailable
 - Icons (checkmark/X) for quick visual scanning
@@ -37,18 +42,21 @@ The closure schedule management interface has been completely redesigned with a 
 ### 3. **Improved User Feedback**
 
 #### Visual States
+
 - Loading states with spinner and message
 - Success states with check icons
 - Error/warning states with appropriate colors
 - Empty states with helpful icons and messages
 
 #### Information Cards
+
 - Selected dates preview with removable badges
 - Summary panel showing current configuration
 - Locked state indicators for dates with closures
 - Status badges and counts
 
 ### 4. **Better Navigation**
+
 - Clear "Previous" and "Next" buttons
 - Progress bar showing completion
 - Can navigate back to change selections
@@ -56,6 +64,7 @@ The closure schedule management interface has been completely redesigned with a 
 - Disabled states prevent invalid actions
 
 ### 5. **Enhanced Accessibility**
+
 - Larger touch targets (buttons, tiles)
 - Clear focus states
 - Semantic HTML structure
@@ -63,6 +72,7 @@ The closure schedule management interface has been completely redesigned with a 
 - Keyboard navigation support
 
 ### 6. **Smooth Animations**
+
 ```css
 - Fade-in animations for step transitions
 - Scale animations for interactive elements
@@ -72,6 +82,7 @@ The closure schedule management interface has been completely redesigned with a 
 ```
 
 ### 7. **Responsive Design**
+
 - Grid layouts adapt to screen size
 - Mobile-friendly touch targets
 - Scrollable service lists
@@ -82,6 +93,7 @@ The closure schedule management interface has been completely redesigned with a 
 ### Main Files Modified
 
 1. **`schedule-shop-closures.tsx`**
+
    - Added step-based state management
    - Implemented mode selection cards
    - Enhanced date selection UI
@@ -90,6 +102,7 @@ The closure schedule management interface has been completely redesigned with a 
    - Included summary panel
 
 2. **`page.tsx`**
+
    - Updated loading states
    - Improved error messages
    - Enhanced empty states
@@ -105,12 +118,14 @@ The closure schedule management interface has been completely redesigned with a 
 ## User Experience Flow
 
 ### Complete Closure Flow
+
 1. Select "Complete Closure" mode
 2. Choose dates on calendar (visual selection)
 3. Review closure summary
 4. Confirm and save
 
 ### Custom Availability Flow
+
 1. Select "Custom Availability" mode
 2. Choose dates on calendar
 3. Toggle individual services on/off
@@ -120,8 +135,9 @@ The closure schedule management interface has been completely redesigned with a 
 ## Visual Consistency
 
 All UI elements now match the booking page style:
+
 - Same color palette (Blue primary, Red for warnings)
-- Consistent border radius (rounded-lg, rounded-xl)
+- Consistent border radius (rounded-lg, rounded-md)
 - Matching shadow depths
 - Similar spacing and typography
 - Unified icon usage (Lucide icons)
@@ -138,6 +154,7 @@ All UI elements now match the booking page style:
 ## Before vs After
 
 ### Before
+
 - Cluttered single-page form
 - Radio buttons for mode selection
 - Basic calendar with minimal styling
@@ -146,6 +163,7 @@ All UI elements now match the booking page style:
 - No progress indication
 
 ### After
+
 - Clean step-by-step wizard
 - Interactive mode selection cards
 - Beautiful calendar with animations

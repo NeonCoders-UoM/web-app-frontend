@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import ProgressBar from "@/components/atoms/progress-bar/progress-bar";
 import colors from "@/styles/colors";
-import "@/styles/fonts.css";
+
 
 interface Tier {
   name: string;

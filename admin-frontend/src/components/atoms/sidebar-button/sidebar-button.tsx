@@ -17,7 +17,7 @@ const SidebarButton: React.FC<SidebarButtonProps> = ({ label, isActive, onClick 
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
       className={`
-        relative w-full h-12 flex items-center px-4 mx-2 rounded-xl cursor-pointer
+        relative w-full h-12 flex items-center px-4 mx-2 rounded-md cursor-pointer
         transition-all duration-300 ease-in-out transform
         ${isActive 
           ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white ' 
@@ -62,7 +62,7 @@ const SidebarButton: React.FC<SidebarButtonProps> = ({ label, isActive, onClick 
       {/* Ripple effect on click */}
       <div 
         className={`
-          absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300
+          absolute inset-0 rounded-md opacity-0 transition-opacity duration-300
           ${isActive ? 'opacity-20' : 'opacity-0'}
           bg-gradient-to-r from-blue-400/20 to-blue-600/20
         `}
@@ -72,7 +72,7 @@ const SidebarButton: React.FC<SidebarButtonProps> = ({ label, isActive, onClick 
       {(isHovered || isActive) && (
         <div 
           className={`
-            absolute inset-0 rounded-xl -z-10 transition-all duration-300
+            absolute inset-0 rounded-md -z-10 transition-all duration-300
             ${isActive 
               ? 'bg-gradient-to-br from-blue-600/30 to-blue-800/30' 
               : 'bg-gradient-to-br from-gray-600/20 to-gray-800/20'

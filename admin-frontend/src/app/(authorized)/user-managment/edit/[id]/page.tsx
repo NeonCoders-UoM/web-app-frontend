@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
+import { ArrowLeft, Loader2 } from "lucide-react"
 import RegistrationForm from "@/components/organism/registration-form/registration-form"
 import UserProfileCard from "@/components/molecules/user-card/user-card"
 import axiosInstance from "@/utils/axios"
@@ -54,13 +55,12 @@ const EditUserPage = () => {
   // Server-side fallback
   if (!isClient || loading) {
     return (
-      <div className="relative min-h-screen bg-white">
-        <div className="absolute top-0 right-0 mt-4 mr-4">
-          <div className="w-[151px] h-[44px] bg-neutral-100 animate-pulse rounded"></div>
-        </div>
-        <div className="flex flex-col items-start min-h-screen pt-16 pl-16">
-          <h1 className="text-lg font-bold mb-8 text-neutral-600">EDIT USER</h1>
-          <div className="w-[620px] h-[380px] bg-neutral-50 rounded-lg animate-pulse border border-primary-100"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="flex flex-col items-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <p className="text-gray-600">Loading user details...</p>
+          </div>
         </div>
       </div>
     )
@@ -68,36 +68,42 @@ const EditUserPage = () => {
 
  if (!user) {
     return (
-      <div className="flex flex-col items-center min-h-screen pt-16">
-        <p className="text-neutral-600">User not found</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <p className="text-gray-600">User not found</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="relative min-h-screen bg-white">
-      {/* UserProfileCard at the top-right */}
-      <div className="absolute top-0 right-0 mt-4 mr-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8">
+      {/* Header with back button, title, and user profile */}
+      <div className="relative flex items-center justify-between mb-8">
+        {/* Back Button */}
+        <button
+          onClick={() => router.push("/user-managment")}
+          className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-all duration-200 bg-white px-4 py-2 rounded-lg shadow-sm hover:shadow-md border border-gray-200"
+        >
+          <ArrowLeft className="h-5 w-5" />
+          <span className="font-medium">Back to Users</span>
+        </button>
+
+        {/* User Profile Card */}
         <UserProfileCard
-            pictureSrc="/images/profipic.jpg"
-            pictureAlt="User Profile"
-            useCurrentUser={true}
-            onLogout={() => {
-              localStorage.removeItem("token");
-              router.push("/login");
-            }}
-          />
+          pictureSrc="/images/profipic.jpg"
+          pictureAlt="User Profile"
+          useCurrentUser={true}
+          onLogout={() => {
+            localStorage.removeItem("token");
+            router.push("/login");
+          }}
+        />
       </div>
 
-      {/* "EDIT USER" heading and form */}
-      <div className="flex flex-col items-start min-h-screen pt-16 pl-16">
-
-        {/* Centered form */}
-        <div className="w-full flex justify-center px-4 py-8">
-          <div className="border border-neutral-200 rounded-lg shadow-sm">
-            <RegistrationForm user={user} isEditMode={true} />
-          </div>
-        </div>
+      {/* Form Container */}
+      <div className="max-w-3xl mx-auto">
+        <RegistrationForm user={user} isEditMode={true} />
       </div>
     </div>
   )

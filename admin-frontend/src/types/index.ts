@@ -74,7 +74,8 @@ export interface CreateServiceCenterDTO {
 export interface ServiceCenterServiceSelection {
   serviceId: number;
   serviceName: string;
-  basePrice: number;
+  systemBasePrice: number; // Base price from system service (read-only)
+  customPrice: number; // Custom price set by service center
   isSelected: boolean;
 }
 
@@ -106,6 +107,9 @@ export interface UpdateServiceCenterDTO {
   telephone?: string;
   address?: string;
   station_status?: string;
+  Latitude?: number;
+  Longitude?: number;
+  DefaultDailyAppointmentLimit?: number;
 }
 
 export interface ServiceCenterServiceDTO {
@@ -297,6 +301,7 @@ export interface UpdateSystemServiceDTO {
   serviceName?: string;
   description?: string;
   category?: string;
+  basePrice?: number;
   isActive?: boolean;
 }
 
@@ -408,4 +413,27 @@ export interface ResetPasswordDto {
   email: string;
   otp: string;
   newPassword: string;
+}
+
+// Emergency Call Center interfaces
+export interface EmergencyCallCenter {
+  centerId: number;
+  name: string;
+  address: string;
+  registrationNumber: string;
+  phoneNumber: string;
+}
+
+export interface CreateEmergencyCallCenterDTO {
+  name: string;
+  address: string;
+  registrationNumber: string;
+  phoneNumber: string;
+}
+
+export interface UpdateEmergencyCallCenterDTO {
+  name: string;
+  address: string;
+  registrationNumber: string;
+  phoneNumber: string;
 }

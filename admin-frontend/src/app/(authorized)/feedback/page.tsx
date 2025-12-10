@@ -8,7 +8,7 @@ import ReviewSummaryCard from "@/components/organism/review-summary-card/review-
 import { FeedbackDTO, FeedbackStatsDTO } from "@/types";
 import { getAllFeedbacks, getFeedbackStats } from "@/utils/api";
 import { formatDate } from "@/lib/utils";
-import "@/styles/fonts.css";
+
 
 const FeedbackPage = () => {
   const router = useRouter();
@@ -98,7 +98,10 @@ const FeedbackPage = () => {
       {/* Main Content */}
       <div className="max-w-full mx-auto w-full">
         {/* Header with user profile */}
-        <div className="flex justify-end items-center mb-10">
+        <div className="flex justify-between items-center mb-10">
+           <div className="flex justify-between items-center mb-[8px]">
+          <h1 className="h2 text-gray-800">Customer Feedbacks</h1>
+        </div>
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
             pictureAlt="User Profile"
@@ -110,16 +113,7 @@ const FeedbackPage = () => {
           />
         </div>
         
-        <div className="flex justify-between items-center mb-[28px]">
-          <h1 className="h2 text-neutral-600">Customer Feedbacks</h1>
-          <button
-            onClick={fetchFeedbackData}
-            disabled={loading}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-          >
-            {loading ? "Refreshing..." : "Refresh"}
-          </button>
-        </div>
+       
 
         <div className="flex justify-center md:justify-start mb-[46px]">
           <ReviewSummaryCard

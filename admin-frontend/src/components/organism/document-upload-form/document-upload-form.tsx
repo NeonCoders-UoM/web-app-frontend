@@ -7,7 +7,7 @@ import InputField from "@/components/atoms/input-fields/input-fields";
 import UploadPhoto from "@/components/atoms/upload-photo/upload-photo";
 import UploadFile from "@/components/atoms/upload-file/upload-file";
 import colors from "@/styles/colors";
-import "@/styles/fonts.css";
+
 import { ServiceCenter } from "@/types";
 
 interface DocumentUploadFormProps {

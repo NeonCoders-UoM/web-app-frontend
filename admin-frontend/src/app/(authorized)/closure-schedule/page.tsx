@@ -568,8 +568,8 @@ const ManageServices = () => {
   if (serviceCenters.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">Service Center Closure Schedule</h1>
-        <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border border-red-200 p-8 text-center">
+        <h1 className="text-2xl font-bold text-gray-800">Service Center Closure Schedule</h1>
+        <div className="max-w-2xl mx-auto bg-white rounded-md shadow-sm border border-red-200 p-8 text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
               className="w-8 h-8 text-red-500"
@@ -601,7 +601,7 @@ const ManageServices = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-8">Service Center Closure Schedule</h1>
-        <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border border-yellow-200 p-8 text-center">
+        <div className="max-w-2xl mx-auto bg-white rounded-md shadow-sm border border-yellow-200 p-8 text-center">
           <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
               className="w-8 h-8 text-yellow-500"
@@ -632,13 +632,13 @@ const ManageServices = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Closure Schedule Management</h1>
+        <h1 className="text-2xl font-bold text-gray-800 ">Closure Schedule Management</h1>
         <p className="text-gray-600">Schedule service center closures and manage service availability</p>
       </div>
 
       {/* Service Center Selection */}
       {getUserRole() === "SuperAdmin" && serviceCenters.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 mb-6">
           <label className="block text-sm font-semibold text-gray-700 mb-3">
             Select Service Center
           </label>
@@ -663,18 +663,18 @@ const ManageServices = () => {
 
       {/* Service Center Info Card */}
       {selectedServiceCenter && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl shadow-sm border border-blue-200 p-6 mb-6">
+        <div className="bg-white rounded-md border shadow-md border-blue-100 p-6 mb-6">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h2 className="text-xl font-bold text-gray-800 mb-1">
+              <h2 className="text-xl font-bold text-blue-600 mb-1">
                 {selectedServiceCenter.serviceCenterName}
               </h2>
-              <p className="text-sm text-gray-600">Service Center ID: {currentServiceCenterId}</p>
+              
             </div>
             <span
               className={`px-4 py-2 rounded-full text-sm font-semibold ${
                 selectedServiceCenter.Station_status === "Active"
-                  ? "bg-green-100 text-green-700 border border-green-300"
+                  ? " text-blue-600 "
                   : "bg-red-100 text-red-700 border border-red-300"
               }`}
             >
@@ -715,7 +715,7 @@ const ManageServices = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar and Controls */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6">
             <ScheduleShopClosures
               onSave={handleSave}
               onDatesSelected={fetchDateServiceAvailabilities}
@@ -734,11 +734,11 @@ const ManageServices = () => {
 
         {/* Scheduled Closures Sidebar */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
+          <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 sticky top-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-gray-800">This Week's Closures</h3>
-              <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                <span className="text-red-600 font-bold text-sm">{shiftCards.length}</span>
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <span className="text-blue-600 font-bold text-sm">{shiftCards.length}</span>
               </div>
             </div>
             <p className="text-sm text-gray-500 mb-4">Individual dates closed this week</p>
@@ -784,7 +784,7 @@ const ManageServices = () => {
 
       {/* Service Availability Table */}
       {(dateServiceAvailabilities.length > 0 || isLoadingAvailabilities) && (
-        <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="mt-8 bg-white rounded-md shadow-sm border border-gray-200 p-6">
           <div className="mb-6">
             <h2 className="text-xl font-bold text-gray-800 mb-2">Service Availability Details</h2>
             <p className="text-sm text-gray-600">

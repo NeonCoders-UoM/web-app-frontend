@@ -12,10 +12,11 @@ import {
   fetchClients,
   fetchVehicles,
   getServicesWithAvailability,
+  fetchAppointmentsForStation,
 } from "@/utils/api";
 import { ServiceCenter } from "@/types";
 // import Sidebar from "@/components/molecules/side-bar/side-bar";
-import "@/styles/fonts.css";
+
 
 const ServiceCenterDashboard = () => {
   const params = useParams();
@@ -67,6 +68,7 @@ const ServiceCenterDashboard = () => {
 
   const [leadingServices, setLeadingServices] = useState<string[][]>([]);
   const [availableServicesCount, setAvailableServicesCount] = useState(0);
+  const [appointmentsCount, setAppointmentsCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isServiceCenterAdmin, setIsServiceCenterAdmin] = useState(false);
 
@@ -99,6 +101,16 @@ const ServiceCenterDashboard = () => {
         fetchClients(),
         fetchVehicles(),
       ]);
+
+      // Fetch appointments for this service center
+      let appointmentsData = [];
+      try {
+        appointmentsData = await fetchAppointmentsForStation(serviceCenterId);
+        setAppointmentsCount(appointmentsData.length);
+      } catch (error) {
+        console.error("Error fetching appointments:", error);
+        setAppointmentsCount(0);
+      }
 
       // Calculate counts for this service center
       // For now, we'll use the total counts since there's no direct relationship
@@ -192,11 +204,11 @@ const ServiceCenterDashboard = () => {
       /> */}
 
       {/* Main Content */}
-      <div className="max-w-full mx-auto w-full">
+      <div className="max-w-full mx-auto">
         {/* Header with user profile */}
         <div className="flex justify-between items-center mb-10">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Service Center Dashboard</h1>
             <p className="text-gray-600">
               {serviceCenter?.serviceCenterName || "Service Center"}
             </p>
@@ -217,7 +229,7 @@ const ServiceCenterDashboard = () => {
           <div className="mb-6">
             <button
               onClick={() => router.push(`/service-center-dashboard/${serviceCenterId}/users`)}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2 font-medium"
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2 font-medium"
             >
               <Users className="w-5 h-5" />
               Manage Users
@@ -226,7 +238,7 @@ const ServiceCenterDashboard = () => {
         )}
 
         {/* Status Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
           <StatusCard
             title="Total Customers"
             value={dashboardData.customers}
@@ -240,12 +252,17 @@ const ServiceCenterDashboard = () => {
           <StatusCard
             title="Available Services"
             value={availableServicesCount}
+            icon="availableCenters"
+          />
+          <StatusCard
+            title="Appointments"
+            value={appointmentsCount}
             icon="serviceCenters"
           />
         </div>
 
         {/* Table Section */}
-        <div className=" p-6">
+        <div className="">
           <h2 className="text-xl font-semibold mb-4">
             Leading Services -{" "}
             {serviceCenter?.serviceCenterName || "Service Center"}

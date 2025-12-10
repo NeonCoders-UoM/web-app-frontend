@@ -1,5 +1,4 @@
 import colors from "@/styles/colors";
-import "@/styles/fonts.css";
 
 type ServiceWithPrice = { name: string; price: number };
 interface AppointmentProps {

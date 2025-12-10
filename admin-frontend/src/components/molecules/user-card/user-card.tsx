@@ -157,7 +157,7 @@ const UserProfileCard = ({
   if (useCurrentUser && isLoadingUser) {
     return (
       <div className="relative">
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-slate-50 to-gray-100 border border-gray-200/50 shadow-sm" 
+        <div className="flex items-center gap-3 p-3 rounded-md bg-gradient-to-r from-slate-50 to-gray-100 border border-gray-200/50 shadow-sm" 
              style={{ width: "180px", height: "56px" }}>
           <div className="w-12 h-12 rounded-full bg-gray-200 animate-pulse"></div>
           <div className="flex flex-col items-start flex-1">
@@ -174,7 +174,7 @@ const UserProfileCard = ({
       {/* Main Card - Modern design with gradient background */}
       <button 
         onClick={toggleDropdown} 
-        className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-slate-50 to-gray-100 hover:from-blue-50 hover:to-indigo-100 border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out transform hover:scale-[1.02]" 
+        className="flex items-center gap-3 p-3 rounded-md bg-gradient-to-r from-slate-50 to-gray-100 hover:from-blue-50 hover:to-indigo-100 border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out transform hover:scale-[1.02]" 
         style={{ width: "240px", height: "80px" }}
       >
         {/* Profile Picture with enhanced styling */}
