@@ -77,10 +77,8 @@ const UsersPage = () => {
               selectedTab={selectedTab}
               setSelectedTab={setSelectedTab}
             />
-      <div className="max-w-7xl mx-auto w-full ml-72">
-        {/* Header with user profile */}
-        <div className="flex justify-between items-center mb-10">
-          <h1 className="text-xl font-bold text-neutral-600">User List</h1>
+      <div className="max-w-full mx-auto ml-72">
+        <div className="flex justify-end items-center mb-10">
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
             pictureAlt="User Profile"
@@ -92,63 +90,49 @@ const UsersPage = () => {
           />
         </div>
 
-        {/* User Filter and Create Button */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="relative">
-            <select
-              className="appearance-none bg-white border border-neutral-150 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-primary-100"
-              value={userFilter}
-              onChange={(e) => setUserFilter(e.target.value)}
-            >
-              <option value="All Users">All Users</option>
-              <option value="Admin">Admin</option>
-              <option value="Service Staff">Service Staff</option>
-              <option value="Data Operator">Data Operator</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-400">
-              <svg
-                className="fill-current h-4 w-4"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-              >
-                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-              </svg>
+        <div className="">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-800 drop-shadow-sm">
+                User Management
+                <p className="text-sm font-light text-gray-600 mt-2">
+                  Manage system users and their roles
+                </p>
+              </h1>
             </div>
+            <Button
+              variant="primary"
+              size="medium"
+              onClick={handleCreateUser}
+            >
+              Create User
+            </Button>
           </div>
 
-          <Button
-            variant="primary"
-            size="medium"
-            onClick={handleCreateUser}
-            icon="PlusIcon"
-            iconPosition="left"
-          >
-            Create User
-          </Button>
-        </div>
-
-        <div className="">
-          {/* User Table */}
-          {isLoading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-          ) : (
-            <ClientTable
-              headers={tableHeaders}
-              data={usersData.map((u) => ({
-                id: u.userId.toString(),
-                firstname: u.firstName,
-                lastname: u.lastName,
-                email: u.email,
-                userrole: u.role,
-              }))}
-              actions={["edit", "delete"]}
-              showSearchBar={true}
-              showClientCell={true}
-              onActionSelect={handleActionSelect}
-            />
-          )}
+          <div className="">
+            {/* User Table */}
+            {isLoading ? (
+              <div className="flex justify-center items-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+              </div>
+            ) : (
+              <ClientTable
+                headers={tableHeaders}
+                data={usersData.map((u) => ({
+                  id: u.userId.toString(),
+                  firstname: u.firstName,
+                  lastname: u.lastName,
+                  email: u.email,
+                  userrole: u.role,
+                }))}
+                actions={["edit", "delete"]}
+                showSearchBar={true}
+                showClientCell={true}
+                onActionSelect={handleActionSelect}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
