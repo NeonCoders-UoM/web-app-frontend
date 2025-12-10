@@ -320,8 +320,11 @@ export default function Page() {
   ).length;
 
   return (
-    <div className="flex flex-col min-h-screen p-[58px] bg-white">
-      <div className="flex justify-end items-center mb-[74px]">
+    <div className="flex flex-col min-h-screen p-8 bg-white">
+      <div className="flex justify-between items-center mb-10">
+        <div className="flex justify-between items-center mb-[8px]">
+          <h1 className="h2 text-gray-800">Appointment Service Status</h1>
+        </div>
         <UserProfileCard
           pictureSrc="/images/profipic.jpg"
           pictureAlt="User Profile"
