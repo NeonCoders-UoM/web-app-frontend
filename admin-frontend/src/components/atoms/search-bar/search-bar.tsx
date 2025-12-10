@@ -19,7 +19,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   return (
     <div className="w-full">
-      <div className="flex items-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 h-14 gap-4">
+      <div className="flex items-center bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md transition-shadow duration-200 h-14 gap-4">
         {/* Search Icon (SVG) */}
         <span className="text-gray-400 pl-4">
           <svg
