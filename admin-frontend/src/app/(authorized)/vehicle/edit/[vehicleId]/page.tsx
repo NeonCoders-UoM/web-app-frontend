@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import DocumentUploadForm from "@/components/organism/document-upload-form/document-upload-form";
 import UserProfileCard from "@/components/molecules/user-card/user-card"
 import { ServiceCenter } from "@/types";
-import "@/styles/fonts.css"
+
 
 interface EditVehiclePageProps {
   params: {

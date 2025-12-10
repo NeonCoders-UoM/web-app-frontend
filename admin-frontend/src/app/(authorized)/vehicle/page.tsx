@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import ClientTable from "@/components/organism/client-table/client-table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
-import "@/styles/fonts.css";
+
 import VehicleDetailsModal from "@/components/atoms/vehicle-details-card/vehicle-details-card";
 import { fetchVehicles, deleteVehicle } from "@/utils/api";
 
@@ -105,7 +105,7 @@ const VehiclesPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8 overflow-x-hidden">
       <div className="max-w-full mx-auto w-full">
         <div className="flex justify-between items-center mb-10">
-          <h1 className="text-xl font-bold text-neutral-600">
+          <h1 className="text-2xl font-bold text-gray-800">
             {serviceCenterId
               ? `Vehicles - Service Center ${serviceCenterId}`
               : "All Vehicles"}
