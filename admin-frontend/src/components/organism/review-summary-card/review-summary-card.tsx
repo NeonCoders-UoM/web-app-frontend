@@ -4,7 +4,7 @@ import React from "react";
 import RatingSummary from "@/components/molecules/rating-summary/rating-summary";
 import ReviewBarRow from "@/components/molecules/review-bar-row/review-bar-row";
 import colors from "@/styles/colors";
-import "@/styles/fonts.css";
+
 
 interface RatingData {
   star: number;

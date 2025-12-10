@@ -1,7 +1,7 @@
 import React from "react";
 import StarRating from "@/components/atoms/star-rating/star-rating";
 import colors from "@/styles/colors";
-import "@/styles/fonts.css";
+
 
 interface RatingSummaryProps {
   average: number;
