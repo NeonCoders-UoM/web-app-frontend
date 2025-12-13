@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getCookie, deleteCookie } from './cookies';
 
 // Ensure this matches your backend URL and port
 const baseURL = process.env.NEXT_PUBLIC_API_URL || '/api';
@@ -15,7 +16,7 @@ const instance = axios.create({
 // Request interceptor for adding auth token
 instance.interceptors.request.use(
   (config) => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const token = typeof window !== 'undefined' ? getCookie('token') : null;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -31,7 +32,7 @@ instance.interceptors.response.use(
     if (error.response?.status === 401) {
       // Handle token expiration or unauthorized access
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
+        deleteCookie('token');
         window.location.href = '/login';
       }
     }

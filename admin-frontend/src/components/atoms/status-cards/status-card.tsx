@@ -6,6 +6,7 @@ interface StatusCardProps {
   icon: "customers" | "vehicles" | "serviceCenters" | "availableCenters";
   trend?: number; // Optional trend percentage
   isLoading?: boolean;
+  onClick?: () => void; // Optional click handler for filtering
 }
 
 const iconConfig = {
@@ -44,18 +45,22 @@ const StatusCard: React.FC<StatusCardProps> = ({
   value, 
   icon, 
   trend,
-  isLoading = false 
+  isLoading = false,
+  onClick 
 }) => {
   const config = iconConfig[icon];
   const IconComponent = config.icon;
 
   return (
-    <div className={`
+    <div 
+      onClick={onClick}
+      className={`
       relative p-6 ${config.cardBg} backdrop-blur-sm rounded-2xl border border-white/50 
       shadow-lg ${config.shadowColor} 
       transition-all duration-300 ease-in-out
       w-[220px] h-[160px] group overflow-hidden
       before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-br before:from-white/20 before:to-transparent before:pointer-events-none
+      ${onClick ? 'cursor-pointer hover:scale-105 hover:shadow-xl' : ''}
     `}>
       {/* Enhanced 3D background layers */}
       <div className={`absolute top-0 right-0 w-32 h-32 ${config.lightBg} rounded-full transform translate-x-16 -translate-y-16 opacity-40`}></div>
