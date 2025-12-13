@@ -1775,6 +1775,7 @@ export interface AppointmentSummary {
   appointmentId: number;
   ownerName: string;
   appointmentDate: string;
+  status?: string;
 }
 
 
