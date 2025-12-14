@@ -14,7 +14,7 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:5040/api/:path*', // Proxy to ASP.NET backend
+        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5039/api'}/:path*`,
       },
     ];
   },
