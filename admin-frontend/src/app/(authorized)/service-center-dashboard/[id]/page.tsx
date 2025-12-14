@@ -6,6 +6,7 @@ import { Users } from "lucide-react";
 import StatusCard from "@/components/atoms/status-cards/status-card";
 import Table from "@/components/organism/table/table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
+import { getCookie,deleteAllAuthCookies  } from "@/utils/cookies";
 import {
   fetchServiceCenterById,
   fetchServiceCenterServices,
@@ -25,8 +26,8 @@ const ServiceCenterDashboard = () => {
 
   // Authorization check for different user roles
   useEffect(() => {
-    const userRole = localStorage.getItem("userRole");
-    const userStationId = localStorage.getItem("station_id");
+    const userRole = getCookie("userRole");
+    const userStationId = getCookie("station_id");
 
     // Super Admin and Admin can access any service center
     if (userRole === "SuperAdmin" || userRole === "Admin") {
@@ -74,7 +75,7 @@ const ServiceCenterDashboard = () => {
 
   // Check user role on client side only
   useEffect(() => {
-    const userRole = localStorage.getItem("userRole");
+    const userRole = getCookie("userRole");
     setIsServiceCenterAdmin(userRole === "ServiceCenterAdmin");
   }, []);
 
@@ -218,7 +219,7 @@ const ServiceCenterDashboard = () => {
             pictureAlt="User Profile"
             useCurrentUser={true}
             onLogout={() => {
-              localStorage.removeItem("token");
+              deleteAllAuthCookies();
               router.push("/login");
             }}
           />

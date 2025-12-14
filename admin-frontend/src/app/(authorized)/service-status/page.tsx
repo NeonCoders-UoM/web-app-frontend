@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { ServiceStatusDataTable } from "@/components/organism/service-status-data-table/servise-status-data-table";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 import AppointmentSearch from "@/components/organism/search-filter-form/search-filter-form";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import Button from "@/components/atoms/button/button";
@@ -35,6 +36,7 @@ interface AvailableService {
 }
 
 export default function Page() {
+  const router = useRouter();
   const [appointmentId, setAppointmentId] = useState("");
   const [services, setServices] = useState<RowData[] | null>(null);
   const [newServiceId, setNewServiceId] = useState<string>("");
@@ -332,8 +334,8 @@ export default function Page() {
           pictureAlt="User Profile"
           useCurrentUser={true}
           onLogout={() => {
-            localStorage.removeItem("token");
-            window.location.href = "/login";
+            deleteAllAuthCookies();
+            router.push("/login");
           }}
         />
       </div>

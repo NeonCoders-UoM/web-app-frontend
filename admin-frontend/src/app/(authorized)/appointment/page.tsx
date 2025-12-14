@@ -17,6 +17,8 @@ import {
   fetchServiceCenterServices,
   fetchAppointmentDetail,
 } from "@/utils/api";
+import { useRouter } from "next/navigation";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +44,7 @@ type TableAppointment = {
 type ServiceWithPrice = { name: string; price: number };
 
 const AppointmentsPage = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const stationId = searchParams.get("stationId");
   const [serviceCenter, setServiceCenter] = useState<ServiceCenter | null>(
@@ -284,8 +287,8 @@ const AppointmentsPage = () => {
             pictureAlt="User Profile"
             useCurrentUser={true}
             onLogout={() => {
-              localStorage.removeItem("token");
-              window.location.href = "/login";
+              deleteAllAuthCookies();
+              router.push("/login");
             }}
           />
         </div>

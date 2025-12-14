@@ -5,6 +5,7 @@ import { ArrowLeft, Loader2 } from "lucide-react"
 import UserProfileCard from "@/components/molecules/user-card/user-card"
 import RegistrationForm from "@/components/organism/registration-form/registration-form"
 import { useRouter } from "next/navigation";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 
 const AddUserPage = () => {
@@ -50,7 +51,7 @@ const AddUserPage = () => {
             pictureAlt="User Profile"
             useCurrentUser={true}
             onLogout={() => {
-              localStorage.removeItem("token");
+              deleteAllAuthCookies();
               router.push("/login");
             }}
           />

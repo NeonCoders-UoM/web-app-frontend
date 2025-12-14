@@ -8,6 +8,7 @@ import StatusCard from "@/components/atoms/status-cards/status-card";
 import Table from "@/components/organism/table/table";
 import { fetchServiceCenterById, getServiceCenterUsers, deleteUser } from "@/utils/api";
 import { ServiceCenter, ServiceCenterUser } from "@/types";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 const ServiceCenterUserManagement = () => {
   const params = useParams();
@@ -156,7 +157,7 @@ const ServiceCenterUserManagement = () => {
           pictureAlt="User Profile"
           useCurrentUser={true}
           onLogout={() => {
-            localStorage.removeItem("token");
+            deleteAllAuthCookies();
             router.push("/login");
           }}
         />

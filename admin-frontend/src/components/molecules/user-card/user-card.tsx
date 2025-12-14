@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { LogOut, User, ShieldCheck, Building2, CreditCard, Database } from "lucide-react"
 import ProfilePicture from "@/components/atoms/profile-picture/profile-picture"
 import { fetchCurrentUser } from "@/utils/api"
+import { getCookie } from "@/utils/cookies"
 
 // Define the user roles as a type
 type UserRole = "admin" | "super-admin" | "service-center-admin" | "cashier" | "data-operator"
@@ -41,8 +42,8 @@ const UserProfileCard = ({
           if (user) {
             setCurrentUser(user)
           } else {
-            // Fallback to localStorage data if API fails
-            const userRole = typeof window !== 'undefined' ? localStorage.getItem('userRole') : null
+            // Fallback to cookie data if API fails
+            const userRole = typeof window !== 'undefined' ? getCookie('userRole') : null
             console.log("API failed, using fallback with role:", userRole)
             if (userRole) {
               setCurrentUser({
@@ -55,8 +56,8 @@ const UserProfileCard = ({
           }
         } catch (error) {
           console.error("Error fetching current user:", error)
-          // Fallback to localStorage data if API fails
-          const userRole = typeof window !== 'undefined' ? localStorage.getItem('userRole') : null
+          // Fallback to cookie data if API fails
+          const userRole = typeof window !== 'undefined' ? getCookie('userRole') : null
           console.log("API error, using fallback with role:", userRole)
           if (userRole) {
             setCurrentUser({

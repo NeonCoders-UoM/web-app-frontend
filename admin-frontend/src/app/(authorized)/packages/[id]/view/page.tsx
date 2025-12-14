@@ -6,6 +6,7 @@ import UserProfileCard from "@/components/molecules/user-card/user-card";
 import Button from "@/components/atoms/button/button";
 import { fetchPackage } from "@/utils/api";
 import { Package } from "@/types";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 const ViewPackagePage: React.FC = () => {
   const router = useRouter();
@@ -56,7 +57,10 @@ const ViewPackagePage: React.FC = () => {
             pictureSrc="/images/profipic.jpg"
             pictureAlt="User Profile"
             useCurrentUser={true}
-            onLogout={() => router.push("/login")}
+            onLogout={() => {
+              deleteAllAuthCookies();
+              router.push("/login");
+            }}
           />
       </div>
 

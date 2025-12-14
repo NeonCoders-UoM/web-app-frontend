@@ -14,6 +14,7 @@ import {
   getServiceAvailabilities,
   deleteClosureSchedule,
 } from "@/utils/api";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 export const dynamic = "force-dynamic";
 import {
@@ -610,8 +611,8 @@ const ManageServices = () => {
             pictureAlt="User Profile"
             useCurrentUser={true}
             onLogout={() => {
-              localStorage.removeItem("token");
-              window.location.href = "/login";
+              deleteAllAuthCookies();
+              router.push("/login");
             }}
           />
         </div>

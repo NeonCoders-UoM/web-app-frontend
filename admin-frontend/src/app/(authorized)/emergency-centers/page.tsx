@@ -13,6 +13,7 @@ import {
   updateEmergencyCallCenter,
   fetchEmergencyCallCenterById,
 } from "@/utils/api";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 export const dynamic = "force-dynamic";
 import { EmergencyCallCenter, CreateEmergencyCallCenterDTO } from "@/types";
@@ -197,7 +198,10 @@ Phone Number: ${center.phoneNumber}
             pictureSrc="/images/profipic.jpg"
             pictureAlt="User Profile"
             useCurrentUser={true}
-            onLogout={() => router.push("/login")}
+            onLogout={() => {
+              deleteAllAuthCookies();
+              router.push("/login");
+            }}
           />
         </div>
 

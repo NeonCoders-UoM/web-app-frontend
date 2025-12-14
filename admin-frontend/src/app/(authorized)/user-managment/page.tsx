@@ -9,6 +9,7 @@ import { fetchUsers } from "@/utils/api";
 import { User } from "@/types";
 import axiosInstance from "@/utils/axios";
 import Sidebar from "@/components/molecules/side-bar/side-bar";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 export const dynamic = "force-dynamic";
 
@@ -86,7 +87,7 @@ const UsersPage = () => {
             pictureAlt="User Profile"
             useCurrentUser={true}
             onLogout={() => {
-              localStorage.removeItem("token");
+              deleteAllAuthCookies();
               router.push("/login");
             }}
           />

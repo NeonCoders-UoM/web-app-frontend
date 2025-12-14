@@ -6,6 +6,7 @@ import { ArrowLeft, Package, Loader2 } from "lucide-react";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import { createPackage } from "@/utils/api";
 import { CreatePackageDTO } from "@/types";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 const AddPackagePage: React.FC = () => {
   const router = useRouter();
@@ -75,7 +76,7 @@ const AddPackagePage: React.FC = () => {
           pictureAlt="User Profile"
           useCurrentUser={true}
           onLogout={() => {
-            localStorage.removeItem("token");
+            deleteAllAuthCookies();
             router.push("/login");
           }}
         />

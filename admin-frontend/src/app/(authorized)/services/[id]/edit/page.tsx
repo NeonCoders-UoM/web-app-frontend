@@ -6,6 +6,7 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import SystemServiceForm from "@/components/organism/system-service-form/system-service-form";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import { fetchSystemServices, updateSystemService } from "@/utils/api";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 import {
   SystemService,
   UpdateSystemServiceDTO,
@@ -107,7 +108,10 @@ const EditServicePage: React.FC = () => {
             pictureSrc="/images/profipic.jpg"
             pictureAlt="User Profile"
             useCurrentUser={true}
-            onLogout={() => router.push("/login")}
+            onLogout={() => {
+              deleteAllAuthCookies();
+              router.push("/login");
+            }}
           />
         </div>
       </div>

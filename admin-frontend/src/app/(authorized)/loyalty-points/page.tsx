@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import InputField from "@/components/atoms/input-fields/input-fields";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 import Button from "@/components/atoms/button/button";
 import { Table } from "@/components/organism/loyalty-poinys-table/loyalty-points-table";
 import colors from "@/styles/colors";
@@ -13,6 +15,7 @@ type Service = {
 };
 
 export default function AddServicesPage() {
+  const router = useRouter();
   const [services, setServices] = useState<Service[]>([
     { label: "Tire Rotation", value: 2 },
     { label: "Engine Check", value: 2 },
@@ -42,8 +45,8 @@ export default function AddServicesPage() {
           pictureAlt="User Profile"
           useCurrentUser={true}
           onLogout={() => {
-            localStorage.removeItem("token");
-            window.location.href = "/login";
+            deleteAllAuthCookies();
+            router.push("/login");
           }}
         />
       </div>

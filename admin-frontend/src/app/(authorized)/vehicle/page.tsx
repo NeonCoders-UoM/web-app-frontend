@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import ClientTable from "@/components/organism/client-table/client-table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 import VehicleDetailsModal from "@/components/atoms/vehicle-details-card/vehicle-details-card";
 import { fetchVehicles, deleteVehicle } from "@/utils/api";
@@ -29,6 +30,7 @@ interface Vehicle {
 }
 
 const VehiclesPage = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const serviceCenterId = searchParams.get("serviceCenterId");
 
@@ -117,8 +119,8 @@ const VehiclesPage = () => {
             pictureAlt="User Profile"
             useCurrentUser={true}
             onLogout={() => {
-              localStorage.removeItem("token");
-              window.location.href = "/login";
+              deleteAllAuthCookies();
+              router.push("/login");
             }}
           />
         </div>

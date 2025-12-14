@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import DocumentUploadForm from "@/components/organism/document-upload-form/document-upload-form";
 import UserProfileCard from "@/components/molecules/user-card/user-card"
 import { ServiceCenter } from "@/types";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 
 export default function EditVehiclePage() {
@@ -75,7 +76,7 @@ export default function EditVehiclePage() {
             pictureAlt="User Profile"
             useCurrentUser={true}
             onLogout={() => {
-              localStorage.removeItem("token");
+              deleteAllAuthCookies();
               router.push("/login");
             }}
           />

@@ -8,6 +8,7 @@ import UserProfileCard from "@/components/molecules/user-card/user-card";
 import TabNavigation from "@/components/atoms/tab-navigation/tab-navigation";
 import { fetchServiceCenterById, fetchServiceCenterPackage } from "@/utils/api";
 import { ServiceCenter, Package } from "@/types";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 const DetailsTab: React.FC = () => {
   const router = useRouter();
@@ -134,7 +135,10 @@ const DetailsTab: React.FC = () => {
             pictureSrc="/images/profipic.jpg"
             pictureAlt="User Profile"
             useCurrentUser={true}
-            onLogout={() => router.push("/login")}
+            onLogout={() => {
+              deleteAllAuthCookies();
+              router.push("/login");
+            }}
           />
         </div>
 

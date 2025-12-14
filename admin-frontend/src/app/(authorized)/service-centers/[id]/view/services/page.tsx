@@ -6,6 +6,7 @@ import { useRouter, useParams } from "next/navigation";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import TabNavigation from "@/components/atoms/tab-navigation/tab-navigation";
 import Table from "@/components/organism/table/table";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 import {
   fetchServiceCenterById,
   fetchServiceCenterServices,
@@ -220,7 +221,10 @@ const ServicesTab: React.FC = () => {
             pictureSrc="/images/profipic.jpg"
             pictureAlt="User Profile"
             useCurrentUser={true}
-            onLogout={() => router.push("/login")}
+            onLogout={() => {
+              deleteAllAuthCookies();
+              router.push("/login");
+            }}
           />
         </div>
 

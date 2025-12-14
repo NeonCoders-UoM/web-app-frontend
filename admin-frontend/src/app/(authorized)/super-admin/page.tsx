@@ -8,6 +8,7 @@ import Button from "@/components/atoms/button/button";
 import StatusCard from "@/components/atoms/status-cards/status-card";
 import Table from "@/components/organism/table/table";
 import Sidebar from "@/components/molecules/side-bar/side-bar";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 import {
   fetchDashboardStats,
   fetchServiceCenters,
@@ -188,7 +189,10 @@ const SuperAdminDashboard: React.FC = () => {
             pictureSrc="/images/profipic.jpg"
             pictureAlt="User Profile"
             useCurrentUser={true}
-            onLogout={() => router.push("/login")}
+            onLogout={() => {
+              deleteAllAuthCookies();
+              router.push("/login");
+            }}
           />
         </div>
 

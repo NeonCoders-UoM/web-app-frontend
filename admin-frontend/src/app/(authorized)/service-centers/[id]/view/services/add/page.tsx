@@ -7,6 +7,7 @@ import TabNavigation from "@/components/atoms/tab-navigation/tab-navigation";
 import ServiceCenterServiceAddForm from "@/components/organism/service-center-service-add-form/service-center-service-add-form";
 import { addServiceToServiceCenter } from "@/utils/api";
 import colors from "@/styles/colors";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 const AddServicePage: React.FC = () => {
   const router = useRouter();
@@ -89,7 +90,10 @@ const AddServicePage: React.FC = () => {
           pictureSrc="/images/profipic.jpg"
           pictureAlt="User Profile"
           useCurrentUser={true}
-          onLogout={() => router.push("/login")}
+          onLogout={() => {
+            deleteAllAuthCookies();
+            router.push("/login");
+          }}
         />
       </div>
 

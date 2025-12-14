@@ -31,6 +31,7 @@ import {
   UpdateEmergencyCallCenterDTO
 } from "@/types";
 import axiosInstance from "./axios";
+import { getCookie } from "./cookies";
 
 
 // Mock data (as provided)
@@ -499,9 +500,9 @@ export const fetchUsers = async (): Promise<User[]> => {
 // Fetch current user details
 export const fetchCurrentUser = async (): Promise<{ firstName: string; lastName: string; email: string; role: string } | null> => {
   try {
-    const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
+    const userId = typeof window !== 'undefined' ? getCookie('userId') : null;
     if (!userId) {
-      console.error("No userId found in localStorage");
+      console.error("No userId found in cookies");
       return null;
     }
 

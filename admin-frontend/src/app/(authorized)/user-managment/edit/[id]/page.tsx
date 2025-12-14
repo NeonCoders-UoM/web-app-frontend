@@ -6,6 +6,7 @@ import { ArrowLeft, Loader2 } from "lucide-react"
 import RegistrationForm from "@/components/organism/registration-form/registration-form"
 import UserProfileCard from "@/components/molecules/user-card/user-card"
 import axiosInstance from "@/utils/axios"
+import { deleteAllAuthCookies } from "@/utils/cookies"
 
 interface User {
   id: string
@@ -95,7 +96,7 @@ const EditUserPage = () => {
           pictureAlt="User Profile"
           useCurrentUser={true}
           onLogout={() => {
-            localStorage.removeItem("token");
+            deleteAllAuthCookies();
             router.push("/login");
           }}
         />

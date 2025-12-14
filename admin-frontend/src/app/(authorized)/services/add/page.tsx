@@ -7,6 +7,7 @@ import SystemServiceForm from "@/components/organism/system-service-form/system-
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import { createSystemService } from "@/utils/api";
 import { CreateSystemServiceDTO } from "@/types";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 const AddServicePage: React.FC = () => {
   const router = useRouter();
@@ -39,7 +40,7 @@ const AddServicePage: React.FC = () => {
           pictureAlt="User Profile"
           useCurrentUser={true}
           onLogout={() => {
-            localStorage.removeItem("token");
+            deleteAllAuthCookies();
             router.push("/login");
           }}
         />

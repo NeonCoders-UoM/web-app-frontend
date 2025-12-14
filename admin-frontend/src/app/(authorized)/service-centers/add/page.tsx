@@ -8,6 +8,7 @@ import EnhancedServiceCenterForm from "@/components/organism/enhanced-service-ce
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import { createServiceCenterWithServices } from "@/utils/api";
 import { CreateServiceCenterWithServicesDTO } from "@/types";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 const AddServiceCenter: React.FC = () => {
   const router = useRouter();
@@ -64,7 +65,10 @@ const AddServiceCenter: React.FC = () => {
             pictureSrc="/images/profipic.jpg"
             pictureAlt="User Profile"
             useCurrentUser={true}
-            onLogout={() => router.push("/login")}
+            onLogout={() => {
+              deleteAllAuthCookies();
+              router.push("/login");
+            }}
           />
         </div>
       </div>

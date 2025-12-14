@@ -8,6 +8,7 @@ import ReviewSummaryCard from "@/components/organism/review-summary-card/review-
 import { FeedbackDTO, FeedbackStatsDTO } from "@/types";
 import { getAllFeedbacks, getFeedbackStats } from "@/utils/api";
 import { formatDate } from "@/lib/utils";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 
 const FeedbackPage = () => {
@@ -107,7 +108,7 @@ const FeedbackPage = () => {
             pictureAlt="User Profile"
             useCurrentUser={true}
             onLogout={() => {
-              localStorage.removeItem("token");
+              deleteAllAuthCookies();
               router.push("/login");
             }}
           />

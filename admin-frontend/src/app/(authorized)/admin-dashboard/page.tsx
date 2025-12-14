@@ -12,6 +12,7 @@ import ClientTable from "@/components/organism/client-table/client-table";
 import { fetchDashboardStats, fetchServiceCenters, checkAllServiceCentersAvailability, fetchUsers, deleteServiceCenter } from "@/utils/api";
 import { ServiceCenter, DashboardStats, User } from "@/types";
 import axiosInstance from "@/utils/axios";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 export const dynamic = "force-dynamic";
 
@@ -165,7 +166,7 @@ const AdminDashboard = () => {
             pictureAlt="User Profile"
             useCurrentUser={true}
             onLogout={() => {
-              localStorage.removeItem("token");
+              deleteAllAuthCookies();
               router.push("/login");
             }}
           />

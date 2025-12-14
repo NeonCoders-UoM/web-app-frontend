@@ -7,6 +7,7 @@ import UserProfileCard from "@/components/molecules/user-card/user-card";
 import { fetchServiceCenterById } from "@/utils/api";
 import { ServiceCenter } from "@/types";
 import axiosInstance from "@/utils/axios";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 const roleMap: { [key: string]: number } = {
   Cashier: 4,
@@ -128,7 +129,7 @@ const AddServiceCenterUser = () => {
           pictureAlt="User Profile"
           useCurrentUser={true}
           onLogout={() => {
-            localStorage.removeItem("token");
+            deleteAllAuthCookies();
             router.push("/login");
           }}
         />

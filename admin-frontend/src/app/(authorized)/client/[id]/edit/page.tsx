@@ -7,6 +7,7 @@ import CustomerUpdateForm from "@/components/organism/customer-update-form/custo
 import { fetchClientById, updateCustomer } from "@/utils/api";
 import { Client } from "@/types";
 import colors from "@/styles/colors";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 const ClientEditPage = () => {
   const router = useRouter();
@@ -98,7 +99,7 @@ const ClientEditPage = () => {
             pictureAlt="User Profile"
             useCurrentUser={true}
             onLogout={() => {
-              localStorage.removeItem("token");
+              deleteAllAuthCookies();
               router.push("/login");
             }}
           />

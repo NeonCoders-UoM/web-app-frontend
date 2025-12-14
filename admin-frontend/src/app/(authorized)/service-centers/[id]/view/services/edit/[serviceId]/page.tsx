@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import TabNavigation from "@/components/atoms/tab-navigation/tab-navigation";
 import ServiceCenterServiceEditForm from "@/components/organism/service-center-service-edit-form/service-center-service-edit-form";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 import {
   fetchServiceCenterServices,
   updateServiceCenterService,
@@ -147,7 +148,10 @@ export default function EditServicePage() {
             pictureSrc="/images/profipic.jpg"
             pictureAlt="User Profile"
             useCurrentUser={true}
-            onLogout={() => router.push("/login")}
+            onLogout={() => {
+              deleteAllAuthCookies();
+              router.push("/login");
+            }}
           />
         </div>
         <div className="flex-1 flex justify-center items-center">

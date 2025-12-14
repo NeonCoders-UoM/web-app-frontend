@@ -15,6 +15,7 @@ import {
   removeServiceFromServiceCenter,
 } from "@/utils/api";
 import { SystemService, ServiceCenter, ServiceCenterServiceDTO } from "@/types";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 export const dynamic = "force-dynamic";
 
@@ -206,7 +207,7 @@ const ServicesPage: React.FC = () => {
             pictureAlt="User Profile"
             useCurrentUser={true}
             onLogout={() => {
-              localStorage.removeItem("token");
+              deleteAllAuthCookies();
               router.push("/login");
             }}
           />

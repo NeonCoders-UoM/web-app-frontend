@@ -17,6 +17,7 @@ import {
   ServiceHistoryDTO,
 } from "@/utils/api";
 import { Client } from "@/types";
+import { deleteAllAuthCookies } from "@/utils/cookies";
 
 const ClientProfilePage = () => {
   const router = useRouter();
@@ -135,7 +136,7 @@ const ClientProfilePage = () => {
             pictureAlt="User Profile"
             useCurrentUser={true}
             onLogout={() => {
-              localStorage.removeItem("token");
+              deleteAllAuthCookies();
               router.push("/login");
             }}
           />
