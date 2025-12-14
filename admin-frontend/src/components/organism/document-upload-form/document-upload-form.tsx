@@ -63,9 +63,10 @@ export default function DocumentUploadForm({ initialData, onSubmit }: DocumentUp
 
   const toggleService = (service: string) => {
     setFormData(prev => {
-      const updated = prev.availableServices.includes(service)
-        ? prev.availableServices.filter(s => s !== service)
-        : [...prev.availableServices, service];
+      const services = prev.availableServices || [];
+      const updated = services.includes(service)
+        ? services.filter(s => s !== service)
+        : [...services, service];
       return { ...prev, availableServices: updated };
     });
   };
@@ -89,16 +90,16 @@ export default function DocumentUploadForm({ initialData, onSubmit }: DocumentUp
     } else if (!/^\d{10}$/.test(formData.telephoneNumber)) {
       newErrors.telephoneNumber = "Telephone Number must be 10 digits";
     }
-    if (!formData.ownersName.trim()) {
+    if (!formData.ownersName?.trim()) {
       newErrors.ownersName = "Owner\'s Name is required";
     }
-    if (!formData.vatNumber.trim()) {
+    if (!formData.vatNumber?.trim()) {
       newErrors.vatNumber = "VAT Number is required";
     }
-    if (!formData.registrationNumber.trim()) {
+    if (!formData.registrationNumber?.trim()) {
       newErrors.registrationNumber = "Registration Number is required";
     }
-    if (formData.availableServices.length === 0) {
+    if ((formData.availableServices || []).length === 0) {
       newErrors.availableServices = "At least one service must be selected";
     }
 
@@ -332,7 +333,7 @@ export default function DocumentUploadForm({ initialData, onSubmit }: DocumentUp
           <div className="col-span-2 relative" ref={dropdownRef}>
             <label className="block mb-1" style={{ color: colors.neutral[600] }}>Available Services</label>
             <div onClick={() => setDropdownOpen(!isDropdownOpen)} className="border border-neutral-600 rounded px-3 py-2 cursor-pointer">
-              {formData.availableServices.length > 0 ? formData.availableServices.join(", ") : "Select services"}
+              {(formData.availableServices || []).length > 0 ? (formData.availableServices || []).join(", ") : "Select services"}
             </div>
             {isDropdownOpen && (
               <div className="absolute z-10 mt-1 w-full bg-white border border-neutral-600 rounded shadow-md max-h-48 overflow-auto">
@@ -340,7 +341,7 @@ export default function DocumentUploadForm({ initialData, onSubmit }: DocumentUp
                   <label key={service} className="flex items-center px-3 py-2 hover:bg-gray-100 cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={formData.availableServices.includes(service)}
+                      checked={(formData.availableServices || []).includes(service)}
                       onChange={() => toggleService(service)}
                       className="mr-2"
                     />

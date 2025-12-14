@@ -8,6 +8,8 @@ import UserProfileCard from "@/components/molecules/user-card/user-card";
 import VehicleDetailsModal from "@/components/atoms/vehicle-details-card/vehicle-details-card";
 import { fetchVehicles, deleteVehicle } from "@/utils/api";
 
+export const dynamic = "force-dynamic";
+
 interface Vehicle {
   id: string;
   vehicleId: number;
@@ -30,7 +32,7 @@ const VehiclesPage = () => {
   const searchParams = useSearchParams();
   const serviceCenterId = searchParams.get("serviceCenterId");
 
-  const [vehicleFilter, setVehicleFilter] = useState("All Vehicles");
+  // const [vehicleFilter, setVehicleFilter] = useState("All Vehicles");
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);

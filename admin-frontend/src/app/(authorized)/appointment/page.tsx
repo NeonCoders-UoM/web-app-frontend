@@ -18,6 +18,8 @@ import {
   fetchAppointmentDetail,
 } from "@/utils/api";
 
+export const dynamic = "force-dynamic";
+
 
 // Types matching backend DTOs
 // Appointment summary for admin

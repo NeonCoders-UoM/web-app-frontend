@@ -13,6 +13,8 @@ import {
   getServiceAvailabilities,
   deleteClosureSchedule,
 } from "@/utils/api";
+
+export const dynamic = "force-dynamic";
 import {
   ClosureSchedule,
   ServiceCenter,

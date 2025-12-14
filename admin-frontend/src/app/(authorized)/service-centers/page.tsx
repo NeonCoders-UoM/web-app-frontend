@@ -13,6 +13,8 @@ import {
   updateServiceCenterStatus,
 } from "@/utils/api";
 
+export const dynamic = "force-dynamic";
+
 const ServiceCentersPage: React.FC = () => {
   const router = useRouter();
   const [serviceCenters, setServiceCenters] = useState<ServiceCenter[]>([]);

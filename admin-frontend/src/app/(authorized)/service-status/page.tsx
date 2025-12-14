@@ -14,6 +14,8 @@ import {
   addServicesToAppointment,
 } from "@/utils/api";
 
+export const dynamic = "force-dynamic";
+
 // Use the AppointmentDetail type from api.ts
 import type { AppointmentDetail } from "@/utils/api";
 

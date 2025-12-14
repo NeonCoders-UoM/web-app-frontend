@@ -16,6 +16,8 @@ import {
 } from "@/utils/api";
 import { SystemService, ServiceCenter, ServiceCenterServiceDTO } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 const ServicesPage: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();

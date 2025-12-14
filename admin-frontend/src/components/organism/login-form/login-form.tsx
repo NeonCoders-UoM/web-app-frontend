@@ -18,7 +18,7 @@ interface LoginFormProps {
   isLoading?: boolean;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ onSuccess: _onSuccess }) => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",

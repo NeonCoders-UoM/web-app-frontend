@@ -13,6 +13,8 @@ import {
   updateEmergencyCallCenter,
   fetchEmergencyCallCenterById,
 } from "@/utils/api";
+
+export const dynamic = "force-dynamic";
 import { EmergencyCallCenter, CreateEmergencyCallCenterDTO } from "@/types";
 
 const EmergencyCallCentersPage: React.FC = () => {

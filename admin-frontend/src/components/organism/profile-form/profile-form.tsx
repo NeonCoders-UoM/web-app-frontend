@@ -208,7 +208,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
       </div>
 
       <div className="flex justify-end gap-4 mt-6">
-        <Button type="button" variant="danger" size="medium" icon="close">
+        <Button type="button" variant="secondary" size="medium">
           Cancel
         </Button>
 
@@ -217,7 +217,6 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
           variant="primary"
           size="medium"
           disabled={isLoading}
-          icon={isLoading ? "loading" : "save"}
         >
           {isLoading ? "Saving..." : "Save Changes"}
         </Button>

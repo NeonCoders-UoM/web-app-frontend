@@ -6,6 +6,8 @@ import ClientTable from "@/components/organism/client-table/client-table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import { fetchClients } from "@/utils/api";
 
+export const dynamic = "force-dynamic";
+
 // Interface for transformed client data that matches table expectations
 interface TransformedClient {
   id: string;
@@ -29,7 +31,7 @@ const ClientsPage = () => {
   const searchParams = useSearchParams();
   const serviceCenterId = searchParams.get("serviceCenterId");
 
-  const [clientFilter, setClientFilter] = useState("All Clients");
+  // const [clientFilter, setClientFilter] = useState("All Clients");
   const [clientsData, setClientsData] = useState<TransformedClient[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

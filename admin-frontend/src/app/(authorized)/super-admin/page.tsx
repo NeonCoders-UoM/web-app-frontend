@@ -16,6 +16,8 @@ import {
 } from "@/utils/api";
 import { ServiceCenter, DashboardStats } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 const SuperAdminDashboard: React.FC = () => {
   const router = useRouter();
     const [selectedTab, setSelectedTab] = useState("dashboard");

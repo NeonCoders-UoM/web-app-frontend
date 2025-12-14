@@ -13,6 +13,8 @@ import { fetchDashboardStats, fetchServiceCenters, checkAllServiceCentersAvailab
 import { ServiceCenter, DashboardStats, User } from "@/types";
 import axiosInstance from "@/utils/axios";
 
+export const dynamic = "force-dynamic";
+
 const AdminDashboard = () => {
   const router = useRouter();
   const [selectedTab, setSelectedTab] = useState("dashboard");
@@ -23,7 +25,7 @@ const AdminDashboard = () => {
   const [usersData, setUsersData] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [userFilter, setUserFilter] = useState("All Users");
-  const [searchTerm, setSearchTerm] = useState("");
+  // const [searchTerm, setSearchTerm] = useState("");
 
 
   useEffect(() => {

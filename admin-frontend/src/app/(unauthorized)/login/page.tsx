@@ -1,13 +1,10 @@
 "use client"; 
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import LoginForm from "@/components/organism/login-form/login-form";
 import colors from "@/styles/colors";
-import axiosInstance from "@/utils/axios";
 
 const LoginPage = () => {
-  const router = useRouter();
   const [error, setError] = useState("");
 
   const handleLoginSuccess = async (data: { email: string; password: string; remember: boolean }) => {
@@ -18,13 +15,9 @@ const LoginPage = () => {
       } else {
         localStorage.removeItem("rememberedEmail");
       }
-
-      // Make API call to get user role (if needed)
-      // const response = await axiosInstance.get('/user/role');
-      // redirectToDashboard(response.data.role);
     } catch (err) {
-      console.error("Failed to get user role:", err);
-      setError("Failed to determine user role");
+      console.error("Failed to handle login:", err);
+      setError("Failed to process login");
     }
   };
 

@@ -4,7 +4,6 @@ import {
   Client, 
   User, 
   ServiceCenterUser,
-  Vehicle,
   ServiceCenterDTO,
   CreateServiceCenterDTO,
   UpdateServiceCenterDTO,
@@ -32,7 +31,6 @@ import {
   UpdateEmergencyCallCenterDTO
 } from "@/types";
 import axiosInstance from "./axios";
-import axios from 'axios';
 
 
 // Mock data (as provided)

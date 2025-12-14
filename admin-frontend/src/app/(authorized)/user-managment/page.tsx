@@ -10,11 +10,13 @@ import { User } from "@/types";
 import axiosInstance from "@/utils/axios";
 import Sidebar from "@/components/molecules/side-bar/side-bar";
 
+export const dynamic = "force-dynamic";
+
 const UsersPage = () => {
   const router = useRouter();
       const [selectedTab, setSelectedTab] = useState("dashboard");
 
-  const [userFilter, setUserFilter] = useState("Admin/all-users");
+  // const [userFilter, setUserFilter] = useState("Admin/all-users");
   const [usersData, setUsersData] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

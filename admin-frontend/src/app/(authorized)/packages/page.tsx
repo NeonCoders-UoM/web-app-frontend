@@ -9,6 +9,8 @@ import Sidebar from "@/components/molecules/side-bar/side-bar";
 import { fetchPackages, deletePackage } from "@/utils/api";
 import { Package } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 const PackagesPage: React.FC = () => {
   const router = useRouter();
   const [packages, setPackages] = useState<Package[]>([]);

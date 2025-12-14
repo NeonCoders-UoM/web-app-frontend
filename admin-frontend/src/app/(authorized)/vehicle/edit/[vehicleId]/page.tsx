@@ -1,21 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import DocumentUploadForm from "@/components/organism/document-upload-form/document-upload-form";
 import UserProfileCard from "@/components/molecules/user-card/user-card"
 import { ServiceCenter } from "@/types";
 
 
-interface EditVehiclePageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default function EditVehiclePage({ params }: EditVehiclePageProps) {
+export default function EditVehiclePage() {
   const router = useRouter();
-  const clientId = params.id;
+  const params = useParams();
+  const clientId = params.vehicleId as string;
   const [loading, setLoading] = useState(true);
   const [vehicleData, setVehicleData] = useState<Partial<ServiceCenter> | null>(null);
 
@@ -38,7 +33,6 @@ export default function EditVehiclePage({ params }: EditVehiclePageProps) {
           vatNumber: "VAT123456",
           registrationNumber: "REG987654",
           availableServices: ["Oil Change"],
-          serviceHours: { start: "09:00", end: "17:00" },
           photoUrl: "",
           registrationCopyUrl: ""
         };

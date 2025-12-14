@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "../styles/fonts.css"; // Import fonts.css
+import { Suspense } from "react";
 import SidebarWrapper from "../components/molecules/sidebar-wrapper/sidebar-wrapper";
 
 const geistSans = Geist({
@@ -28,7 +29,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <div className="min-h-screen bg-gray-50">
-          <SidebarWrapper />
+          <Suspense fallback={<div />}>
+            <SidebarWrapper />
+          </Suspense>
           <main className="transition-all duration-300 ease-in-out">{children}</main>
         </div>
       </body>
