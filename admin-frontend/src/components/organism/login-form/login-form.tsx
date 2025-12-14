@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, ArrowUpIcon } from "lucide-react";
 import Button from "@/components/atoms/button/button";
@@ -8,6 +6,7 @@ import ForgotPasswordForm from "@/components/organism/forgot-password-form/forgo
 import axiosInstance from "@/utils/axios";
 import { useRouter } from "next/navigation";
 import { getDashboardRoute } from "@/utils/auth";
+import { setCookie, getCookie, deleteCookie } from "@/utils/cookies";
 
 interface LoginFormProps {
   onSuccess?: (data: {
@@ -38,7 +37,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const router = useRouter();
 
   useEffect(() => {
-    const rememberedEmail = localStorage.getItem("rememberedEmail");
+    const rememberedEmail = getCookie("rememberedEmail");
     if (rememberedEmail) {
       setFormData((prev) => ({
         ...prev,
@@ -66,24 +65,25 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
 
       const { token, userId, userRole, userRoleId, station_id, serviceCenterName } = response.data;
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("userId", userId.toString());
-      localStorage.setItem("userRole", userRole);
-      localStorage.setItem("userRoleId", userRoleId.toString());
+      // Store authentication data in cookies (7 days expiry)
+      setCookie("token", token, 7);
+      setCookie("userId", userId.toString(), 7);
+      setCookie("userRole", userRole, 7);
+      setCookie("userRoleId", userRoleId.toString(), 7);
       
       // Store station_id and service center name for service center admins
       if (station_id) {
-        localStorage.setItem("station_id", station_id.toString());
-        localStorage.setItem("serviceCenterName", serviceCenterName || "");
+        setCookie("station_id", station_id.toString(), 7);
+        setCookie("serviceCenterName", serviceCenterName || "", 7);
       }
 
       // Dispatch custom event to notify components of role change
       window.dispatchEvent(new Event("roleChanged"));
 
       if (data.remember) {
-        localStorage.setItem("rememberedEmail", data.email);
+        setCookie("rememberedEmail", data.email, 30); // 30 days for remembered email
       } else {
-        localStorage.removeItem("rememberedEmail");
+        deleteCookie("rememberedEmail");
       }
 
       console.log("Login response:", { userId, userRole, userRoleId, station_id, serviceCenterName });

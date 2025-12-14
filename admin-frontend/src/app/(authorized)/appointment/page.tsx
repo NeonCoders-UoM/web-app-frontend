@@ -21,11 +21,12 @@ import {
 
 // Types matching backend DTOs
 // Appointment summary for admin
-// { appointmentId, ownerName, appointmentDate }
+// { appointmentId, ownerName, appointmentDate, status }
 type AppointmentSummary = {
   appointmentId: number;
   ownerName: string;
   appointmentDate: string;
+  status?: string;
 };
 
 // Table expects this type:
@@ -33,6 +34,7 @@ type TableAppointment = {
   id: string;
   name: string;
   date: string;
+  status?: string;
 };
 
 type ServiceWithPrice = { name: string; price: number };
@@ -44,6 +46,9 @@ const AppointmentsPage = () => {
     null
   );
   const [appointments, setAppointments] = useState<AppointmentSummary[]>([]);
+  const [filteredAppointments, setFilteredAppointments] = useState<AppointmentSummary[]>([]);
+  const [selectedFilter, setSelectedFilter] = useState<string>("All");
+  const [dateFilter, setDateFilter] = useState<string>("All"); // All, Today, Tomorrow
   const [appointmentsLoading, setAppointmentsLoading] = useState(false);
   const [appointmentsError, setAppointmentsError] = useState<string | null>(
     null
@@ -90,6 +95,7 @@ const AppointmentsPage = () => {
         try {
           const data = await fetchAppointmentsForStation(stationId);
           setAppointments(data);
+          setFilteredAppointments(data); // Initially show all
         } catch (error: unknown) {
           setAppointmentsError(
             error instanceof Error ? error.message : "Unknown error"
@@ -102,6 +108,54 @@ const AppointmentsPage = () => {
     fetchAppointments();
   }, [stationId]);
 
+  // Helper function to check if date is today
+  const isToday = (dateString: string) => {
+    const today = new Date();
+    const appointmentDate = new Date(dateString);
+    return (
+      appointmentDate.getDate() === today.getDate() &&
+      appointmentDate.getMonth() === today.getMonth() &&
+      appointmentDate.getFullYear() === today.getFullYear()
+    );
+  };
+
+  // Helper function to check if date is tomorrow
+  const isTomorrow = (dateString: string) => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const appointmentDate = new Date(dateString);
+    return (
+      appointmentDate.getDate() === tomorrow.getDate() &&
+      appointmentDate.getMonth() === tomorrow.getMonth() &&
+      appointmentDate.getFullYear() === tomorrow.getFullYear()
+    );
+  };
+
+  // Filter appointments based on selected status and date filter
+  useEffect(() => {
+    let filtered = appointments;
+
+    // Apply status filter
+    if (selectedFilter !== "All") {
+      if (selectedFilter === "Payment_Pending") {
+        filtered = filtered.filter(
+          (apt) => apt.status === "Payment_Pending" || apt.status === "Pending"
+        );
+      } else {
+        filtered = filtered.filter((apt) => apt.status === selectedFilter);
+      }
+    }
+
+    // Apply date filter
+    if (dateFilter === "Today") {
+      filtered = filtered.filter((apt) => isToday(apt.appointmentDate));
+    } else if (dateFilter === "Tomorrow") {
+      filtered = filtered.filter((apt) => isTomorrow(apt.appointmentDate));
+    }
+
+    setFilteredAppointments(filtered);
+  }, [selectedFilter, dateFilter, appointments]);
+
   // Fetch available services for the service center
   useEffect(() => {
     if (stationId) {
@@ -111,16 +165,29 @@ const AppointmentsPage = () => {
 
   // Map fetched appointments to table format
   useEffect(() => {
-    if (appointments && Array.isArray(appointments)) {
+    if (filteredAppointments && Array.isArray(filteredAppointments)) {
       setTableAppointments(
-        appointments.map((a) => ({
+        filteredAppointments.map((a) => ({
           id: a.appointmentId.toString(),
           name: a.ownerName,
           date: a.appointmentDate,
+          status: a.status || "Pending",
         }))
       );
     }
-  }, [appointments]);
+  }, [filteredAppointments]);
+
+  // Calculate status counts
+  const totalAppointments = appointments.length;
+  const paymentPendingCount = appointments.filter(
+    (apt) => apt.status === "Payment_Pending" || apt.status === "Pending"
+  ).length;
+  const confirmedCount = appointments.filter(
+    (apt) => apt.status === "Confirmed"
+  ).length;
+  const completedCount = appointments.filter(
+    (apt) => apt.status === "Completed"
+  ).length;
 
   // Accepts TableAppointment, finds AppointmentSummary, then fetches detail
   const handleViewAppointment = async (appointment: TableAppointment) => {
@@ -224,34 +291,92 @@ const AppointmentsPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
         <StatusCard
           title="Totaly Appointments"
-          value={0}
+          value={totalAppointments}
           icon="customers"
+          onClick={() => setSelectedFilter("All")}
         />
         <StatusCard
-          title="Pending Appointments"
-          value={0}
+          title="Payment Pending Appointments"
+          value={paymentPendingCount}
           icon="customers"
+          onClick={() => setSelectedFilter("Payment_Pending")}
+        />
+        <StatusCard
+          title="Confirmed Appointments"
+          value={confirmedCount}
+          icon="customers"
+          onClick={() => setSelectedFilter("Confirmed")}
         />
         <StatusCard
           title="Completed Appointments"
-          value={0}
+          value={completedCount}
           icon="customers"
-        />
-        <StatusCard
-          title="Completed Appointments"
-          value={0}
-          icon="customers"
+          onClick={() => setSelectedFilter("Completed")}
         />
       </div>
 
         <div className=" p-6">
-          <h1 className="h2 text-neutral-800 mb-[40px]">
+          <h1 className="h2 text-neutral-800 mb-[20px]">
             {stationId
               ? `Appointments - Service Center ${
                   serviceCenter?.serviceCenterName || stationId
                 }`
               : "Appointments Requests"}
           </h1>
+
+          {/* Date Filter Buttons */}
+          <div className="mb-[20px] flex gap-3">
+            <button
+              onClick={() => setDateFilter("All")}
+              className={`px-6 py-2.5 rounded-lg font-medium transition-all ${
+                dateFilter === "All"
+                  ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg"
+                  : "bg-white text-gray-700 border border-gray-300 hover:border-blue-400 hover:text-blue-600"
+              }`}
+            >
+              All Appointments
+            </button>
+            <button
+              onClick={() => setDateFilter("Today")}
+              className={`px-6 py-2.5 rounded-lg font-medium transition-all ${
+                dateFilter === "Today"
+                  ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg"
+                  : "bg-white text-gray-700 border border-gray-300 hover:border-blue-400 hover:text-blue-600"
+              }`}
+            >
+              Today
+            </button>
+            <button
+              onClick={() => setDateFilter("Tomorrow")}
+              className={`px-6 py-2.5 rounded-lg font-medium transition-all ${
+                dateFilter === "Tomorrow"
+                  ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg"
+                  : "bg-white text-gray-700 border border-gray-300 hover:border-blue-400 hover:text-blue-600"
+              }`}
+            >
+              Tomorrow
+            </button>
+          </div>
+
+          {/* Filter Status Indicator */}
+          {selectedFilter !== "All" && (
+            <div className="mb-[20px] p-[16px] bg-blue-50 border border-blue-200 rounded-[12px] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                <span className="text-blue-700 font-medium">
+                  Showing: <span className="font-bold">{selectedFilter}</span> appointments
+                </span>
+              </div>
+              <button
+                onClick={() => setSelectedFilter("All")}
+                className="text-blue-600 hover:text-blue-800 font-medium text-sm underline"
+              >
+                Clear Filter
+              </button>
+            </div>
+          )}
 
           {appointmentsLoading ? (
             <div className="text-gray-500">Loading appointments...</div>
