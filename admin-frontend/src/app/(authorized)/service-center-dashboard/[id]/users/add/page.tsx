@@ -7,7 +7,7 @@ import UserProfileCard from "@/components/molecules/user-card/user-card";
 import { fetchServiceCenterById } from "@/utils/api";
 import { ServiceCenter } from "@/types";
 import axiosInstance from "@/utils/axios";
-import { deleteAllAuthCookies } from "@/utils/cookies";
+import { deleteAllAuthCookies, getCookie } from "@/utils/cookies";
 
 const roleMap: { [key: string]: number } = {
   Cashier: 4,
@@ -30,8 +30,8 @@ const AddServiceCenterUser = () => {
   });
 
   useEffect(() => {
-    const userRole = localStorage.getItem("userRole");
-    const userStationId = localStorage.getItem("station_id");
+    const userRole = getCookie("userRole");
+    const userStationId = getCookie("station_id");
 
     if (userRole !== "ServiceCenterAdmin") {
       router.push(`/service-center-dashboard/${serviceCenterId}`);

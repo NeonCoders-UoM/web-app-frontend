@@ -8,7 +8,7 @@ import StatusCard from "@/components/atoms/status-cards/status-card";
 import Table from "@/components/organism/table/table";
 import { fetchServiceCenterById, getServiceCenterUsers, deleteUser } from "@/utils/api";
 import { ServiceCenter, ServiceCenterUser } from "@/types";
-import { deleteAllAuthCookies } from "@/utils/cookies";
+import { deleteAllAuthCookies, getCookie } from "@/utils/cookies";
 
 const ServiceCenterUserManagement = () => {
   const params = useParams();
@@ -23,8 +23,8 @@ const ServiceCenterUserManagement = () => {
   const [filterRole, setFilterRole] = useState<"all" | "Cashier" | "DataOperator">("all");
 
   useEffect(() => {
-    const userRole = localStorage.getItem("userRole");
-    const userStationId = localStorage.getItem("station_id");
+    const userRole = getCookie("userRole");
+    const userStationId = getCookie("station_id");
 
     // Only ServiceCenterAdmin can access this page
     if (userRole !== "ServiceCenterAdmin") {

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ServiceStatusDataTable } from "@/components/organism/service-status-data-table/servise-status-data-table";
-import { deleteAllAuthCookies } from "@/utils/cookies";
+import { deleteAllAuthCookies, getCookie } from "@/utils/cookies";
 import AppointmentSearch from "@/components/organism/search-filter-form/search-filter-form";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import Button from "@/components/atoms/button/button";
@@ -92,7 +92,7 @@ export default function Page() {
   // Helper to get userId from localStorage
   const getCurrentUserId = () => {
     if (typeof window !== "undefined") {
-      const userId = localStorage.getItem("userId");
+      const userId = getCookie("userId");
       return userId ? parseInt(userId) : undefined;
     }
     return undefined;

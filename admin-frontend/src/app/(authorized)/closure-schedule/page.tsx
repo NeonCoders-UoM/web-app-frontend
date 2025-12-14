@@ -654,14 +654,14 @@ const ManageServices = () => {
           <p className="text-gray-600">Schedule service center closures and manage service availability</p>
         </div>
         <UserProfileCard
-          pictureSrc="/images/profipic.jpg"
-          pictureAlt="User Profile"
-          useCurrentUser={true}
-          onLogout={() => {
-            localStorage.removeItem("token");
-            window.location.href = "/login";
-          }}
-        />
+                    pictureSrc="/images/profipic.jpg"
+                    pictureAlt="User Profile"
+                    useCurrentUser={true}
+                    onLogout={() => {
+                      deleteAllAuthCookies();
+                      router.push("/login");
+                    }}
+                  />
       </div>
 
       {/* Service Center Selection */}

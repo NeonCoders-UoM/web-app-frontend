@@ -8,7 +8,7 @@ import EnhancedServiceCenterForm from "@/components/organism/enhanced-service-ce
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import { createServiceCenterWithServices } from "@/utils/api";
 import { CreateServiceCenterWithServicesDTO } from "@/types";
-import { deleteAllAuthCookies } from "@/utils/cookies";
+import { deleteAllAuthCookies, getCookie } from "@/utils/cookies";
 
 const AddServiceCenter: React.FC = () => {
   const router = useRouter();
@@ -41,7 +41,7 @@ const AddServiceCenter: React.FC = () => {
           {/* Back Button */}
           <button
             onClick={() => {
-              const userRole = localStorage.getItem("userRole");
+              const userRole = getCookie("userRole");
               if (userRole === "SuperAdmin") {
                 router.push("/super-admin");
               } else if (userRole === "Admin") {

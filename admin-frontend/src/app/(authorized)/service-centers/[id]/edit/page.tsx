@@ -7,7 +7,7 @@ import EnhancedServiceCenterForm from "@/components/organism/enhanced-service-ce
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import { fetchServiceCenterById, updateServiceCenter } from "@/utils/api";
 import { ServiceCenter, CreateServiceCenterWithServicesDTO } from "@/types";
-import { deleteAllAuthCookies } from "@/utils/cookies";
+import { deleteAllAuthCookies, getCookie } from "@/utils/cookies";
 
 const EditServiceCenter: React.FC = () => {
   const router = useRouter();
@@ -65,7 +65,7 @@ const EditServiceCenter: React.FC = () => {
         alert("Service Center updated successfully!");
         
         // Redirect based on user role
-        const userRole = localStorage.getItem("userRole");
+        const userRole = getCookie("userRole");
         if (userRole === "SuperAdmin") {
           router.push("/super-admin");
         } else if (userRole === "Admin") {
@@ -124,7 +124,7 @@ const EditServiceCenter: React.FC = () => {
           {/* Back Button */}
           <button
             onClick={() => {
-              const userRole = localStorage.getItem("userRole");
+              const userRole = getCookie("userRole");
               if (userRole === "SuperAdmin") {
                 router.push("/super-admin");
               } else if (userRole === "Admin") {
