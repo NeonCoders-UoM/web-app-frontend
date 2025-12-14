@@ -7,6 +7,7 @@ interface Appointment {
   id: string;
   name: string;
   date: string;
+  status?: string;
 }
 
 interface TableProps {
@@ -42,6 +43,11 @@ const Table: React.FC<TableProps> = ({ data, onView }) => {
           ? sorted.sort((a, b) => a.date.localeCompare(b.date))
           : sorted.sort((a, b) => b.date.localeCompare(a.date));
         break;
+      case 3:
+        sorted = sortAsc
+          ? sorted.sort((a, b) => (a.status || "").localeCompare(b.status || ""))
+          : sorted.sort((a, b) => (b.status || "").localeCompare(a.status || ""));
+        break;
     }
     setSortedData(sorted);
     setSortAsc(!sortAsc);
@@ -74,6 +80,7 @@ const Table: React.FC<TableProps> = ({ data, onView }) => {
             { title: "Appointment ID", sortable: true },
             { title: "Name", sortable: true },
             { title: "Date", sortable: true },
+            { title: "Status", sortable: true },
             { title: "", sortable: false },
           ]}
           onSort={handleSort}
@@ -85,8 +92,8 @@ const Table: React.FC<TableProps> = ({ data, onView }) => {
               appointmentId={appointment.id}
               name={appointment.name}
               date={appointment.date}
+              status={appointment.status}
               onView={() => onView(appointment)}
-          
             />
           ))}
         </tbody>

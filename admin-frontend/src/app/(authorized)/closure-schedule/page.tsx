@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import ScheduleShopClosures from "@/components/molecules/schedule-shop-closures/schedule-shop-closures";
 import ShiftCard from "@/components/atoms/shiftcard/shiftcard";
+import UserProfileCard from "@/components/molecules/user-card/user-card";
 import {
   addClosureSchedule,
   getClosures,
@@ -602,6 +603,19 @@ const ManageServices = () => {
   if (currentServiceCenterId === null) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8">
+        {/* Header with user profile */}
+        <div className="flex justify-end items-center mb-10">
+          <UserProfileCard
+            pictureSrc="/images/profipic.jpg"
+            pictureAlt="User Profile"
+            useCurrentUser={true}
+            onLogout={() => {
+              localStorage.removeItem("token");
+              window.location.href = "/login";
+            }}
+          />
+        </div>
+        
         <h1 className="text-3xl font-bold text-gray-800 mb-8">Service Center Closure Schedule</h1>
         <div className="max-w-2xl mx-auto bg-white rounded-md shadow-sm border border-yellow-200 p-8 text-center">
           <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -632,10 +646,21 @@ const ManageServices = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 p-8">
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800 ">Closure Schedule Management</h1>
-        <p className="text-gray-600">Schedule service center closures and manage service availability</p>
+      {/* Header with user profile */}
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Closure Schedule Management</h1>
+          <p className="text-gray-600">Schedule service center closures and manage service availability</p>
+        </div>
+        <UserProfileCard
+          pictureSrc="/images/profipic.jpg"
+          pictureAlt="User Profile"
+          useCurrentUser={true}
+          onLogout={() => {
+            localStorage.removeItem("token");
+            window.location.href = "/login";
+          }}
+        />
       </div>
 
       {/* Service Center Selection */}

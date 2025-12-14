@@ -1,5 +1,6 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { getCookie, deleteAllAuthCookies } from "./cookies";
 
 export interface AuthUser {
   userId: string;
@@ -12,12 +13,7 @@ export interface AuthUser {
 export const logout = () => {
   if (typeof window === "undefined") return;
   
-  localStorage.removeItem("token");
-  localStorage.removeItem("userId");
-  localStorage.removeItem("userRole");
-  localStorage.removeItem("userRoleId");
-  localStorage.removeItem("station_id");
-  localStorage.removeItem("serviceCenterName");
+  deleteAllAuthCookies();
   
   // Dispatch custom event to notify components of role change
   window.dispatchEvent(new Event("roleChanged"));
@@ -26,11 +22,11 @@ export const logout = () => {
 export const getAuthUser = (): AuthUser | null => {
   if (typeof window === "undefined") return null;
   
-  const userId = localStorage.getItem("userId");
-  const userRole = localStorage.getItem("userRole");
-  const userRoleId = localStorage.getItem("userRoleId");
-  const stationId = localStorage.getItem("station_id");
-  const serviceCenterName = localStorage.getItem("serviceCenterName");
+  const userId = getCookie("userId");
+  const userRole = getCookie("userRole");
+  const userRoleId = getCookie("userRoleId");
+  const stationId = getCookie("station_id");
+  const serviceCenterName = getCookie("serviceCenterName");
 
   if (!userId || !userRole || !userRoleId) {
     return null;
