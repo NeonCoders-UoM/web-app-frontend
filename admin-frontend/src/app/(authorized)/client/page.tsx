@@ -146,7 +146,8 @@ const ClientsPage = () => {
             <ClientTable
               headers={tableHeaders}
               data={clientsData as unknown as Record<string, string>[]}
-              actions={["view", "edit", "delete"]}
+              // actions={["view", "edit", "delete"]}
+              actions={[]}
               showSearchBar={true}
               showClientCell={true}
               onActionSelect={handleActionSelect}

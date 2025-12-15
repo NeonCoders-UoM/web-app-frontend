@@ -3,6 +3,7 @@
 import React from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import Sidebar from "@/components/molecules/side-bar/side-bar";
+import { getCookie } from "@/utils/cookies";
 
 const SidebarWrapper = () => {
   const pathname = usePathname();
@@ -17,10 +18,10 @@ const SidebarWrapper = () => {
   const currentStationId =
     queryStationId || (stationIdMatch ? stationIdMatch[1] : undefined);
 
-  // Get user role from localStorage and listen for changes
+  // Get user role from cookies and listen for changes
   React.useEffect(() => {
     const updateRole = () => {
-      const role = localStorage.getItem("userRole");
+      const role = getCookie("userRole");
       if (role) {
         // Convert backend role format to sidebar role format
         const roleMap: Record<string, "super-admin" | "admin" | "service-center-admin" | "cashier" | "data-operator"> = {
