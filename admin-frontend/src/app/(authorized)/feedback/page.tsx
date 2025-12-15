@@ -6,9 +6,9 @@ import FeedbackTable from "@/components/organism/feedback-table/feedback-table";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import ReviewSummaryCard from "@/components/organism/review-summary-card/review-summary-card";
 import { FeedbackDTO, FeedbackStatsDTO } from "@/types";
-import { getAllFeedbacks, getFeedbackStats } from "@/utils/api";
+import { getAllFeedbacks, getFeedbackStats, getServiceCenterFeedbacks } from "@/utils/api";
 import { formatDate } from "@/lib/utils";
-import { deleteAllAuthCookies } from "@/utils/cookies";
+import { deleteAllAuthCookies, getCookie } from "@/utils/cookies";
 
 
 const FeedbackPage = () => {
@@ -23,10 +23,22 @@ const FeedbackPage = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch feedbacks and stats in parallel
+      // Get service center ID and user role directly from cookies
+      const stationId = getCookie("station_id");
+      const userRole = getCookie("userRole");
+      const serviceCenterId = stationId ? parseInt(stationId) : undefined;
+
+      // Check if user is a service center admin
+      const isServiceCenter = userRole === "ServiceCenterAdmin";
+
+      // Fetch feedbacks and stats based on user role
       const [feedbacks, stats] = await Promise.all([
-        getAllFeedbacks({ page: 1, pageSize: 50 }), // Adjust pageSize as needed
-        getFeedbackStats()
+        isServiceCenter && serviceCenterId
+          ? getServiceCenterFeedbacks(serviceCenterId) // Fetch only service center's feedback
+          : getAllFeedbacks({ page: 1, pageSize: 50 }), // Fetch all feedback for super admin
+        isServiceCenter && serviceCenterId
+          ? getFeedbackStats(serviceCenterId) // Fetch stats for specific service center
+          : getFeedbackStats() // Fetch all stats for super admin
       ]);
 
       setFeedbackData(feedbacks);
