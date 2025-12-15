@@ -136,7 +136,7 @@ const AddServiceCenterUser = () => {
       </div>
 
       {/* Form */}
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto mt-2">
         <div className="bg-white rounded-md shadow-sm border border-gray-200 p-8">
           <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-200">
             

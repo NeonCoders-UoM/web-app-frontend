@@ -164,7 +164,7 @@ const ServiceCenterUserManagement = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-40 mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-40 mb-10 mt-2">
         <StatusCard
           title="Total Users"
           value={users.length}
