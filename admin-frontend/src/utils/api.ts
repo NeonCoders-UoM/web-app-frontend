@@ -1800,6 +1800,8 @@ export type AppointmentDetail = {
   serviceCenterName?: string;
   status?: string; // Add status field to track appointment status
   appointmentPrice?: number; // Add appointment price field
+  customerLoyaltyPoints?: number; // Add customer loyalty points
+  customerId?: number; // Add customer ID
 };
 
 export const fetchAdminAppointmentVehicleDetail = async (
@@ -1830,8 +1832,11 @@ export const fetchAppointmentDetail = async (
       `/Appointment/station/${stationId}/details/${appointmentId}`
     );
     return response.data;
-  } catch (error) {
-
+  } catch (error: any) {
+    // If it's a 404, the appointment doesn't belong to this service center
+    if (error.response?.status === 404) {
+      throw new Error('APPOINTMENT_NOT_FOUND_FOR_CENTER');
+    }
     
     try {
       // If the simple endpoint fails, try to get all appointments for the station
@@ -1842,7 +1847,7 @@ export const fetchAppointmentDetail = async (
       );
       
       if (!targetAppointment) {
-        throw new Error('Appointment not found');
+        throw new Error('APPOINTMENT_NOT_FOUND_FOR_CENTER');
       }
       
       // For now, return a basic structure with the information we have
@@ -1891,6 +1896,32 @@ export const addServicesToAppointment = async (
     await axiosInstance.post(`/Appointment/${appointmentId}/add-services`, serviceNames);
   } catch (error) {
     console.error("Error adding services to appointment:", error);
+    throw error;
+  }
+};
+
+// Apply loyalty discount to appointment
+export const applyLoyaltyDiscount = async (
+  appointmentId: number,
+  pointsToRedeem: number
+): Promise<{
+  appointmentId: number;
+  originalPrice: number;
+  discountPercentage: number;
+  discountAmount: number;
+  finalPrice: number;
+  pointsRedeemed: number;
+  remainingLoyaltyPoints: number;
+  message: string;
+}> => {
+  try {
+    const response = await axiosInstance.post(
+      `/Appointment/${appointmentId}/apply-loyalty-discount`,
+      pointsToRedeem
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error applying loyalty discount:", error);
     throw error;
   }
 };

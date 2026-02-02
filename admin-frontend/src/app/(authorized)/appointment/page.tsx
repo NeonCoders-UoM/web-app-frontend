@@ -281,7 +281,14 @@ const AppointmentsPage = () => {
       {/* Main Content */}
       <div className="max-w-full mx-auto w-full">
         {/* Header with user profile */}
-        <div className="flex justify-end items-center mb-10">
+        <div className="flex justify-between items-center mb-10">
+          <h1 className="h2 text-neutral-800">
+            {stationId
+              ? `Appointments - ${
+                  serviceCenter?.serviceCenterName || stationId
+                }`
+              : "Appointments Requests"}
+          </h1>
           <UserProfileCard
             pictureSrc="/images/profipic.jpg"
             pictureAlt="User Profile"
@@ -321,14 +328,6 @@ const AppointmentsPage = () => {
       </div>
 
         <div className=" p-6">
-          <h1 className="h2 text-neutral-800 mb-[20px]">
-            {stationId
-              ? `Appointments - Service Center ${
-                  serviceCenter?.serviceCenterName || stationId
-                }`
-              : "Appointments Requests"}
-          </h1>
-
           {/* Date Filter Buttons */}
           <div className="mb-[20px] flex gap-3">
             <button

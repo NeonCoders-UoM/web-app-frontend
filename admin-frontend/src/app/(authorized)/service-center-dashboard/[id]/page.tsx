@@ -210,7 +210,7 @@ const ServiceCenterDashboard = () => {
         <div className="flex justify-between items-center mb-10">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">Service Center Dashboard</h1>
-            <p className="text-gray-600">
+            <p className="text-lg text-gray-800">
               {serviceCenter?.serviceCenterName || "Service Center"}
             </p>
           </div>
@@ -227,12 +227,11 @@ const ServiceCenterDashboard = () => {
 
         {/* User Management Link (Only for Service Center Admin) */}
         {isServiceCenterAdmin && (
-          <div className="mb-6">
+          <div className="mb-6 flex justify-end">
             <button
               onClick={() => router.push(`/service-center-dashboard/${serviceCenterId}/users`)}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2 font-medium"
+              className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2 font-medium"
             >
-              <Users className="w-5 h-5" />
               Manage Users
             </button>
           </div>
@@ -264,7 +263,7 @@ const ServiceCenterDashboard = () => {
 
         {/* Table Section */}
         <div className="">
-          <h2 className="text-xl font-semibold mb-4">
+          <h2 className="text-xl  text-gray-800 font-semibold mb-4">
             Leading Services -{" "}
             {serviceCenter?.serviceCenterName || "Service Center"}
           </h2>

@@ -194,7 +194,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess: _onSuccess }) => {
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-neutral-600 mb-1"
+            className="block text-sm font-medium text-white mb-1"
           >
             Email Address
           </label>
@@ -218,14 +218,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess: _onSuccess }) => {
           <div className="flex items-center justify-between mb-1">
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-neutral-600"
+              className="block text-sm font-medium text-white"
             >
               Password
             </label>
             <button
               type="button"
               onClick={() => setShowForgotPassword(true)}
-              className="text-sm text-blue-600 hover:underline"
+              className="text-sm text-white hover:underline"
             >
               Forgot Password?
             </button>
@@ -263,7 +263,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess: _onSuccess }) => {
             onChange={handleChange}
             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-neutral-300 rounded"
           />
-          <label htmlFor="remember" className="ml-2 text-sm text-neutral-600">
+          <label htmlFor="remember" className="ml-2 text-sm text-white">
             Remember Password
           </label>
         </div>

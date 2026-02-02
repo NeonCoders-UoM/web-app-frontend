@@ -165,7 +165,7 @@ const currentStationId =
   
 
   return (
-    <div className="w-72 min-h-screen flex flex-col bg-indigo-500/20 bg-gradient-to-b from-[#010134] to-[#010134]  fixed left-0 top-0 z-50 sidebar-scrollbar overflow-y-auto border-r border-[#0000A0]/30">
+    <div className="w-72 min-h-screen flex flex-col bg-[#010134] fixed left-0 top-0 z-50 sidebar-scrollbar overflow-y-auto border-r border-[#0000A0]/30">
       {/* Logo Section */}
       <div className="px-6 py-6 flex items-center justify-center border-b border-white/10 relative">
         <Image src="/images/logo3.png" alt="Logo" width={120} height={40} />

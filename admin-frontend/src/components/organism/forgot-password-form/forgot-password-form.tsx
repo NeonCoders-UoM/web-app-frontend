@@ -156,15 +156,13 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBack, onSucce
   const renderEmailStep = () => (
     <div className="space-y-6">
       <div className="text-center">
-        <Mail className="w-12 h-12 mx-auto text-blue-600 mb-4" />
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Forgot Password?</h2>
-        <p className="text-gray-600">
+        <p className="text-gray-300">
           Enter your email address and we'll send you a verification code to reset your password.
         </p>
       </div>
 
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-neutral-600 mb-1">
+        <label htmlFor="email" className="block text-sm font-medium text-white mb-1">
           Email Address
         </label>
         <InputField
@@ -217,15 +215,15 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBack, onSucce
   const renderOtpStep = () => (
     <div className="space-y-6">
       <div className="text-center">
-        <Key className="w-12 h-12 mx-auto text-blue-600 mb-4" />
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Enter Verification Code</h2>
-        <p className="text-gray-600">
+        <Key className="w-12 h-12 mx-auto text-white mb-4" />
+        <h2 className="text-2xl font-bold text-white mb-2">Enter Verification Code</h2>
+        <p className="text-gray-300">
           We've sent a 6-digit code to <strong>{email}</strong>
         </p>
       </div>
 
       <div>
-        <label htmlFor="otp" className="block text-sm font-medium text-neutral-600 mb-1">
+        <label htmlFor="otp" className="block text-sm font-medium text-white mb-1">
           Verification Code
         </label>
         <InputField
@@ -285,7 +283,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBack, onSucce
           type="button"
           onClick={handleResendOtp}
           disabled={isLoading}
-          className="text-sm text-blue-600 hover:text-blue-800 disabled:text-gray-400"
+          className="text-sm text-white hover:underline disabled:text-gray-400"
         >
           Didn't receive the code? Resend
         </button>
@@ -296,15 +294,15 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBack, onSucce
   const renderResetStep = () => (
     <div className="space-y-6">
       <div className="text-center">
-        <Lock className="w-12 h-12 mx-auto text-blue-600 mb-4" />
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Reset Your Password</h2>
-        <p className="text-gray-600">
+        <Lock className="w-12 h-12 mx-auto text-white mb-4" />
+        <h2 className="text-2xl font-bold text-white mb-2">Reset Your Password</h2>
+        <p className="text-gray-300">
           Enter your new password below.
         </p>
       </div>
 
       <div>
-        <label htmlFor="newPassword" className="block text-sm font-medium text-neutral-600 mb-1">
+        <label htmlFor="newPassword" className="block text-sm font-medium text-white mb-1">
           New Password
         </label>
         <InputField
@@ -327,7 +325,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBack, onSucce
       </div>
 
       <div>
-        <label htmlFor="confirmPassword" className="block text-sm font-medium text-neutral-600 mb-1">
+        <label htmlFor="confirmPassword" className="block text-sm font-medium text-white mb-1">
           Confirm New Password
         </label>
         <InputField

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Users, UserPlus, ArrowLeft, Loader2, Search } from "lucide-react";
+import { Users, ArrowLeft, Loader2, Search, Plus } from "lucide-react";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import StatusCard from "@/components/atoms/status-cards/status-card";
 import Table from "@/components/organism/table/table";
@@ -212,7 +212,7 @@ const ServiceCenterUserManagement = () => {
               onClick={() => router.push(`/service-center-dashboard/${serviceCenterId}/users/add`)}
               className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2 font-medium shadow-md hover:shadow-lg"
             >
-              <UserPlus className="w-5 h-5" />
+              <Plus className="w-5 h-5" />
               Add User
             </button>
           </div>

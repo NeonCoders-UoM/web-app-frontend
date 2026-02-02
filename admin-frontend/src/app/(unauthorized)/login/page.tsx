@@ -35,11 +35,11 @@ const LoginPage = () => {
       {/* Right Side - Login Form */}
       <div className="flex items-center justify-center w-full lg:w-1/2 p-8">
         <div className="w-full max-w-md">
-          <div className="rounded-[10px] shadow-lg p-12">
-            <p className="text-blue-500 text-2xl font-bold text-center mb-2">
+          <div className="rounded-[10px] drop-shadow-2xl p-12" style={{ backgroundColor: '#010134' }}>
+            <p className="text-white text-2xl font-bold text-center mb-2">
               Welcome to VApp Admin
             </p>
-            <p className="text-sm text-center text-neutral-500 mb-12">
+            <p className="text-sm text-center text-gray-300 mb-12">
               Please enter your email and password to continue
             </p>
 

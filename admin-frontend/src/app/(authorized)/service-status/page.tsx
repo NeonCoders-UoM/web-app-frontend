@@ -13,6 +13,7 @@ import {
   fetchAppointmentDetail,
   fetchServiceCenterServices,
   addServicesToAppointment,
+  applyLoyaltyDiscount,
 } from "@/utils/api";
 
 export const dynamic = "force-dynamic";
@@ -52,6 +53,15 @@ export default function Page() {
   );
   const searchParams = useSearchParams();
   const stationId = searchParams.get("stationId");
+  
+  // Loyalty points state
+  const [isLoyaltyApplied, setIsLoyaltyApplied] = useState(false);
+  const [discountInfo, setDiscountInfo] = useState<{
+    originalPrice: number;
+    discountAmount: number;
+    finalPrice: number;
+    pointsRedeemed: number;
+  } | null>(null);
 
   // Check if appointment is completed
   const isAppointmentCompleted = appointmentDetails?.status === "Completed";
@@ -103,6 +113,8 @@ export default function Page() {
     setFeedback(null);
     setFeedbackType(null);
     setLoading(true);
+    setIsLoyaltyApplied(false);
+    setDiscountInfo(null);
     try {
       const trimmedId = appointmentId.replace("#APT-", "").replace(/^0+/, "");
       const stationIdNum = stationId ? parseInt(stationId) : undefined;
@@ -152,10 +164,18 @@ export default function Page() {
         setFeedback("Appointment found successfully!");
         setFeedbackType("success");
       }
-    } catch {
+    } catch (error: any) {
       setServices([]);
       setAppointmentDetails(null);
-      setFeedback("Appointment not found or error fetching details.");
+      
+      // Check if the error is specifically about appointment not belonging to this center
+      if (error.message === 'APPOINTMENT_NOT_FOUND_FOR_CENTER') {
+        setFeedback(
+          "Appointment not found for this service center. This appointment may belong to a different service center or does not exist."
+        );
+      } else {
+        setFeedback("Appointment not found or error fetching details.");
+      }
       setFeedbackType("error");
     } finally {
       setLoading(false);
@@ -188,6 +208,39 @@ export default function Page() {
     }
   };
 
+  // Handle loyalty points redemption
+  const handleRedeemLoyaltyPoints = async () => {
+    if (!appointmentDetails) {
+      setFeedback("No appointment details available.");
+      setFeedbackType("error");
+      return;
+    }
+
+    const pointsToRedeem = appointmentDetails.customerLoyaltyPoints || 0;
+    
+    if (pointsToRedeem <= 0) {
+      setFeedback("Customer has no loyalty points to redeem.");
+      setFeedbackType("error");
+      return;
+    }
+
+    // Calculate discount preview without actually applying it
+    const discountPercentage = pointsToRedeem / 1000;
+    const discountAmount = totalCost * (discountPercentage / 100);
+    const finalPrice = totalCost - discountAmount;
+
+    setDiscountInfo({
+      originalPrice: totalCost,
+      discountAmount: discountAmount,
+      finalPrice: finalPrice,
+      pointsRedeemed: pointsToRedeem,
+    });
+
+    setIsLoyaltyApplied(true);
+    setFeedback(`Discount preview: ${discountPercentage.toFixed(1)}% off (${discountAmount.toFixed(2)} LKR). Click "Submit & Complete Appointment" to apply.`);
+    setFeedbackType("success");
+  };
+
   const handleSubmit = async () => {
     if (!appointmentDetails || !services) {
       setFeedback("No appointment or services to submit.");
@@ -207,6 +260,23 @@ export default function Page() {
     setFeedback("");
 
     try {
+      // Step 1: Apply loyalty discount if redemption was requested
+      if (isLoyaltyApplied && discountInfo) {
+        try {
+          await applyLoyaltyDiscount(
+            appointmentDetails.appointmentId,
+            discountInfo.pointsRedeemed
+          );
+        } catch (loyaltyError) {
+          console.error("Error applying loyalty discount:", loyaltyError);
+          setFeedback(
+            "Warning: Loyalty discount could not be applied, but continuing with appointment completion."
+          );
+          setFeedbackType("error");
+          // Continue with appointment completion even if loyalty fails
+        }
+      }
+
       const vehicleId = appointmentDetails.vehicleId;
       const serviceCenterId = appointmentDetails.serviceCenterId;
       const servicedByUserId = getCurrentUserId();
@@ -222,7 +292,7 @@ export default function Page() {
         return;
       }
 
-      // Step 1: Add selected services to AppointmentServices table
+      // Step 2: Add selected services to AppointmentServices table
       const serviceNames = selectedServices.map((s) => s.service);
       try {
         await addServicesToAppointment(
@@ -237,7 +307,7 @@ export default function Page() {
         // Continue even if this fails - we still want to create service history
       }
 
-      // Step 2: Create service history records for completed services
+      // Step 3: Create service history records for completed services
       for (const service of selectedServices) {
         try {
           await addServiceHistory(vehicleId, {
@@ -264,12 +334,14 @@ export default function Page() {
         }
       }
 
-      // Step 3: Mark appointment as "Completed" using the backend endpoint
+      // Step 4: Mark appointment as "Completed" using the backend endpoint
       await completeAppointment(appointmentDetails.appointmentId);
 
-      setFeedback(
-        "Appointment completed successfully! Service history has been created and the appointment is marked as completed."
-      );
+      const successMessage = isLoyaltyApplied
+        ? `Appointment completed successfully! ${discountInfo?.pointsRedeemed} loyalty points were redeemed for a discount of ${discountInfo?.discountAmount.toFixed(2)} LKR. Service history has been created.`
+        : "Appointment completed successfully! Service history has been created and the appointment is marked as completed.";
+
+      setFeedback(successMessage);
       setFeedbackType("success");
 
       // Update appointment details to reflect completed status
@@ -281,6 +353,8 @@ export default function Page() {
       // Clear services and appointment ID
       setServices(null);
       setAppointmentId("");
+      setIsLoyaltyApplied(false);
+      setDiscountInfo(null);
     } catch (error) {
       console.error("Error completing appointment:", error);
 
@@ -317,6 +391,11 @@ export default function Page() {
   const totalCost = (services || [])
     .filter((s) => s.checked)
     .reduce((sum, s) => sum + (s.price || 0), 0);
+
+  // Calculate final cost after loyalty discount
+  const finalCost = isLoyaltyApplied && discountInfo
+    ? discountInfo.finalPrice
+    : totalCost;
 
   // Calculate selected services count
   const selectedServicesCount = (services || []).filter(
@@ -426,8 +505,8 @@ export default function Page() {
         </div>
       )}
 
-      {/* Service Type Dropdown - Only show for non-completed appointments */}
-      {services !== null && !isAppointmentCompleted && (
+      {/* Service Type Dropdown - Only show for non-completed appointments and valid appointment */}
+      {services !== null && !isAppointmentCompleted && appointmentDetails && (
         <>
           <div className="mb-4">
             <label className="block text-md text-neutral-500 mb-2">
@@ -461,8 +540,8 @@ export default function Page() {
         </>
       )}
 
-      {/* Services Table */}
-      {services !== null && (
+      {/* Services Table - Only show when appointment is valid */}
+      {services !== null && appointmentDetails && (
         <>
           <div className="flex flex-col gap-[72px] pr-[38px]">
             <div>
@@ -478,23 +557,114 @@ export default function Page() {
 
             {/* Total and Submit - Only show for non-completed appointments */}
             {!isAppointmentCompleted && (
-              <div className="flex flex-col items-end gap-4">
-                <div className="text-sm text-neutral-600 mb-2">
-                  Selected: {selectedServicesCount} of {services.length}{" "}
-                  services
+              <div className="flex gap-6">
+                {/* Loyalty Points Redemption Section */}
+                <div className="flex-1 p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg">
+                  <h3 className="text-lg font-semibold text-blue-800 mb-3">
+                    Loyalty Points Redemption
+                  </h3>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">
+                        Customer has{" "}
+                        <span className="font-bold text-blue-700">
+                          {appointmentDetails.customerLoyaltyPoints || 0}
+                        </span>{" "}
+                        loyalty points available
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        (1000 points = 1% discount)
+                      </p>
+                      {!isLoyaltyApplied && (appointmentDetails.customerLoyaltyPoints || 0) > 0 && (
+                        <p className="text-xs text-blue-600 font-medium mt-1">
+                          Redeeming all points will give {((appointmentDetails.customerLoyaltyPoints || 0) / 1000).toFixed(1)}% discount
+                        </p>
+                      )}
+                    </div>
+
+                    {!isLoyaltyApplied ? (
+                      <Button
+                        variant="primary"
+                        size="medium"
+                        onClick={handleRedeemLoyaltyPoints}
+                        disabled={
+                          loading || (appointmentDetails.customerLoyaltyPoints || 0) <= 0
+                        }
+                        className="w-full"
+                      >
+                        Redeem Loyalty Points
+                      </Button>
+                    ) : (
+                      <div className="bg-green-50 border border-green-300 rounded-md p-3">
+                        <div className="flex items-center">
+                          <svg
+                            className="h-5 w-5 text-green-500 mr-2"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          <span className="text-sm font-semibold text-green-800">
+                            Ready to redeem: {discountInfo?.pointsRedeemed} points
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="text-lg font-semibold text-neutral-700">
-                  Total: {totalCost} LKR
+
+                {/* Total Calculation Section */}
+                <div className="flex-1 flex flex-col gap-4">
+                  <div className="text-sm text-neutral-600 mb-2">
+                    Selected: {selectedServicesCount} of {services.length}{" "}
+                    services
+                  </div>
+                  
+                  {/* Price breakdown */}
+                  <div className="w-full space-y-2">
+                    <div className="flex justify-between text-lg text-neutral-700">
+                      <span>Subtotal:</span>
+                      <span className={isLoyaltyApplied ? "line-through text-gray-400" : "font-semibold"}>
+                        {totalCost.toFixed(2)} LKR
+                      </span>
+                    </div>
+                    
+                    {isLoyaltyApplied && discountInfo && (
+                      <>
+                        <div className="flex justify-between text-md text-green-600">
+                          <span>Loyalty Discount ({(discountInfo.pointsRedeemed / 1000).toFixed(1)}%):</span>
+                          <span>- {discountInfo.discountAmount.toFixed(2)} LKR</span>
+                        </div>
+                        <div className="flex justify-between text-xl font-bold text-blue-700 pt-2 border-t border-gray-300">
+                          <span>Final Total:</span>
+                          <span>{finalCost.toFixed(2)} LKR</span>
+                        </div>
+                      </>
+                    )}
+                    
+                    {!isLoyaltyApplied && (
+                      <div className="flex justify-between text-xl font-semibold text-neutral-700 pt-2 border-t border-gray-300">
+                        <span>Total:</span>
+                        <span>{totalCost.toFixed(2)} LKR</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end">
+                    <Button
+                      variant="primary"
+                      size="large"
+                      onClick={handleSubmit}
+                      disabled={loading || selectedServicesCount === 0}
+                    >
+                      {loading ? "Processing..." : "Submit & Complete Appointment"}
+                    </Button>
+                  </div>
                 </div>
-                <Button
-                  variant="primary"
-                  size="large"
-                  className="w-full"
-                  onClick={handleSubmit}
-                  disabled={loading || selectedServicesCount === 0}
-                >
-                  {loading ? "Processing..." : "Submit & Complete Appointment"}
-                </Button>
               </div>
             )}
 
