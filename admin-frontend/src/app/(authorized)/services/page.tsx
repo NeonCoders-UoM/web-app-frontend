@@ -228,19 +228,30 @@ const ServicesPage: React.FC = () => {
                 </p>
               </h1>
             </div>
-            <Button
-              variant="primary"
-              size="medium"
-              onClick={() => {
-                if (serviceCenterId) {
-                  router.push(`/service-centers/${serviceCenterId}/view/services/add`);
-                } else {
-                  router.push("/services/add");
-                }
-              }}
-            >
-              {serviceCenterId ? "Add Service to Center" : "Add System Service"}
-            </Button>
+            <div className="flex gap-3">
+              {!serviceCenterId && (
+                <Button
+                  variant="primary"
+                  size="medium"
+                  onClick={() => router.push("/super-admin/service-requests")}
+                >
+                  Service Requests
+                </Button>
+              )}
+              <Button
+                variant="primary"
+                size="medium"
+                onClick={() => {
+                  if (serviceCenterId) {
+                    router.push(`/service-centers/${serviceCenterId}/view/services/add`);
+                  } else {
+                    router.push("/services/add");
+                  }
+                }}
+              >
+                {serviceCenterId ? "Add Service to Center" : "Add System Service"}
+              </Button>
+            </div>
           </div>
 
           <div>

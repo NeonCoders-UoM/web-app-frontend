@@ -437,3 +437,34 @@ export interface UpdateEmergencyCallCenterDTO {
   registrationNumber: string;
   phoneNumber: string;
 }
+
+// Service Request interfaces (matching backend DTOs)
+export interface ServiceRequest {
+  serviceRequestId: number;
+  serviceName: string;
+  description?: string;
+  category?: string;
+  status: string; // "Pending", "Approved", "Rejected"
+  approvedBasePrice?: number;
+  rejectionReason?: string;
+  requestedByUserId: number;
+  requestedByName?: string;
+  requestedByEmail?: string;
+  serviceCenterName?: string; // Service center that requested the service
+  requestedAt: string;
+  approvedServiceId?: number;
+}
+
+export interface CreateServiceRequestDTO {
+  serviceName: string;
+  description?: string;
+  category?: string;
+}
+
+export interface ApproveServiceRequestDTO {
+  basePrice: number;
+}
+
+export interface RejectServiceRequestDTO {
+  rejectionReason: string;
+}

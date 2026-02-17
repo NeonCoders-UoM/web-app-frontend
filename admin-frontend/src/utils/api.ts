@@ -28,7 +28,11 @@ import {
   FeedbackFilters,
   EmergencyCallCenter,
   CreateEmergencyCallCenterDTO,
-  UpdateEmergencyCallCenterDTO
+  UpdateEmergencyCallCenterDTO,
+  ServiceRequest,
+  CreateServiceRequestDTO,
+  ApproveServiceRequestDTO,
+  RejectServiceRequestDTO
 } from "@/types";
 import axiosInstance from "./axios";
 import { getCookie } from "./cookies";
@@ -2022,6 +2026,99 @@ export const deleteEmergencyCallCenter = async (id: number): Promise<void> => {
     console.log("Successfully deleted emergency call center");
   } catch (error) {
     console.error(`Error deleting emergency call center ${id}:`, error);
+    throw error;
+  }
+};
+
+// ========== Service Request API Functions ==========
+
+// Create a service request (Service Center Admin)
+export const createServiceRequest = async (data: CreateServiceRequestDTO): Promise<ServiceRequest> => {
+  try {
+    console.log("Creating service request:", data);
+    const response = await axiosInstance.post('/ServiceRequest', data);
+    console.log("Successfully created service request:", response.data);
+    return response.data.data; // Backend wraps in { success, message, data }
+  } catch (error) {
+    console.error("Error creating service request:", error);
+    throw error;
+  }
+};
+
+// Fetch all service requests (Admin/SuperAdmin)
+export const fetchServiceRequests = async (): Promise<ServiceRequest[]> => {
+  try {
+    console.log("Fetching all service requests from backend");
+    const response = await axiosInstance.get('/ServiceRequest/all');
+    console.log("Successfully fetched service requests:", response.data);
+    return response.data.data; // Backend wraps in { success, data }
+  } catch (error) {
+    console.error("Error fetching service requests:", error);
+    throw error;
+  }
+};
+
+// Fetch service requests for current Service Center Admin
+export const fetchMyServiceRequests = async (): Promise<ServiceRequest[]> => {
+  try {
+    console.log("Fetching my service requests");
+    const response = await axiosInstance.get('/ServiceRequest/my-requests');
+    console.log("Successfully fetched my service requests:", response.data);
+    return response.data.data; // Backend wraps in { success, data }
+  } catch (error) {
+    console.error("Error fetching my service requests:", error);
+    throw error;
+  }
+};
+
+// Fetch pending service requests (Admin/SuperAdmin)
+export const fetchPendingServiceRequests = async (): Promise<ServiceRequest[]> => {
+  try {
+    console.log("Fetching pending service requests");
+    const response = await axiosInstance.get('/ServiceRequest/pending');
+    console.log("Successfully fetched pending service requests:", response.data);
+    return response.data.data; // Backend wraps in { success, data }
+  } catch (error) {
+    console.error("Error fetching pending service requests:", error);
+    throw error;
+  }
+};
+
+// Get specific service request by ID
+export const fetchServiceRequestById = async (requestId: number): Promise<ServiceRequest> => {
+  try {
+    console.log(`Fetching service request ${requestId}`);
+    const response = await axiosInstance.get(`/ServiceRequest/${requestId}`);
+    console.log("Successfully fetched service request:", response.data);
+    return response.data.data; // Backend wraps in { success, data }
+  } catch (error) {
+    console.error(`Error fetching service request ${requestId}:`, error);
+    throw error;
+  }
+};
+
+// Approve a service request (Admin/Super Admin)
+export const approveServiceRequest = async (requestId: number, data: ApproveServiceRequestDTO): Promise<ServiceRequest> => {
+  try {
+    console.log("Approving service request:", requestId, data);
+    const response = await axiosInstance.post(`/ServiceRequest/${requestId}/approve`, data);
+    console.log("Successfully approved service request:", response.data);
+    return response.data.data; // Backend wraps in { success, message, data }
+  } catch (error) {
+    console.error("Error approving service request:", error);
+    throw error;
+  }
+};
+
+// Reject a service request (Admin/Super Admin)
+export const rejectServiceRequest = async (requestId: number, data: RejectServiceRequestDTO): Promise<ServiceRequest> => {
+  try {
+    console.log("Rejecting service request:", requestId, data);
+    const response = await axiosInstance.post(`/ServiceRequest/${requestId}/reject`, data);
+    console.log("Successfully rejected service request:", response.data);
+    return response.data.data; // Backend wraps in { success, message, data }
+  } catch (error) {
+    console.error("Error rejecting service request:", error);
     throw error;
   }
 };

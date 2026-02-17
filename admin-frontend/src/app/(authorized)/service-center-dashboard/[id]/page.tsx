@@ -227,7 +227,13 @@ const ServiceCenterDashboard = () => {
 
         {/* User Management Link (Only for Service Center Admin) */}
         {isServiceCenterAdmin && (
-          <div className="mb-6 flex justify-end">
+          <div className="mb-6 flex justify-end gap-4">
+            <button
+              onClick={() => router.push(`/service-center-dashboard/${serviceCenterId}/my-requests`)}
+              className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2 font-medium"
+            >
+              Service Requests
+            </button>
             <button
               onClick={() => router.push(`/service-center-dashboard/${serviceCenterId}/users`)}
               className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2 font-medium"
