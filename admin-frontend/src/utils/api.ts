@@ -1758,6 +1758,85 @@ export const deleteFeedback = async (id: number): Promise<void> => {
   }
 };
 
+// ========== Appointment Management API Functions ==========
+
+// Delete an appointment
+export const deleteAppointment = async (appointmentId: number): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/Appointment/${appointmentId}`);
+  } catch (error) {
+    console.error("Error deleting appointment:", error);
+    throw error;
+  }
+};
+
+// Update an appointment
+export interface AppointmentUpdatePayload {
+  appointmentDate?: string;
+  status?: string;
+  description?: string;
+  serviceIds?: number[];
+}
+
+export const updateAppointment = async (
+  appointmentId: number,
+  data: AppointmentUpdatePayload
+): Promise<void> => {
+  try {
+    await axiosInstance.put(`/Appointment/${appointmentId}`, data);
+  } catch (error) {
+    console.error("Error updating appointment:", error);
+    throw error;
+  }
+};
+
+// Fetch appointments for a specific customer's vehicle
+export const fetchCustomerVehicleAppointments = async (
+  customerId: number,
+  vehicleId: number
+): Promise<{
+  appointmentId: number;
+  stationName: string;
+  appointmentDate: string;
+}[]> => {
+  try {
+    const response = await axiosInstance.get(
+      `/Appointment/customer/${customerId}/vehicle/${vehicleId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching customer vehicle appointments:", error);
+    return [];
+  }
+};
+
+// Fetch full appointment detail for customer
+export const fetchCustomerAppointmentDetail = async (
+  customerId: number,
+  vehicleId: number,
+  appointmentId: number
+): Promise<{
+  vehicleRegistration: string;
+  appointmentDate: string;
+  serviceCenterId: number;
+  serviceCenterAddress?: string;
+  serviceCenterName?: string;
+  distanceInKm?: number;
+  loyaltyPoints: number;
+  services: { serviceName: string; estimatedCost: number }[];
+  totalCost: number;
+} | null> => {
+  try {
+    const response = await axiosInstance.get(
+      `/Appointment/customer/${customerId}/vehicle/${vehicleId}/details/${appointmentId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching customer appointment detail:", error);
+    return null;
+  }
+};
+
 export const updateAppointmentStatus = async (
   appointmentId: number,
   status: string
@@ -1798,10 +1877,13 @@ export type AppointmentDetail = {
   vehicleId: number;
   serviceCenterId: number;
   serviceCenterName?: string;
-  status?: string; // Add status field to track appointment status
-  appointmentPrice?: number; // Add appointment price field
-  customerLoyaltyPoints?: number; // Add customer loyalty points
-  customerId?: number; // Add customer ID
+  status?: string;
+  appointmentPrice?: number;
+  customerLoyaltyPoints?: number;
+  customerId?: number;
+  customerEmail?: string;
+  customerPhone?: string;
+  description?: string;
 };
 
 export const fetchAdminAppointmentVehicleDetail = async (
@@ -1922,6 +2004,64 @@ export const applyLoyaltyDiscount = async (
     return response.data;
   } catch (error) {
     console.error("Error applying loyalty discount:", error);
+    throw error;
+  }
+};
+
+// ========== Notification API Functions ==========
+
+// Create a notification for a customer
+export interface CreateNotificationPayload {
+  customerId: number;
+  title: string;
+  message: string;
+  type?: string; // "appointment" | "service_reminder" | "general"
+  priority?: string; // "low" | "medium" | "high"
+  appointmentId?: number;
+  vehicleId?: number;
+}
+
+export const createNotification = async (
+  data: CreateNotificationPayload
+): Promise<void> => {
+  try {
+    await axiosInstance.post(`/Notifications`, data);
+  } catch (error) {
+    console.error("Error creating notification:", error);
+    throw error;
+  }
+};
+
+// Cancel an appointment (update status to Cancelled) and notify the customer
+export const cancelAppointment = async (
+  appointmentId: number,
+  customerId?: number,
+  ownerName?: string
+): Promise<void> => {
+  try {
+    // Update appointment status to Cancelled
+    await axiosInstance.put(`/Appointment/${appointmentId}`, {
+      status: "Cancelled",
+    });
+
+    // Send notification to the customer if customerId is available
+    if (customerId) {
+      try {
+        await axiosInstance.post(`/Notifications`, {
+          customerId,
+          title: "Appointment Cancelled",
+          message: `Dear ${ownerName || "Customer"}, your appointment #${appointmentId} has been cancelled by the service center. Please contact us for further assistance or to reschedule.`,
+          type: "appointment",
+          priority: "high",
+          appointmentId,
+        });
+      } catch (notifError) {
+        console.error("Notification created but failed to send:", notifError);
+        // Don't throw - the cancellation was successful
+      }
+    }
+  } catch (error) {
+    console.error("Error cancelling appointment:", error);
     throw error;
   }
 };

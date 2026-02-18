@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Car } from "lucide-react";
+import { Car, CalendarDays } from "lucide-react";
 import UserProfileCard from "@/components/molecules/user-card/user-card";
 import ProfileCard from "@/components/molecules/client-card/client-card";
 import AvailablePointsCard from "@/components/molecules/available-points-card/available-points-card";
@@ -10,14 +10,34 @@ import TabNavigation from "@/components/atoms/tab-navigation/tab-navigation";
 import VehicleDetails from "@/components/molecules/vehicle-details/vehicle-details";
 import Button from "@/components/atoms/button/button";
 import OrdersTable from "@/components/organism/service-history-table/service-history-table";
-import { AppointmentCard } from "@/components/atoms/appointment-details/appointment-details"; // Updated import
+import {
+  AppointmentCard,
+  AppointmentCardSkeleton,
+} from "@/components/atoms/appointment-details/appointment-details";
 import {
   fetchClientById,
   fetchVehicleServiceHistory,
+  fetchCustomerVehicleAppointments,
+  fetchCustomerAppointmentDetail,
+  deleteAppointment,
+  updateAppointment,
   ServiceHistoryDTO,
 } from "@/utils/api";
 import { Client } from "@/types";
 import { deleteAllAuthCookies } from "@/utils/cookies";
+
+// Appointment detail type for fully loaded appointments
+interface AppointmentDetailView {
+  appointmentId: number;
+  appointmentDate: string;
+  serviceCenterName: string;
+  vehicleRegistration: string;
+  services: { serviceName: string; estimatedCost: number }[];
+  totalCost: number;
+  loyaltyPoints: number;
+  status?: string;
+  description?: string;
+}
 
 const ClientProfilePage = () => {
   const router = useRouter();
@@ -31,6 +51,10 @@ const ClientProfilePage = () => {
   const [clientData, setClientData] = useState<Client | null>(null);
   const [serviceHistory, setServiceHistory] = useState<ServiceHistoryDTO[]>([]);
   const [isLoadingServiceHistory, setIsLoadingServiceHistory] = useState(false);
+  const [appointments, setAppointments] = useState<AppointmentDetailView[]>([]);
+  const [isLoadingAppointments, setIsLoadingAppointments] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [updatingId, setUpdatingId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchClientData = async () => {
@@ -72,6 +96,88 @@ const ClientProfilePage = () => {
     }
   }, [clientData, activeTab, activeView]);
 
+  // Fetch appointments when active vehicle changes or view switches to appointments
+  const loadAppointments = useCallback(async () => {
+    if (!clientData?.customerId || !clientData?.vehicles?.[activeTab - 1]?.id)
+      return;
+
+    setIsLoadingAppointments(true);
+    try {
+      const vehicleId = clientData.vehicles[activeTab - 1].id;
+      const numericVehicleId =
+        typeof vehicleId === "string" ? parseInt(vehicleId) : vehicleId;
+
+      // Get appointment summaries
+      const summaries = await fetchCustomerVehicleAppointments(
+        clientData.customerId,
+        numericVehicleId
+      );
+
+      // Fetch full details for each appointment
+      const detailedAppointments: AppointmentDetailView[] = [];
+
+      for (const summary of summaries) {
+        try {
+          const detail = await fetchCustomerAppointmentDetail(
+            clientData.customerId,
+            numericVehicleId,
+            summary.appointmentId
+          );
+
+          if (detail) {
+            detailedAppointments.push({
+              appointmentId: summary.appointmentId,
+              appointmentDate:
+                detail.appointmentDate || summary.appointmentDate,
+              serviceCenterName: detail.serviceCenterName || summary.stationName,
+              vehicleRegistration: detail.vehicleRegistration || "",
+              services: detail.services || [],
+              totalCost: detail.totalCost || 0,
+              loyaltyPoints: detail.loyaltyPoints || 0,
+              status: undefined, // Customer detail doesn't include status
+              description: undefined,
+            });
+          } else {
+            // Fallback with summary data
+            detailedAppointments.push({
+              appointmentId: summary.appointmentId,
+              appointmentDate: summary.appointmentDate,
+              serviceCenterName: summary.stationName,
+              vehicleRegistration: "",
+              services: [],
+              totalCost: 0,
+              loyaltyPoints: 0,
+            });
+          }
+        } catch {
+          // Fallback with summary data
+          detailedAppointments.push({
+            appointmentId: summary.appointmentId,
+            appointmentDate: summary.appointmentDate,
+            serviceCenterName: summary.stationName,
+            vehicleRegistration: "",
+            services: [],
+            totalCost: 0,
+            loyaltyPoints: 0,
+          });
+        }
+      }
+
+      setAppointments(detailedAppointments);
+    } catch (error) {
+      console.error("Error fetching appointments:", error);
+      setAppointments([]);
+    } finally {
+      setIsLoadingAppointments(false);
+    }
+  }, [clientData, activeTab]);
+
+  useEffect(() => {
+    if (clientData && activeView === "appointments") {
+      loadAppointments();
+    }
+  }, [clientData, activeTab, activeView, loadAppointments]);
+
   // Function to refresh service history (useful for future enhancements)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const refreshServiceHistory = async () => {
@@ -86,6 +192,44 @@ const ClientProfilePage = () => {
       console.error("Error refreshing service history:", error);
     } finally {
       setIsLoadingServiceHistory(false);
+    }
+  };
+
+  // Handle appointment delete
+  const handleDeleteAppointment = async (appointmentId: number) => {
+    setDeletingId(appointmentId);
+    try {
+      await deleteAppointment(appointmentId);
+      // Remove from local state
+      setAppointments((prev) =>
+        prev.filter((a) => a.appointmentId !== appointmentId)
+      );
+    } catch (error) {
+      console.error("Error deleting appointment:", error);
+      alert("Failed to delete appointment. Please try again.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  // Handle appointment update
+  const handleUpdateAppointment = async (
+    appointmentId: number,
+    data: { appointmentDate?: string; description?: string }
+  ) => {
+    setUpdatingId(appointmentId);
+    try {
+      await updateAppointment(appointmentId, {
+        appointmentDate: data.appointmentDate,
+        description: data.description,
+      });
+      // Refresh appointments after update
+      await loadAppointments();
+    } catch (error) {
+      console.error("Error updating appointment:", error);
+      alert("Failed to update appointment. Please try again.");
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -217,7 +361,19 @@ const ClientProfilePage = () => {
           >
             Service History
           </Button>
-          
+          <Button
+            variant={activeView === "appointments" ? "primary" : "primary"}
+            size="medium"
+            onClick={() => setActiveView("appointments")}
+            className={
+              activeView !== "appointments"
+                ? "bg-white text-primary-200 border border-primary-200"
+                : ""
+            }
+          >
+            <CalendarDays size={16} className="mr-1 inline" />
+            Appointments
+          </Button>
         </div>
 
         {/* Service History or Appointments View */}
@@ -260,20 +416,54 @@ const ClientProfilePage = () => {
           <div>
             <h2 className="text-xl font-semibold text-neutral-600 mb-4">
               Appointments
+              {activeVehicle && (
+                <span className="text-sm text-neutral-500 ml-2">
+                  - {activeVehicle.brand} {activeVehicle.model} (
+                  {activeVehicle.licensePlate})
+                </span>
+              )}
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {(clientData.appointments || []).map((appointment) => (
-                <AppointmentCard
-                  key={appointment.appointmentId}
-                  appointmentNo={appointment.appointmentId}
-                  date={appointment.date}
-                  serviceCenter={appointment.serviceCenter}
-                  serviceType={appointment.services}
-                  additionalNotes="-"
-                  fee="500"
+            {isLoadingAppointments ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[1, 2].map((i) => (
+                  <AppointmentCardSkeleton key={i} />
+                ))}
+              </div>
+            ) : appointments.length === 0 ? (
+              <div className="text-center py-16 bg-neutral-50 rounded-xl border border-dashed border-neutral-200">
+                <CalendarDays
+                  size={48}
+                  className="mx-auto text-neutral-300 mb-3"
                 />
-              ))}
-            </div>
+                <p className="text-neutral-500 font-medium">
+                  No appointments found
+                </p>
+                <p className="text-neutral-400 text-sm mt-1">
+                  This vehicle has no scheduled appointments.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {appointments.map((appointment) => (
+                  <AppointmentCard
+                    key={appointment.appointmentId}
+                    appointmentId={appointment.appointmentId}
+                    appointmentDate={appointment.appointmentDate}
+                    serviceCenterName={appointment.serviceCenterName}
+                    services={appointment.services}
+                    totalCost={appointment.totalCost}
+                    status={appointment.status}
+                    description={appointment.description}
+                    vehicleRegistration={appointment.vehicleRegistration}
+                    loyaltyPoints={appointment.loyaltyPoints}
+                    onDelete={handleDeleteAppointment}
+                    onUpdate={handleUpdateAppointment}
+                    isDeleting={deletingId === appointment.appointmentId}
+                    isUpdating={updatingId === appointment.appointmentId}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

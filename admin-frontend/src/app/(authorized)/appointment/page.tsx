@@ -8,8 +8,10 @@ import AppointmentCard from "@/components/molecules/appoinment-cards/appoinment-
 import StatusCard from "@/components/atoms/status-cards/status-card";
 import {
   fetchServiceCenterById,
-  updateAppointmentStatus,
   fetchAppointmentsForStation,
+  updateAppointment,
+  cancelAppointment,
+  createNotification,
 } from "@/utils/api";
 import { ServiceCenter, ServiceCenterServiceDTO } from "@/types";
 import type { AppointmentDetail } from "@/utils/api";
@@ -74,6 +76,8 @@ const AppointmentsPage = () => {
     ServiceWithPrice[]
   >([]);
   const [appointmentPrice, setAppointmentPrice] = useState<number>(0);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   // Fetch service center details
   useEffect(() => {
@@ -443,44 +447,80 @@ const AppointmentsPage = () => {
                   vehicle={selectedAppointment.vehicleType}
                   servicesWithPrices={servicesWithPrices}
                   appointmentPrice={appointmentPrice}
-                  onAccept={async () => {
+                  status={selectedAppointment.status}
+                  customerId={selectedAppointment.customerId}
+                  vehicleId={selectedAppointment.vehicleId}
+                  serviceCenterName={selectedAppointment.serviceCenterName || serviceCenter?.serviceCenterName}
+                  customerLoyaltyPoints={selectedAppointment.customerLoyaltyPoints}
+                  customerEmail={selectedAppointment.customerEmail}
+                  customerPhone={selectedAppointment.customerPhone}
+                  description={selectedAppointment.description}
+                  isUpdating={isUpdating}
+                  isCancelling={isCancelling}
+                  onClose={closeModal}
+                  onUpdate={async (data) => {
                     try {
-                      await updateAppointmentStatus(
+                      setIsUpdating(true);
+                      await updateAppointment(
                         selectedAppointment.appointmentId,
-                        "Accepted"
+                        {
+                          appointmentDate: data.appointmentDate,
+                          description: data.description,
+                          status: data.status,
+                        }
                       );
+                      // Send notification to customer about the update
+                      if (selectedAppointment.customerId) {
+                        try {
+                          await createNotification({
+                            customerId: selectedAppointment.customerId,
+                            title: "Appointment Updated",
+                            message: `Dear ${selectedAppointment.ownerName}, your appointment #${selectedAppointment.appointmentId} has been updated by the service center.${data.appointmentDate ? ` New date: ${new Date(data.appointmentDate).toLocaleDateString()}.` : ""}${data.status ? ` Status: ${data.status}.` : ""} Please check your appointment details.`,
+                            type: "appointment",
+                            priority: "medium",
+                            appointmentId: selectedAppointment.appointmentId,
+                          });
+                        } catch {
+                          // Notification failed but update was successful
+                          console.error("Failed to send update notification");
+                        }
+                      }
+                      alert("Appointment updated successfully!");
                       closeModal();
                       // Refresh appointments
                       if (stationId) {
                         setAppointmentsLoading(true);
-                        const data = await fetchAppointmentsForStation(
-                          stationId
-                        );
-                        setAppointments(data);
+                        const freshData = await fetchAppointmentsForStation(stationId);
+                        setAppointments(freshData);
                         setAppointmentsLoading(false);
                       }
                     } catch {
-                      alert("Failed to accept appointment");
+                      alert("Failed to update appointment. Please try again.");
+                    } finally {
+                      setIsUpdating(false);
                     }
                   }}
-                  onReject={async () => {
+                  onCancel={async () => {
                     try {
-                      await updateAppointmentStatus(
+                      setIsCancelling(true);
+                      await cancelAppointment(
                         selectedAppointment.appointmentId,
-                        "Rejected"
+                        selectedAppointment.customerId,
+                        selectedAppointment.ownerName
                       );
+                      alert("Appointment cancelled. Customer has been notified.");
                       closeModal();
                       // Refresh appointments
                       if (stationId) {
                         setAppointmentsLoading(true);
-                        const data = await fetchAppointmentsForStation(
-                          stationId
-                        );
-                        setAppointments(data);
+                        const freshData = await fetchAppointmentsForStation(stationId);
+                        setAppointments(freshData);
                         setAppointmentsLoading(false);
                       }
                     } catch {
-                      alert("Failed to reject appointment");
+                      alert("Failed to cancel appointment. Please try again.");
+                    } finally {
+                      setIsCancelling(false);
                     }
                   }}
                 />
