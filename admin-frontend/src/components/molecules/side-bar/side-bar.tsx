@@ -17,6 +17,7 @@ interface SidebarProps {
   stationId?: string;
   selectedTab?: string;
   setSelectedTab?: (tab: string) => void;
+  activeRoute?: string; // Override the active route detection
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -25,6 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   stationId,
   selectedTab,
   setSelectedTab,
+  activeRoute,
 }) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -96,7 +98,10 @@ const currentStationId =
   };
 
   const getAdminSidebarOptions = () => {
-    return [{ label: "Users", route: "/user-managment" }];
+    return [
+      { label: "Users", route: "/user-managment" },
+      { label: "Service Requests", route: "/admin-dashboard/service-requests" },
+    ];
   };
 
   const getServiceCenterAdminOptions = () => {
@@ -207,9 +212,17 @@ const currentStationId =
             const url = new URL(section.route, "http://dummy");
             const sectionPath = url.pathname;
             const sectionStationId = url.searchParams.get("stationId");
-            const isActive =
-              pathname.startsWith(sectionPath) &&
-              (!sectionStationId || sectionStationId === currentStationId);
+            
+            // If activeRoute is provided, use it for matching, otherwise use pathname
+            let isActive;
+            if (activeRoute) {
+              isActive = section.route === activeRoute;
+            } else {
+              isActive =
+                pathname.startsWith(sectionPath) &&
+                (!sectionStationId || sectionStationId === currentStationId);
+            }
+            
             return (
               <SidebarButton
                 key={section.label}
