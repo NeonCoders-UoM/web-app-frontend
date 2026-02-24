@@ -171,6 +171,12 @@ const ServiceRequestsPage: React.FC = () => {
                               {new Date(request.requestedAt).toLocaleDateString()}
                             </p>
                           </div>
+                          {request.requestedCustomPrice && (
+                            <div>
+                              <span className="text-gray-500">Requested Custom Price:</span>
+                              <p className="font-medium text-blue-600">${request.requestedCustomPrice.toFixed(2)}</p>
+                            </div>
+                          )}
                         </div>
                         <div className="flex gap-3">
                           <button
@@ -210,6 +216,11 @@ const ServiceRequestsPage: React.FC = () => {
               <p className="text-gray-600 mb-2">
                 <strong>Requested by:</strong> {selectedRequest.serviceCenterName || 'N/A'}
               </p>
+              {selectedRequest.requestedCustomPrice && (
+                <p className="text-gray-600 mb-2">
+                  <strong>Requested Custom Price:</strong> <span className="text-blue-600 font-semibold">${selectedRequest.requestedCustomPrice.toFixed(2)}</span>
+                </p>
+              )}
               {reviewAction === "approved" ? (
                 <div>
                   <label htmlFor="basePrice" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -227,7 +238,7 @@ const ServiceRequestsPage: React.FC = () => {
                   />
                   <div className="p-3 bg-green-50 border border-green-200 rounded-md">
                     <p className="text-sm text-green-800">
-                      This service will be added to the system with the specified base price and will be available for all service centers.
+                      This service will be added to the system with your specified base price. {selectedRequest.requestedCustomPrice ? `The service center's custom price ($${selectedRequest.requestedCustomPrice.toFixed(2)}) will be automatically applied to their center.` : 'It will be available for all service centers.'}
                     </p>
                   </div>
                 </div>

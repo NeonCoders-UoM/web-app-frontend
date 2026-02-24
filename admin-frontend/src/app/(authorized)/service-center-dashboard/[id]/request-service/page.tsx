@@ -20,6 +20,7 @@ const RequestServicePage: React.FC = () => {
     serviceName: "",
     description: "",
     category: "",
+    customPrice: undefined,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof CreateServiceRequestDTO, string>>>({});
@@ -59,7 +60,7 @@ const RequestServicePage: React.FC = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === "customPrice" ? (value ? parseFloat(value) : undefined) : value,
     }));
     setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
@@ -195,10 +196,37 @@ const RequestServicePage: React.FC = () => {
               )}
             </div>
 
+            {/* Custom Price */}
+            <div>
+              <label htmlFor="customPrice" className="block text-sm font-semibold text-gray-700 mb-2">
+                Your Custom Price
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
+                <input
+                  id="customPrice"
+                  name="customPrice"
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  placeholder="e.g., 50.00"
+                  value={formData.customPrice || ""}
+                  onChange={handleChange}
+                  className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Specify your desired custom price for this service at your center. The admin will still set the base price.
+              </p>
+              {errors.customPrice && (
+                <p className="text-red-500 text-sm mt-1">{errors.customPrice}</p>
+              )}
+            </div>
+
             {/* Info Box */}
             <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
               <p className="text-sm text-blue-800">
-                <strong>Note:</strong> Your request will be reviewed by an Admin who will set the base price for the service.
+                <strong>Note:</strong> Your request will be reviewed by a SuperAdmin who will set the base price. If you specify a custom price, it will be automatically applied to your service center after approval.
               </p>
             </div>
 

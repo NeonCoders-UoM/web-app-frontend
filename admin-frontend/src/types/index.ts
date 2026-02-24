@@ -445,6 +445,7 @@ export interface ServiceRequest {
   description?: string;
   category?: string;
   status: string; // "Pending", "Approved", "Rejected"
+  requestedCustomPrice?: number;
   approvedBasePrice?: number;
   rejectionReason?: string;
   requestedByUserId: number;
@@ -459,6 +460,7 @@ export interface CreateServiceRequestDTO {
   serviceName: string;
   description?: string;
   category?: string;
+  customPrice?: number;
 }
 
 export interface ApproveServiceRequestDTO {

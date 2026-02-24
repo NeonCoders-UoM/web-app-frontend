@@ -189,6 +189,12 @@ const MyRequestsPage: React.FC = () => {
                                   {new Date(request.requestedAt).toLocaleDateString()}
                                 </p>
                               </div>
+                              {request.requestedCustomPrice && (
+                                <div>
+                                  <span className="text-gray-500">Your Custom Price:</span>
+                                  <p className="font-medium text-blue-600">${request.requestedCustomPrice.toFixed(2)}</p>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
